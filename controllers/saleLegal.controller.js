@@ -20,6 +20,22 @@ class saleLegalController {
       next(error);
     }
   }
+  async GetProType(req, res, next) {
+    try {
+      const model = await SaleLegalService.GetProType(req.params);
+      res.status(200).json(model);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async GetProName(req, res, next) {
+    try {
+      const model = await SaleLegalService.GetProName(req.params);
+      res.status(200).json(model);
+    } catch (error) {
+      next(error);
+    }
+  }
   async getModel(req, res, next) {
     try {
       const model = await SaleLegalService.getModel();

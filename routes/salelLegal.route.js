@@ -14,6 +14,16 @@ router.post(
   authMiddleware,
   saleLegalController.CreateProductType
 );
+router.post(
+  "/pro_type",
+  authMiddleware,
+  saleLegalController.GetProType
+);
+router.post(
+  "/pro_name",
+  authMiddleware,
+  saleLegalController.GetProName
+);
 router.get("/legal_model", saleLegalController.getModel);
 router.post("/legal_proccess/:id", saleLegalController.AllOrderProccessById);
 router.post("/legal_all", authMiddleware, saleLegalController.getAll);

@@ -17,6 +17,16 @@ class SaleLegalService {
     const type = await ProductType.create(payload);
     return type;
   }
+  async GetProName() {
+    const names = await ProductName.find();
+    console.log(names);
+    return names;
+  }
+  async GetProType() {
+    const types = await ProductType.find();
+    console.log(types);
+    return types;
+  }
   async getModel() {
     const order_num = randomstring.generate({
       length: 8,
