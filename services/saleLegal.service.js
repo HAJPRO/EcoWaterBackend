@@ -7,15 +7,15 @@ const SaleDepPaintCardModel = require("../models/saleDepPaintCard.model");
 const SaleDepWeavingCardModel = require("../models/saleDepWeavingCard.model");
 const SaleDepSpinningCardModel = require("../models/SaleDepSpinningCardModel.model");
 const ProductName = require("../models/Sale/ProductName.model");
-// const ProductType = require("../models/Sale/ProductType.model");
+const ProductType = require("../models/Sale/ProductType.model");
 class SaleLegalService {
   async CreateProductName(payload) {
     const name = await ProductName.create(payload);
     return name;
   }
   async CreateProductType(payload) {
-    // const type = await ProductType.create(payload);
-    // return type;
+    const type = await ProductType.create(payload);
+    return type;
   }
   async getModel() {
     const order_num = randomstring.generate({
