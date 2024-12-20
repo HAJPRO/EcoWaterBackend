@@ -1,0 +1,9 @@
+PORT = 3000
+DB_URL = mongodb+srv://umidshomurodov265:XnhfHpS4sG4ru5hI@cluster0.3ujxc.mongodb.net/
+
+JWT_REFRESH_TOKEN = backend_refresh_key
+JWT_ACCESS_TOKEN = backend_access_key
+
+
+
+

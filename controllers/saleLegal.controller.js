@@ -4,6 +4,24 @@ const path = require("path");
 const saleLegalCardModel = require("../models/saleLegalCard.model.js");
 
 class saleLegalController {
+  async CreateProductName(req, res, next) {
+    console.log(req.body);
+
+    try {
+      const model = await SaleLegalService.CreateProductName(req.body);
+      res.status(200).json(model);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async CreateProductType(req, res, next) {
+    try {
+      const model = await SaleLegalService.CreateProductType(req.body);
+      res.status(200).json(model);
+    } catch (error) {
+      next(error);
+    }
+  }
   async getModel(req, res, next) {
     try {
       const model = await SaleLegalService.getModel();
@@ -14,9 +32,10 @@ class saleLegalController {
   }
   async AllOrderProccessById(req, res, next) {
     try {
-      const proccess = await SaleLegalService.AllOrderProccessById(req.params.id);
+      const proccess = await SaleLegalService.AllOrderProccessById(
+        req.params.id
+      );
       res.status(200).json(proccess);
-
     } catch (error) {
       next(error);
     }
@@ -25,7 +44,6 @@ class saleLegalController {
     try {
       const allLength = await SaleLegalService.getAllLength(req.user.id);
       res.status(200).json(allLength);
-
     } catch (error) {
       next(error);
     }
@@ -34,7 +52,6 @@ class saleLegalController {
     try {
       const all = await SaleLegalService.getAll(req.body, req.user);
       res.status(200).json(all);
-
     } catch (error) {
       next(error);
     }
@@ -47,7 +64,6 @@ class saleLegalController {
       next(error);
     }
   }
-
 
   async create(req, res, next) {
     try {
