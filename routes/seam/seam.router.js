@@ -19,5 +19,20 @@ router.get(
   authMiddleware,
   DepSeamWarehouseController.ResponsiblesModel
 );
+router.post(
+  "/warehouse_create_from",
+  authMiddleware,
+  DepSeamWarehouseController.CreaetToForm
+);
+router.post(
+  "/warehouse_all_from",
+  authMiddleware,
+  DepSeamWarehouseController.GetAllForm
+);
+router.post(
+  "/warehouse_model_form",
+  authMiddleware,
+  DepSeamWarehouseController.GetFormMode
+);
 
 module.exports = router;

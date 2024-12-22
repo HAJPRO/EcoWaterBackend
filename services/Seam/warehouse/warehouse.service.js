@@ -2,9 +2,31 @@ const randomstring = require("randomstring");
 const QR = require("qrcode");
 const BarCodeModel = require("../../../models/Barcode/BarCode.model");
 const QRCodeModel = require("../../../models/Barcode/QRCode.model");
+const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
+
 const XLSX = require("xlsx");
 const path = require("path");
 class DepSeamWarehouseService {
+  async GetFormMode() {
+    const model = {
+      party_number: "",
+      customer_name: "",
+      material_name: "",
+      color: "",
+      quantity: "",
+      unit: "",
+      sort: "",
+    };
+    return model;
+  }
+  async CreaetToForm(data) {
+    const res = await AddToFormModel.create(data);
+    return res;
+  }
+  async GetAllForm() {
+    const res = await AddToFormModel.find();
+    return res;
+  }
   async ResponsiblesModel() {
     const invoice = randomstring.generate({
       length: 8,
