@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddleware = require("../../middlewares/auth.middleware.js");
 const authorMiddleware = require("../../middlewares/author.middleware.js");
 const DepSeamWarehouseController = require("../../controllers/seam/warehouse/warehouse.controller.js");
+const SeamInFormController = require("../../controllers/seam/form/form.controller.js");
 
 const router = express.Router();
 router.post(
@@ -34,5 +35,6 @@ router.post(
   authMiddleware,
   DepSeamWarehouseController.GetFormMode
 );
+router.post("/all_form", authMiddleware, SeamInFormController.getAll);
 
 module.exports = router;
