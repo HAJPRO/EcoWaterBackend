@@ -14,7 +14,7 @@ class SeamInFormController {
         data: req.body,
         user: req.user,
       });
-      res.status(200).json(data);
+      res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi ! ", data });
     } catch (error) {
       next(error);
     }

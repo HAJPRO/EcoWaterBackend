@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
 const AddParamsToFormSchema = require("../../../models/Seam/form/AddParamsToForm.model");
 class SeamInFormService {
@@ -8,6 +9,7 @@ class SeamInFormService {
       const all_length = await this.getAllLength();
       if (status === 1) {
         const items = await this.getAllInProcess();
+
         return { items, all_length };
       }
       if (status === 2) {
@@ -24,7 +26,36 @@ class SeamInFormService {
   }
 
   async getAllInProcess(id) {
+    let ID = new mongoose.Types.ObjectId(id);
     try {
+      const allInProcess = await AddParamsToFormSchema.aggregate([
+        { $match: { status: "Jarayonda" } },
+        {
+          $lookup: {
+            from: "addtoforms",
+            localField: "warehouse_id",
+            foreignField: "_id",
+            as: "warehouse",
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            pastal_quantity: 1,
+            waste_quantity: 1,
+            fact_gramage: 1,
+            createdAt: 1,
+            warehouse: {
+              $cond: {
+                if: { $isArray: "$warehouse" },
+                then: { $arrayElemAt: ["$warehouse", 0] },
+                else: null,
+              },
+            },
+          },
+        },
+      ]);
+      return allInProcess
     } catch (error) {
       return error.message;
     }
@@ -32,7 +63,7 @@ class SeamInFormService {
 
   async AllSentFromWarehouse() {
     try {
-      const items = await AddToFormModel.find();
+      const items = await AddToFormModel.find({ status: "Bichuvga yuborildi" });
       return items;
     } catch (error) {
       return error.message;
@@ -72,9 +103,16 @@ class SeamInFormService {
     };
 
     const res = await AddParamsToFormSchema.create(model);
-    console.log(res);
+
+    if (await res) {
+      const updateStatus = await AddParamsToFormSchema.findByIdAndUpdate(res._id, { status: "Jarayonda" }, { new: true })
+      this.AddToFormUpdate(warehouse_id)
+    }
 
     return res;
+  }
+  async AddToFormUpdate(id) {
+    await AddToFormModel.findByIdAndUpdate(id, { status: "Bichuv tasdiqladi" }, { new: true })
   }
 }
 
