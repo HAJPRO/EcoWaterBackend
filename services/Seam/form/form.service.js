@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
-const AddParamsToFormSchema = require("../../../models/Seam/form/AddParamsToForm.model");
+const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
+const ProcessBoxModel = require("../../../models/Seam/form/ProcessBox.model");
+
 class SeamInFormService {
   async getAll(is_status) {
     const status = is_status.status;
@@ -28,7 +30,7 @@ class SeamInFormService {
   async getAllInProcess(id) {
     let ID = new mongoose.Types.ObjectId(id);
     try {
-      const allInProcess = await AddParamsToFormSchema.aggregate([
+      const allInProcess = await AddParamsToFormModel.aggregate([
         { $match: { status: "Jarayonda" } },
         {
           $lookup: {
@@ -55,7 +57,7 @@ class SeamInFormService {
           },
         },
       ]);
-      return allInProcess
+      return allInProcess;
     } catch (error) {
       return error.message;
     }
@@ -102,17 +104,39 @@ class SeamInFormService {
       fact_gramage,
     };
 
-    const res = await AddParamsToFormSchema.create(model);
+    const res = await AddParamsToFormModel.create(model);
 
     if (await res) {
-      const updateStatus = await AddParamsToFormSchema.findByIdAndUpdate(res._id, { status: "Jarayonda" }, { new: true })
-      this.AddToFormUpdate(warehouse_id)
+      const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
+        res._id,
+        { status: "Jarayonda" },
+        { new: true }
+      );
+      this.AddToFormUpdate(warehouse_id);
     }
 
     return res;
   }
   async AddToFormUpdate(id) {
-    await AddToFormModel.findByIdAndUpdate(id, { status: "Bichuv tasdiqladi" }, { new: true })
+    await AddToFormModel.findByIdAndUpdate(
+      id,
+      { status: "Bichuv tasdiqladi" },
+      { new: true }
+    );
+  }
+
+  async CreateDayReport(data) {
+    const res = await ProcessBoxModel.create(data.items);
+    if (await res) {
+      await AddParamsToFormModel.findByIdAndUpdate(
+        data.id,
+        { status: "Yig'ilmoqda", procces_box: res._id },
+        { new: true }
+      );
+      console.log(res);
+    }
+
+    return res;
   }
 }
 

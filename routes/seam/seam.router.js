@@ -41,5 +41,10 @@ router.post(
   authMiddleware,
   SeamInFormController.CreaetInfoToForm
 );
+router.post(
+  "/create_day_report",
+  authMiddleware,
+  SeamInFormController.CreateDayReport
+);
 
 module.exports = router;
