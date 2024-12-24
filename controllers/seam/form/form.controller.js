@@ -27,5 +27,13 @@ class SeamInFormController {
       next(error);
     }
   }
+  async GetOneReport(req, res, next) {
+    try {
+      const data = await SeamInFormService.GetOneReport(req.body);
+      res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi ! ", data });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new SeamInFormController();

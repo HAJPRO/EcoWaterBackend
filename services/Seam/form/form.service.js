@@ -31,7 +31,7 @@ class SeamInFormService {
     let ID = new mongoose.Types.ObjectId(id);
     try {
       const allInProcess = await AddParamsToFormModel.aggregate([
-        { $match: { status: "Jarayonda" } },
+        { $match: {} },
         {
           $lookup: {
             from: "addtoforms",
@@ -126,17 +126,33 @@ class SeamInFormService {
   }
 
   async CreateDayReport(data) {
-    const res = await ProcessBoxModel.create(data.items);
-    if (await res) {
-      await AddParamsToFormModel.findByIdAndUpdate(
-        data.id,
-        { status: "Yig'ilmoqda", procces_box: res._id },
-        { new: true }
-      );
-      console.log(res);
-    }
+    const item = await AddParamsToFormModel.findOne({ _id: data.id });
+    const newItem = item;
+    newItem.report_box.push(data.items);
+    const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {
+      new: true,
+    });
 
     return res;
+  }
+  async GetOneReport(data) {
+    let ID = new mongoose.Types.ObjectId(data.id);
+    const res = await AddParamsToFormModel.aggregate([
+      { $match: { _id: ID } },
+
+      {
+        $project: {
+          status: 1,
+          pastal_quantity: 1,
+          waste_quantity: 1,
+          fact_gramage: 1,
+          createdAt: 1,
+          report: 1,
+          report_box: 1,
+        },
+      },
+    ]);
+    console.log(res);
   }
 }
 

@@ -4,7 +4,7 @@ const AddParamsToFormSchema = new Schema(
   {
     author: { type: Schema.ObjectId, ref: "User" },
     warehouse_id: { type: Schema.ObjectId, ref: "AddToForm" },
-    procces_box: { type: Schema.ObjectId, ref: "AddToForm" },
+    report_box: { type: Array },
     pastal_quantity: {
       type: Number,
       required: true,
