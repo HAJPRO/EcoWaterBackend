@@ -36,5 +36,10 @@ router.post(
   DepSeamWarehouseController.GetFormMode
 );
 router.post("/all_form", authMiddleware, SeamInFormController.getAll);
+router.post(
+  "/form_create",
+  authMiddleware,
+  SeamInFormController.CreaetInfoToForm
+);
 
 module.exports = router;

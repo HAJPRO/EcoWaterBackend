@@ -1,4 +1,5 @@
 const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
+const AddParamsToFormSchema = require("../../../models/Seam/form/AddParamsToForm.model");
 class SeamInFormService {
   async getAll(is_status) {
     const status = is_status.status;
@@ -54,6 +55,25 @@ class SeamInFormService {
     //   (data) => data.length
     // );
     // return { process_length, warehouse_length, classification_length };
+  }
+  async CreaetInfoToForm(payload) {
+    const author = payload.user.id;
+    const warehouse_id = payload.data.id;
+    const pastal_quantity = payload.data.data.pastal_quantity;
+    const waste_quantity = payload.data.data.waste_quantity;
+    const fact_gramage = payload.data.data.fact_gramage;
+
+    const model = {
+      author,
+      warehouse_id,
+      pastal_quantity,
+      waste_quantity,
+      fact_gramage,
+    };
+    console.log(model);
+
+    const res = await AddParamsToFormSchema.create(model);
+    return res;
   }
 }
 
