@@ -70,9 +70,10 @@ class SeamInFormService {
       waste_quantity,
       fact_gramage,
     };
-    console.log(model);
 
     const res = await AddParamsToFormSchema.create(model);
+    console.log(res);
+
     return res;
   }
 }
