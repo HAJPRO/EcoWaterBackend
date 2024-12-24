@@ -3,7 +3,7 @@ const { model, Schema } = require("mongoose");
 const AddToFormSchema = new Schema(
   {
     party_number: {
-      type: Number,
+      type: String,
       required: true,
     },
     customer_name: {
@@ -27,7 +27,7 @@ const AddToFormSchema = new Schema(
       required: true,
     },
     sort: {
-      type: Number,
+      type: String,
       required: true,
     },
     status: {
