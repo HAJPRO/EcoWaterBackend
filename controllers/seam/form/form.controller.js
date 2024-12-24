@@ -30,7 +30,7 @@ class SeamInFormController {
   async GetOneReport(req, res, next) {
     try {
       const data = await SeamInFormService.GetOneReport(req.body);
-      res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi ! ", data });
+      res.status(200).json(data);
     } catch (error) {
       next(error);
     }

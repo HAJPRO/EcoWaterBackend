@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
 const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
-const ProcessBoxModel = require("../../../models/Seam/form/ProcessBox.model");
 
 class SeamInFormService {
   async getAll(is_status) {
@@ -139,7 +138,6 @@ class SeamInFormService {
     let ID = new mongoose.Types.ObjectId(data.id);
     const res = await AddParamsToFormModel.aggregate([
       { $match: { _id: ID } },
-
       {
         $project: {
           status: 1,
@@ -152,7 +150,7 @@ class SeamInFormService {
         },
       },
     ]);
-    console.log(res);
+    return res;
   }
 }
 
