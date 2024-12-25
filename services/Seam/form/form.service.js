@@ -42,6 +42,7 @@ class SeamInFormService {
         {
           $project: {
             status: 1,
+            head_pack: 1,
             pastal_quantity: 1,
             waste_quantity: 1,
             fact_gramage: 1,
@@ -91,6 +92,7 @@ class SeamInFormService {
   async CreaetInfoToForm(payload) {
     const author = payload.user.id;
     const warehouse_id = payload.data.id;
+    const head_pack = payload.data.data.head_pack;
     const pastal_quantity = payload.data.data.pastal_quantity;
     const waste_quantity = payload.data.data.waste_quantity;
     const fact_gramage = payload.data.data.fact_gramage;
@@ -98,6 +100,7 @@ class SeamInFormService {
     const model = {
       author,
       warehouse_id,
+      head_pack,
       pastal_quantity,
       waste_quantity,
       fact_gramage,
@@ -144,6 +147,7 @@ class SeamInFormService {
           pastal_quantity: 1,
           waste_quantity: 1,
           fact_gramage: 1,
+          head_pack: 1,
           createdAt: 1,
           report: 1,
           report_box: 1,
