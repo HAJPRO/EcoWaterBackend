@@ -3,6 +3,7 @@ const authMiddleware = require("../../middlewares/auth.middleware.js");
 const authorMiddleware = require("../../middlewares/author.middleware.js");
 const DepSeamWarehouseController = require("../../controllers/seam/warehouse/warehouse.controller.js");
 const SeamInFormController = require("../../controllers/seam/form/form.controller.js");
+const SeamInClassificationController = require("../../controllers/seam/classification/classification.controller.js");
 
 const router = express.Router();
 router.post(
@@ -50,6 +51,21 @@ router.post(
   "/get_one_report",
   authMiddleware,
   SeamInFormController.GetOneReport
+);
+router.post(
+  "/all_classification",
+  authMiddleware,
+  SeamInClassificationController.getAll
+);
+router.post(
+  "/classification_get_one_report",
+  authMiddleware,
+  SeamInClassificationController.GetOneReport
+);
+router.post(
+  "/accept_report_item",
+  authMiddleware,
+  SeamInClassificationController.AcceptReportItem
 );
 
 module.exports = router;

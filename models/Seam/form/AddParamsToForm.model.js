@@ -27,6 +27,14 @@ const AddParamsToFormSchema = new Schema(
       required: true,
       default: "Jarayonda",
     },
+    processing: {
+      type: String,
+      default: "Tasnifga yuborildi",
+    },
+    state: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

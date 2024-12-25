@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
 const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
 
-class SeamInFormService {
+class SeamInClassificationService {
   async getAll(is_status) {
     const status = is_status.status;
 
@@ -14,11 +13,11 @@ class SeamInFormService {
         return { items, all_length };
       }
       if (status === 2) {
-        const items = await this.AllSentFromWarehouse();
+        const items = await this.AllSentFromForm();
         return { items, all_length };
       }
       if (status === 3) {
-        const items = await this.AllSentToClassification();
+        const items = await this.AllSentToPatoks();
         return { items, all_length };
       }
     } catch (error) {
@@ -29,81 +28,38 @@ class SeamInFormService {
   async getAllInProcess(id) {
     let ID = new mongoose.Types.ObjectId(id);
     try {
-      const allInProcess = await AddParamsToFormModel.aggregate([
-        { $match: {} },
-        {
-          $lookup: {
-            from: "addtoforms",
-            localField: "warehouse_id",
-            foreignField: "_id",
-            as: "warehouse",
-          },
-        },
-        {
-          $project: {
-            status: 1,
-            head_pack: 1,
-            pastal_quantity: 1,
-            waste_quantity: 1,
-            fact_gramage: 1,
-            createdAt: 1,
-            warehouse: {
-              $cond: {
-                if: { $isArray: "$warehouse" },
-                then: { $arrayElemAt: ["$warehouse", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
-      return allInProcess;
+      return;
     } catch (error) {
       return error.message;
     }
   }
 
-  async AllSentFromWarehouse() {
+  async AllSentFromForm() {
     try {
-      const items = await AddToFormModel.find({ status: "Bichuvga yuborildi" });
+      const items = await AddParamsToFormModel.aggregate([
+        { $match: { processing: "Tasnifga yuborildi" } },
+
+        {
+          $project: {
+            status: 1,
+            pastal_quantity: 1,
+            waste_quantity: 1,
+            fact_gramage: 1,
+            head_pack: 1,
+            createdAt: 1,
+            processing: 1,
+            report: 1,
+            report_box: 1,
+          },
+        },
+      ]);
       return items;
     } catch (error) {
       return error.message;
     }
   }
-  async AllSentToClassification() {
+  async AllSentToPatoks() {
     try {
-      const allClassification = await AddParamsToFormModel.aggregate([
-        { $match: { processing: "Tasnifga yuborildi" } },
-        {
-          $lookup: {
-            from: "addtoforms",
-            localField: "warehouse_id",
-            foreignField: "_id",
-            as: "warehouse",
-          },
-        },
-        {
-          $project: {
-            status: 1,
-            head_pack: 1,
-            pastal_quantity: 1,
-            waste_quantity: 1,
-            fact_gramage: 1,
-            processing: 1,
-            createdAt: 1,
-            warehouse: {
-              $cond: {
-                if: { $isArray: "$warehouse" },
-                then: { $arrayElemAt: ["$warehouse", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
-
-      return allClassification;
     } catch (error) {
       return error.message;
     }
@@ -150,19 +106,11 @@ class SeamInFormService {
 
     return res;
   }
-  async AddToFormUpdate(id) {
-    await AddToFormModel.findByIdAndUpdate(
-      id,
-      { status: "Bichuv tasdiqladi" },
-      { new: true }
-    );
-  }
 
   async CreateDayReport(data) {
     const item = await AddParamsToFormModel.findOne({ _id: data.id });
     const newItem = item;
     newItem.report_box.push(data.items);
-    newItem.processing = "Tasnifga yuborildi";
     const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {
       new: true,
     });
@@ -175,19 +123,28 @@ class SeamInFormService {
       { $match: { _id: ID } },
       {
         $project: {
-          status: 1,
-          pastal_quantity: 1,
-          waste_quantity: 1,
-          fact_gramage: 1,
-          head_pack: 1,
-          createdAt: 1,
-          report: 1,
           report_box: 1,
         },
       },
     ]);
+
     return res;
+  }
+  async AcceptReportItem(data) {
+    const id = data.card_id;
+    const index = data.index;
+    const item = await AddParamsToFormModel.findOne({ _id: id });
+    const newData = item;
+    newData.report_box[index].status = "Tasdiqlandi";
+    const updateData = await AddParamsToFormModel.findByIdAndUpdate(
+      id,
+      newData,
+      {
+        new: true,
+      }
+    );
+    return updateData;
   }
 }
 
-module.exports = new SeamInFormService();
+module.exports = new SeamInClassificationService();
