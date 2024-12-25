@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
+const ClassificationProcess = require("../../../models/Seam/classification/ClassificationProcess.modal");
+
 
 class SeamInClassificationService {
   async getAll(is_status) {
@@ -26,9 +28,33 @@ class SeamInClassificationService {
   }
 
   async getAllInProcess(id) {
-    let ID = new mongoose.Types.ObjectId(id);
     try {
-      return;
+      let ID = new mongoose.Types.ObjectId(id);
+      const allProcess = await ClassificationProcess.aggregate([{ $match: {} },
+      {
+        $lookup: {
+          from: "addparamstoforms",
+          localField: "form_id",
+          foreignField: "_id",
+          as: "form_item",
+        },
+      },
+
+      {
+        $project: {
+          status: 1,
+          item: 1,
+          form_item: {
+            $cond: {
+              if: { $isArray: "$form_item" },
+              then: { $arrayElemAt: ["$form_item", 0] },
+              else: null,
+            },
+          },
+        },
+      }])
+      console.log(allProcess);
+      return allProcess;
     } catch (error) {
       return error.message;
     }
@@ -38,6 +64,14 @@ class SeamInClassificationService {
     try {
       const items = await AddParamsToFormModel.aggregate([
         { $match: { processing: "Tasnifga yuborildi" } },
+        {
+          $lookup: {
+            from: "addtoforms",
+            localField: "warehouse_id",
+            foreignField: "_id",
+            as: "warehouse",
+          },
+        },
 
         {
           $project: {
@@ -48,10 +82,17 @@ class SeamInClassificationService {
             head_pack: 1,
             createdAt: 1,
             processing: 1,
-            report: 1,
             report_box: 1,
+            warehouse: {
+              $cond: {
+                if: { $isArray: "$warehouse" },
+                then: { $arrayElemAt: ["$warehouse", 0] },
+                else: null,
+              },
+            },
           },
         },
+
       ]);
       return items;
     } catch (error) {
@@ -122,8 +163,25 @@ class SeamInClassificationService {
     const res = await AddParamsToFormModel.aggregate([
       { $match: { _id: ID } },
       {
+        $lookup: {
+          from: "addtoforms",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
+
+      {
         $project: {
           report_box: 1,
+          status: 1,
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
+              else: null,
+            },
+          },
         },
       },
     ]);
@@ -135,7 +193,11 @@ class SeamInClassificationService {
     const index = data.index;
     const item = await AddParamsToFormModel.findOne({ _id: id });
     const newData = item;
-    newData.report_box[index].status = "Tasdiqlandi";
+    newData.report_box[index].status = "Qabul qilindi";
+    const processData = {
+      form_id: id,
+      item: newData.report_box[index]
+    }
     const updateData = await AddParamsToFormModel.findByIdAndUpdate(
       id,
       newData,
@@ -143,6 +205,7 @@ class SeamInClassificationService {
         new: true,
       }
     );
+    const process_data = await ClassificationProcess.create(processData)
     return updateData;
   }
 }
