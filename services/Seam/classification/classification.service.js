@@ -182,6 +182,7 @@ class SeamInClassificationService {
     const item = await ClassificationProcess.findOne({ _id: data.id });
     const newItem = item;
     newItem.report_box.push(data.items);
+    newItem.processing = "Patokga yuborildi";
     const res = await ClassificationProcess.findByIdAndUpdate(
       data.id,
       newItem,
@@ -219,7 +220,6 @@ class SeamInClassificationService {
         },
       },
     ]);
-    console.log(res);
 
     return res;
   }
