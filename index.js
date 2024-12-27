@@ -17,14 +17,26 @@ app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 3000;
 // Routes
+app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
 app.use("/api/v1/sale", require("./routes/salelLegal.route.js"));
 app.use("/api/v1/paint", require("./routes/paint/paint.route.js"));
 app.use("/api/v1/provide", require("./routes/provide/provide.route.js"));
 app.use("/api/v1/weaving", require("./routes/weaving/weaving.route.js"));
 app.use("/api/v1/spinning", require("./routes/spinning/spinning.route.js"));
-app.use("/api/v1/seam", require("./routes/seam/seam.router.js"));
-app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
+app.use(
+  "/api/v1/seam/warehouse",
+  require("./routes/seam/warehouse/warehouse.router.js")
+);
+app.use("/api/v1/seam/form", require("./routes/seam/form/form.router.js"));
+app.use(
+  "/api/v1/seam/classification",
+  require("./routes/seam/classification/classification.router.js")
+);
+app.use(
+  "/api/v1/seam/patoks",
+  require("./routes/seam/patoks/patoks.router.js")
+);
 
 const START = async () => {
   try {
