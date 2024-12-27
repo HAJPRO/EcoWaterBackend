@@ -19,6 +19,17 @@ class SeamInClassificationController {
       next(error);
     }
   }
+  async ConfirmAndCreteProcess(req, res, next) {
+    try {
+      const data = await SeamInClassificationService.ConfirmAndCreteProcess({
+        data: req.body,
+        user: req.user,
+      });
+      res.status(200).json({ msg: "Muvaffaqiyatli tasdiqlandi ! ", data });
+    } catch (error) {
+      next(error);
+    }
+  }
   async CreateDayReport(req, res, next) {
     try {
       const data = await SeamInClassificationService.CreateDayReport(req.body);

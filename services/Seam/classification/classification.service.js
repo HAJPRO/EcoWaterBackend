@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
 const ClassificationProcess = require("../../../models/Seam/classification/ClassificationProcess.modal");
 
-
 class SeamInClassificationService {
   async getAll(is_status) {
     const status = is_status.status;
@@ -30,30 +29,45 @@ class SeamInClassificationService {
   async getAllInProcess(id) {
     try {
       let ID = new mongoose.Types.ObjectId(id);
-      const allProcess = await ClassificationProcess.aggregate([{ $match: {} },
-      {
-        $lookup: {
-          from: "addparamstoforms",
-          localField: "form_id",
-          foreignField: "_id",
-          as: "form_item",
+      const allProcess = await ClassificationProcess.aggregate([
+        { $match: {} },
+        {
+          $lookup: {
+            from: "addparamstoforms",
+            localField: "form_id",
+            foreignField: "_id",
+            as: "form_item",
+          },
         },
-      },
-
-      {
-        $project: {
-          status: 1,
-          item: 1,
-          form_item: {
-            $cond: {
-              if: { $isArray: "$form_item" },
-              then: { $arrayElemAt: ["$form_item", 0] },
-              else: null,
+        {
+          $lookup: {
+            from: "addtoforms",
+            localField: "warehouse_id",
+            foreignField: "_id",
+            as: "warehouse",
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            createdAt: 1,
+            form_item: {
+              $cond: {
+                if: { $isArray: "$form_item" },
+                then: { $arrayElemAt: ["$form_item", 0] },
+                else: null,
+              },
+            },
+            warehouse: {
+              $cond: {
+                if: { $isArray: "$warehouse" },
+                then: { $arrayElemAt: ["$warehouse", 0] },
+                else: null,
+              },
             },
           },
         },
-      }])
-      console.log(allProcess);
+      ]);
       return allProcess;
     } catch (error) {
       return error.message;
@@ -92,7 +106,6 @@ class SeamInClassificationService {
             },
           },
         },
-
       ]);
       return items;
     } catch (error) {
@@ -116,6 +129,23 @@ class SeamInClassificationService {
     //   (data) => data.length
     // );
     // return { process_length, warehouse_length, classification_length };
+  }
+  async ConfirmAndCreteProcess(data) {
+    const form = await AddParamsToFormModel.findOne({ _id: data.data.id });
+    const newData = {
+      form_id: data.data.id,
+      author: data.user.id,
+      warehouse_id: form.warehouse_id,
+    };
+    const res = await ClassificationProcess.create(newData);
+    if (res) {
+      const update = await AddParamsToFormModel.findByIdAndUpdate(
+        data.data.id,
+        { status: "Tasnif tasdiqladi", processing: "Tasnifda" },
+        { new: true }
+      );
+    }
+    return res;
   }
   async CreaetInfoToForm(payload) {
     const author = payload.user.id;
@@ -149,25 +179,29 @@ class SeamInClassificationService {
   }
 
   async CreateDayReport(data) {
-    const item = await AddParamsToFormModel.findOne({ _id: data.id });
+    const item = await ClassificationProcess.findOne({ _id: data.id });
     const newItem = item;
     newItem.report_box.push(data.items);
-    const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {
-      new: true,
-    });
+    const res = await ClassificationProcess.findByIdAndUpdate(
+      data.id,
+      newItem,
+      {
+        new: true,
+      }
+    );
 
     return res;
   }
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
-    const res = await AddParamsToFormModel.aggregate([
+    const res = await ClassificationProcess.aggregate([
       { $match: { _id: ID } },
       {
         $lookup: {
-          from: "addtoforms",
-          localField: "warehouse_id",
+          from: "addparamstoforms",
+          localField: "form_id",
           foreignField: "_id",
-          as: "warehouse",
+          as: "form",
         },
       },
 
@@ -175,38 +209,39 @@ class SeamInClassificationService {
         $project: {
           report_box: 1,
           status: 1,
-          warehouse: {
+          form: {
             $cond: {
-              if: { $isArray: "$warehouse" },
-              then: { $arrayElemAt: ["$warehouse", 0] },
+              if: { $isArray: "$form" },
+              then: { $arrayElemAt: ["$form", 0] },
               else: null,
             },
           },
         },
       },
     ]);
+    console.log(res);
 
     return res;
   }
   async AcceptReportItem(data) {
     const id = data.card_id;
     const index = data.index;
-    const item = await AddParamsToFormModel.findOne({ _id: id });
-    const newData = item;
-    newData.report_box[index].status = "Qabul qilindi";
-    const processData = {
-      form_id: id,
-      item: newData.report_box[index]
+    const form = await ClassificationProcess.findOne({ _id: id });
+
+    if (await form) {
+      const item = await AddParamsToFormModel.findOne({ _id: form.form_id });
+      const newData = item;
+      newData.report_box[index].status = "Qabul qilindi";
+      const updateData = await AddParamsToFormModel.findByIdAndUpdate(
+        form.form_id,
+        newData,
+        {
+          new: true,
+        }
+      );
     }
-    const updateData = await AddParamsToFormModel.findByIdAndUpdate(
-      id,
-      newData,
-      {
-        new: true,
-      }
-    );
-    const process_data = await ClassificationProcess.create(processData)
-    return updateData;
+
+    return;
   }
 }
 

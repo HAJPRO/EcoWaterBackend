@@ -21,16 +21,17 @@ const AddParamsToFormSchema = new Schema(
       type: Number,
       required: true,
     },
-
+    processing: {
+      type: String,
+      required: true,
+      default: "Bichimda",
+    },
     status: {
       type: String,
       required: true,
       default: "Jarayonda",
     },
-    processing: {
-      type: String,
-      default: "Tasnifga yuborildi",
-    },
+
     state: {
       type: Boolean,
       default: true,

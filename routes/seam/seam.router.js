@@ -63,9 +63,19 @@ router.post(
   SeamInClassificationController.GetOneReport
 );
 router.post(
+  "/confim_and_create",
+  authMiddleware,
+  SeamInClassificationController.ConfirmAndCreteProcess
+);
+router.post(
   "/accept_report_item",
   authMiddleware,
   SeamInClassificationController.AcceptReportItem
+);
+router.post(
+  "/create_day_report_classification",
+  authMiddleware,
+  SeamInClassificationController.CreateDayReport
 );
 
 module.exports = router;

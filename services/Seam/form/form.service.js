@@ -163,6 +163,7 @@ class SeamInFormService {
     const newItem = item;
     newItem.report_box.push(data.items);
     newItem.processing = "Tasnifga yuborildi";
+    newItem.status = "Tasnifga yuborildi";
     const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {
       new: true,
     });

@@ -2,6 +2,7 @@ const { model, Schema } = require("mongoose");
 
 const AddToFormSchema = new Schema(
   {
+    author: { type: Schema.ObjectId, ref: "User" },
     party_number: {
       type: String,
       required: true,
