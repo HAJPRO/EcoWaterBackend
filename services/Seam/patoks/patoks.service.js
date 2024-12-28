@@ -126,118 +126,118 @@ class SeamInPatoksService {
     // );
     // return { process_length, warehouse_length, classification_length };
   }
-  //   async ConfirmAndCreteProcess(data) {
-  //     const form = await AddParamsToFormModel.findOne({ _id: data.data.id });
-  //     const newData = {
-  //       form_id: data.data.id,
-  //       author: data.user.id,
-  //       warehouse_id: form.warehouse_id,
-  //     };
-  //     const res = await ClassificationProcess.create(newData);
-  //     if (res) {
-  //       const update = await AddParamsToFormModel.findByIdAndUpdate(
-  //         data.data.id,
-  //         { status: "Tasnif tasdiqladi", processing: "Tasnifda" },
-  //         { new: true }
-  //       );
-  //     }
-  //     return res;
-  //   }
-  //   async CreaetInfoToForm(payload) {
-  //     const author = payload.user.id;
-  //     const warehouse_id = payload.data.id;
-  //     const head_pack = payload.data.data.head_pack;
-  //     const pastal_quantity = payload.data.data.pastal_quantity;
-  //     const waste_quantity = payload.data.data.waste_quantity;
-  //     const fact_gramage = payload.data.data.fact_gramage;
+  async ConfirmAndCreteProcess(data) {
+    console.log(data);
 
-  //     const model = {
-  //       author,
-  //       warehouse_id,
-  //       head_pack,
-  //       pastal_quantity,
-  //       waste_quantity,
-  //       fact_gramage,
-  //     };
+    const form = await ClassificationProcess.findOne({ _id: data.data.id });
+    const newData = {
+      classification_id: data.data.id,
+      author: data.user.id,
+      warehouse_id: form.warehouse_id,
+    };
+    const res = await PatoksProcess.create(newData);
+    if (res) {
+      const update = await ClassificationProcess.findByIdAndUpdate(
+        data.data.id,
+        { status: "Patok tasdiqladi", processing: "Patokda" },
+        { new: true }
+      );
+    }
+    return res;
+  }
+  // async CreaetInfoToForm(payload) {
+  //   const author = payload.user.id;
+  //   const warehouse_id = payload.data.id;
+  //   const head_pack = payload.data.data.head_pack;
+  //   const pastal_quantity = payload.data.data.pastal_quantity;
+  //   const waste_quantity = payload.data.data.waste_quantity;
+  //   const fact_gramage = payload.data.data.fact_gramage;
 
-  //     const res = await AddParamsToFormModel.create(model);
+  //   const model = {
+  //     author,
+  //     warehouse_id,
+  //     head_pack,
+  //     pastal_quantity,
+  //     waste_quantity,
+  //     fact_gramage,
+  //   };
 
-  //     if (await res) {
-  //       const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
-  //         res._id,
-  //         { status: "Jarayonda" },
-  //         { new: true }
-  //       );
-  //       this.AddToFormUpdate(warehouse_id);
-  //     }
+  //   const res = await AddParamsToFormModel.create(model);
 
-  //     return res;
-  //   }
-
-  //   async CreateDayReport(data) {
-  //     const item = await ClassificationProcess.findOne({ _id: data.id });
-  //     const newItem = item;
-  //     newItem.report_box.push(data.items);
-  //     const res = await ClassificationProcess.findByIdAndUpdate(
-  //       data.id,
-  //       newItem,
-  //       {
-  //         new: true,
-  //       }
+  //   if (await res) {
+  //     const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
+  //       res._id,
+  //       { status: "Jarayonda" },
+  //       { new: true }
   //     );
-
-  //     return res;
+  //     this.AddToFormUpdate(warehouse_id);
   //   }
-  //   async GetOneReport(data) {
-  //     let ID = new mongoose.Types.ObjectId(data.id);
-  //     const res = await ClassificationProcess.aggregate([
-  //       { $match: { _id: ID } },
-  //       {
-  //         $lookup: {
-  //           from: "addparamstoforms",
-  //           localField: "form_id",
-  //           foreignField: "_id",
-  //           as: "form",
-  //         },
-  //       },
 
-  //       {
-  //         $project: {
-  //           report_box: 1,
-  //           status: 1,
-  //           form: {
-  //             $cond: {
-  //               if: { $isArray: "$form" },
-  //               then: { $arrayElemAt: ["$form", 0] },
-  //               else: null,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     ]);
+  //   return res;
+  // }
 
-  //     return res;
-  //   }
-  //   async AcceptReportItem(data) {
-  //     const id = data.card_id;
-  //     const index = data.index;
-  //     const form = await ClassificationProcess.findOne({ _id: id });
+  async CreateDayReport(data) {
+    const item = await PatoksProcess.findOne({ _id: data.id.id });
+    console.log(item);
 
-  //     if (await form) {
-  //       const item = await AddParamsToFormModel.findOne({ _id: form.form_id });
-  //       const newData = item;
-  //       newData.report_box[index].status = "Qabul qilindi";
-  //       const updateData = await AddParamsToFormModel.findByIdAndUpdate(
-  //         form.form_id,
-  //         newData,
-  //         {
-  //           new: true,
-  //         }
-  //       );
-  //     }
+    // const newItem = item;
+    // newItem.report_box.push(data.items);
+    // const res = await PatoksProcess.findByIdAndUpdate(data.id.id, newItem, {
+    //   new: true,
+    // });
 
-  //     return;
-  //   }
+    // return res;
+  }
+  async GetOneReport(data) {
+    let ID = new mongoose.Types.ObjectId(data.id);
+    const res = await PatoksProcess.aggregate([
+      { $match: { _id: ID } },
+      {
+        $lookup: {
+          from: "addparamstoforms",
+          localField: "form_id",
+          foreignField: "_id",
+          as: "form",
+        },
+      },
+
+      {
+        $project: {
+          report_box: 1,
+          status: 1,
+          form: {
+            $cond: {
+              if: { $isArray: "$form" },
+              then: { $arrayElemAt: ["$form", 0] },
+              else: null,
+            },
+          },
+        },
+      },
+    ]);
+
+    return res;
+  }
+  async AcceptReportItem(data) {
+    const id = data.card_id;
+    const index = data.index;
+    const form = await ClassificationProcess.findOne({ _id: id });
+
+    if (await form) {
+      const item = await AddParamsToFormModel.findOne({ _id: form.form_id });
+      const newData = item;
+      newData.report_box[index].status = "Qabul qilindi";
+      const updateData = await AddParamsToFormModel.findByIdAndUpdate(
+        form.form_id,
+        newData,
+        {
+          new: true,
+        }
+      );
+    }
+
+    return;
+  }
 }
 
 module.exports = new SeamInPatoksService();
