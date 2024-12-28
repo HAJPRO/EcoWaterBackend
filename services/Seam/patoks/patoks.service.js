@@ -33,10 +33,10 @@ class SeamInPatoksService {
         { $match: {} },
         {
           $lookup: {
-            from: "addparamstoforms",
-            localField: "form_id",
+            from: "classificationprocesses",
+            localField: "classification_id",
             foreignField: "_id",
-            as: "form_item",
+            as: "classification_item",
           },
         },
         {
@@ -50,11 +50,12 @@ class SeamInPatoksService {
         {
           $project: {
             status: 1,
+            report_box: 1,
             createdAt: 1,
-            form_item: {
+            classification_item: {
               $cond: {
-                if: { $isArray: "$form_item" },
-                then: { $arrayElemAt: ["$form_item", 0] },
+                if: { $isArray: "$classification_item" },
+                then: { $arrayElemAt: ["$classification_item", 0] },
                 else: null,
               },
             },
@@ -68,6 +69,7 @@ class SeamInPatoksService {
           },
         },
       ]);
+
       return allProcess;
     } catch (error) {
       return error.message;
@@ -127,8 +129,6 @@ class SeamInPatoksService {
     // return { process_length, warehouse_length, classification_length };
   }
   async ConfirmAndCreteProcess(data) {
-    console.log(data);
-
     const form = await ClassificationProcess.findOne({ _id: data.data.id });
     const newData = {
       classification_id: data.data.id,
@@ -177,16 +177,14 @@ class SeamInPatoksService {
   // }
 
   async CreateDayReport(data) {
-    const item = await PatoksProcess.findOne({ _id: data.id.id });
-    console.log(item);
+    const item = await PatoksProcess.findOne({ _id: data.id });
+    const newItem = item;
+    newItem.report_box.push(data.items);
+    const res = await PatoksProcess.findByIdAndUpdate(data.id, newItem, {
+      new: true,
+    });
 
-    // const newItem = item;
-    // newItem.report_box.push(data.items);
-    // const res = await PatoksProcess.findByIdAndUpdate(data.id.id, newItem, {
-    //   new: true,
-    // });
-
-    // return res;
+    return res;
   }
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
@@ -194,10 +192,10 @@ class SeamInPatoksService {
       { $match: { _id: ID } },
       {
         $lookup: {
-          from: "addparamstoforms",
-          localField: "form_id",
+          from: "classificationprocesses",
+          localField: "classification_id",
           foreignField: "_id",
-          as: "form",
+          as: "classification",
         },
       },
 
@@ -205,30 +203,33 @@ class SeamInPatoksService {
         $project: {
           report_box: 1,
           status: 1,
-          form: {
+          processing: 1,
+          createdAt: 1,
+          classification: {
             $cond: {
-              if: { $isArray: "$form" },
-              then: { $arrayElemAt: ["$form", 0] },
+              if: { $isArray: "$classification" },
+              then: { $arrayElemAt: ["$classification", 0] },
               else: null,
             },
           },
         },
       },
     ]);
-
     return res;
   }
   async AcceptReportItem(data) {
     const id = data.card_id;
     const index = data.index;
-    const form = await ClassificationProcess.findOne({ _id: id });
+    const patok = await PatoksProcess.findOne({ _id: id });
 
-    if (await form) {
-      const item = await AddParamsToFormModel.findOne({ _id: form.form_id });
+    if (await patok) {
+      const item = await ClassificationProcess.findOne({
+        _id: patok.classification_id,
+      });
       const newData = item;
       newData.report_box[index].status = "Qabul qilindi";
-      const updateData = await AddParamsToFormModel.findByIdAndUpdate(
-        form.form_id,
+      const updateData = await ClassificationProcess.findByIdAndUpdate(
+        patok.classification_id,
         newData,
         {
           new: true,

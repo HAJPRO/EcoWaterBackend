@@ -11,7 +11,7 @@ router.post(
   SeamInPatoksController.GetOneReport
 );
 router.post(
-  "confim_and_create",
+  "/confirm_and_create",
   authMiddleware,
   SeamInPatoksController.ConfirmAndCreteProcess
 );
