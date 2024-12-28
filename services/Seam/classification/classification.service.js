@@ -131,6 +131,7 @@ class SeamInClassificationService {
     // return { process_length, warehouse_length, classification_length };
   }
   async ConfirmAndCreteProcess(data) {
+    console.log(data);
     const form = await AddParamsToFormModel.findOne({ _id: data.data.id });
     const newData = {
       form_id: data.data.id,
