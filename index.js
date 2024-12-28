@@ -37,6 +37,10 @@ app.use(
   "/api/v1/seam/patoks",
   require("./routes/seam/patoks/patoks.router.js")
 );
+app.use(
+  "/api/v1/seam/packing",
+  require("./routes/seam/packing/packing.router.js")
+);
 
 const START = async () => {
   try {

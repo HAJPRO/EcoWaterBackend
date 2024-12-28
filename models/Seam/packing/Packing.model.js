@@ -2,7 +2,7 @@ const { model, Schema } = require("mongoose");
 const PackingProcessSchema = new Schema(
   {
     author: { type: Schema.ObjectId, ref: "User" },
-    classification_id: { type: Schema.ObjectId, ref: "ClassificationProcess" },
+    patoks_id: { type: Schema.ObjectId, ref: "PatoksProcess" },
     warehouse_id: { type: Schema.ObjectId, ref: "AddToForm" },
     report_box: {
       type: Array,
@@ -17,8 +17,6 @@ const PackingProcessSchema = new Schema(
     },
     processing: {
       type: String,
-      required: true,
-      default: "Skladga yuborildi",
     },
     state: {
       type: Boolean,
@@ -28,4 +26,4 @@ const PackingProcessSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model("PackingProcess", PackingProcessSchema);
+module.exports = model(" PackingProcess", PackingProcessSchema);
