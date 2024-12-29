@@ -54,5 +54,13 @@ class SeamInPatoksController {
       next(error);
     }
   }
+  async AcceptFromPatok(req, res, next) {
+    try {
+      const data = await SeamInPatoksService.AcceptFromPatok(req.body);
+      res.status(200).json({ msg: "Tasdiqlandi", data });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new SeamInPatoksController();

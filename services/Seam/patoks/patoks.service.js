@@ -129,11 +129,14 @@ class SeamInPatoksService {
     // return { process_length, warehouse_length, classification_length };
   }
   async ConfirmAndCreteProcess(data) {
-    const form = await ClassificationProcess.findOne({ _id: data.data.id });
+    const classification = await ClassificationProcess.findOne({
+      _id: data.data.id,
+    });
+
     const newData = {
       classification_id: data.data.id,
       author: data.user.id,
-      warehouse_id: form.warehouse_id,
+      warehouse_id: classification.warehouse_id,
     };
     const res = await PatoksProcess.create(newData);
     if (res) {
@@ -177,10 +180,10 @@ class SeamInPatoksService {
   // }
 
   async CreateDayReport(data) {
-    const item = await PatoksProcess.findOne({ _id: data.id });
+    const item = await PatoksProcess.findById(data.id.id);
     const newItem = item;
-    newItem.report_box.push(data.items);
-    const res = await PatoksProcess.findByIdAndUpdate(data.id, newItem, {
+    newItem.patoks_process.push(data.items);
+    const res = await PatoksProcess.findByIdAndUpdate(data.id.id, newItem, {
       new: true,
     });
 
@@ -202,6 +205,7 @@ class SeamInPatoksService {
       {
         $project: {
           report_box: 1,
+          patoks_process: 1,
           status: 1,
           processing: 1,
           createdAt: 1,
@@ -218,7 +222,7 @@ class SeamInPatoksService {
     return res;
   }
   async AcceptReportItem(data) {
-    const id = data.card_id;
+    const id = data.card_id.id;
     const index = data.index;
     const patok = await PatoksProcess.findOne({ _id: id });
 
@@ -236,8 +240,26 @@ class SeamInPatoksService {
         }
       );
     }
-
-    return;
+  }
+  async AcceptFromPatok(data) {
+    const id = data.card_id.id;
+    const index = data.index;
+    const patok = await PatoksProcess.findOne({ _id: id });
+    const patokNew = patok;
+    const process_item = patokNew.patoks_process[index];
+    const report_box = {
+      status: "Upakovkaga yuborildi",
+      date: new Date(),
+      quantity: process_item.quantity,
+      unit: process_item.unit,
+      id: process_item.id,
+    };
+    patokNew.report_box.push(report_box);
+    patokNew.patoks_process[index].status = "Qabul qilindi";
+    patokNew.processing = "Upakovkaga yuborildi";
+    const update = await PatoksProcess.findByIdAndUpdate(id, patokNew, {
+      new: true,
+    });
   }
 }
 

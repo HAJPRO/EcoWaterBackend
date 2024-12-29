@@ -25,4 +25,9 @@ router.post(
   authMiddleware,
   SeamInPatoksController.CreateDayReport
 );
+router.post(
+  "/accept_from_patok",
+  authMiddleware,
+  SeamInPatoksController.AcceptFromPatok
+);
 module.exports = router;

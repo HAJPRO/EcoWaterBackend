@@ -4,6 +4,7 @@ const PatoksProcessSchema = new Schema(
     author: { type: Schema.ObjectId, ref: "User" },
     classification_id: { type: Schema.ObjectId, ref: "ClassificationProcess" },
     warehouse_id: { type: Schema.ObjectId, ref: "AddToForm" },
+    patoks_process: { type: Array, default: [], required: true },
     report_box: {
       type: Array,
       default: [],
@@ -18,7 +19,7 @@ const PatoksProcessSchema = new Schema(
     processing: {
       type: String,
       required: true,
-      default: "Upakovkaga yuborildi",
+      default: "Patokda",
     },
     state: {
       type: Boolean,

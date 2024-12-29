@@ -131,7 +131,7 @@ class SeamInPackingService {
   async ConfirmAndCreteProcess(data) {
     const form = await PatoksProcess.findOne({ _id: data.data.id });
     const newData = {
-      classification_id: data.data.id,
+      patoks_id: data.data.id,
       author: data.user.id,
       warehouse_id: form.warehouse_id,
     };
@@ -145,42 +145,12 @@ class SeamInPackingService {
     }
     return res;
   }
-  // async CreaetInfoToForm(payload) {
-  //   const author = payload.user.id;
-  //   const warehouse_id = payload.data.id;
-  //   const head_pack = payload.data.data.head_pack;
-  //   const pastal_quantity = payload.data.data.pastal_quantity;
-  //   const waste_quantity = payload.data.data.waste_quantity;
-  //   const fact_gramage = payload.data.data.fact_gramage;
-
-  //   const model = {
-  //     author,
-  //     warehouse_id,
-  //     head_pack,
-  //     pastal_quantity,
-  //     waste_quantity,
-  //     fact_gramage,
-  //   };
-
-  //   const res = await AddParamsToFormModel.create(model);
-
-  //   if (await res) {
-  //     const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
-  //       res._id,
-  //       { status: "Jarayonda" },
-  //       { new: true }
-  //     );
-  //     this.AddToFormUpdate(warehouse_id);
-  //   }
-
-  //   return res;
-  // }
 
   async CreateDayReport(data) {
-    const item = await PackingProcess.findOne({ _id: data.id });
+    const item = await PackingProcess.findOne({ _id: data.id.id });
     const newItem = item;
     newItem.report_box.push(data.items);
-    const res = await PackingProcess.findByIdAndUpdate(data.id, newItem, {
+    const res = await PackingProcess.findByIdAndUpdate(data.id.id, newItem, {
       new: true,
     });
 
@@ -215,14 +185,15 @@ class SeamInPackingService {
         },
       },
     ]);
+
     return res;
   }
   async AcceptReportItem(data) {
-    const id = data.card_id;
+    const id = data.card_id.id;
     const index = data.index;
     const packing = await PackingProcess.findOne({ _id: id });
 
-    if (await patok) {
+    if (await packing) {
       const item = await PatoksProcess.findOne({
         _id: packing.patoks_id,
       });
