@@ -1,13 +1,12 @@
 const UserDto = require("../dtos/user.dto");
 const userModel = require("../models/user.model");
-const PermissionModel = require("../models/permission.model");
-const UserPermissonModel = require("../models/UserPermission.model");
+const PermissionModel = require("../models/Admin/permission.model");
+const UserPermissionModel = require("../models/Admin/UserPermission.model");
 
 const bcrypt = require("bcryptjs");
 const tokenService = require("../services/token.service");
 // const mailService = require('./mail.service')
 const BaseError = require("../errors/base.error");
-const UserPermissionModel = require("../models/UserPermission.model");
 
 class AuthService {
   async register(username, password, department) {
@@ -59,55 +58,57 @@ class AuthService {
   async login(username, password) {
     const user = await userModel.findOne({ username });
     if (!user) {
-      throw BaseError.BadRequest("User is not defined");
+      return BaseError.BadRequest("User is not defined");
+
     }
+    if (user) {
+      const isPassword = await bcrypt.compare(password, user.password);
+      if (!isPassword) {
+        return BaseError.BadRequest("Password is incorrect");
+      }
+      if (isPassword && user.username === username) {
+        const userDto = new UserDto(user);
 
-    const isPassword = await bcrypt.compare(password, user.password);
-    if (!isPassword) {
-      throw BaseError.BadRequest("Password is incorrect");
-    }
+        const tokens = tokenService.generateToken({ ...userDto });
 
-    const userDto = new UserDto(user);
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-    const tokens = tokenService.generateToken({ ...userDto });
-
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-    // GET USER DATA WITH ALL PERMISSIONS
-    const result = await userModel.aggregate([
-      { $match: { username: userDto.username } },
-      {
-        $lookup: {
-          from: "userpermissions",
-          localField: "_id",
-          foreignField: "user_id",
-          as: "permissions",
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          username: 1,
-          permissions: {
-            $cond: {
-              if: { $isArray: "$permissions" },
-              then: { $arrayElemAt: ["$permissions", 0] },
-              else: null,
+        // GET USER DATA WITH ALL PERMISSIONS
+        const result = await userModel.aggregate([
+          { $match: { username: userDto.username } },
+          {
+            $lookup: {
+              from: "userpermissions",
+              localField: "_id",
+              foreignField: "user_id",
+              as: "permissions",
             },
           },
-        },
-      },
-      // {
-      //   $addFields: {
-      //     permissions: {
-      //       permissions: "$permissions.permissions",
-      //     },
-      //   },
-      // },
-    ]);
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              permissions: {
+                $cond: {
+                  if: { $isArray: "$permissions" },
+                  then: { $arrayElemAt: ["$permissions", 0] },
+                  else: null,
+                },
+              },
+            },
+          },
+          // {
+          //   $addFields: {
+          //     permissions: {
+          //       permissions: "$permissions.permissions",
+          //     },
+          //   },
+          // },
+        ]);
+        return { user: userDto, ...tokens, result };
+      }
+    }
 
-    //
-    return { user: userDto, ...tokens, result };
   }
 
   async logout(refreshToken) {

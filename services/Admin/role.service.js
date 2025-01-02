@@ -1,4 +1,4 @@
-const RoleModel = require("../../models/role.model");
+const RoleModel = require("../../models/Admin/role.model");
 
 class PermissionService {
   async storeRole(data) {
@@ -16,6 +16,9 @@ class PermissionService {
       return err;
     }
   }
+
 }
+
+
 
 module.exports = new PermissionService();

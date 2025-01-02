@@ -7,8 +7,8 @@ const PermissionSchema = new Schema(
       required: true,
     },
     is_default: {
-      type: Number,
-      default: 0,
+      type: Array,
+      default: [],
     },
   },
   { timestamps: true }

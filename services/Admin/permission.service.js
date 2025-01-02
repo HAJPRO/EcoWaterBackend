@@ -1,4 +1,4 @@
-const PermissionModel = require("../../models/permission.model");
+const PermissionModel = require("../../models/Admin/permission.model");
 
 class PermissionService {
   async addPermission(data) {
