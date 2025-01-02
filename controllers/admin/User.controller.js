@@ -16,6 +16,22 @@ class UserController {
       next(error);
     }
   }
+  async GetRoles(req, res, next) {
+    try {
+      const roles = await UserService.GetRoles();
+      res.status(200).json(roles);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async GetPermissions(req, res, next) {
+    try {
+      const permissions = await UserService.GetPermissions();
+      res.status(200).json(permissions);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new UserController();

@@ -1,4 +1,9 @@
 const UserModel = require("../../models/user.model");
+const RoleModel = require("../../models/Admin/role.model");
+const PermissionModel = require("../../models/Admin/permission.model");
+
+
+
 const bcrypt = require("bcryptjs");
 
 class UserService {
@@ -45,6 +50,23 @@ class UserService {
       // })
 
       return users;
+    } catch (error) {
+      return error.messages;
+    }
+  }
+  async GetRoles() {
+    try {
+      const roles = await RoleModel.find();
+
+      return roles;
+    } catch (error) {
+      return error.messages;
+    }
+  }
+  async GetPermissions() {
+    try {
+      const permissions = await PermissionModel.find();
+      return permissions;
     } catch (error) {
       return error.messages;
     }

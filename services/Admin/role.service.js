@@ -1,7 +1,7 @@
 const RoleModel = require("../../models/Admin/role.model");
 
-class PermissionService {
-  async storeRole(data) {
+class RoleService {
+  async CreateRole(data) {
     try {
       const role_name = data.role_name;
       const isExists = await RoleModel.findOne({ role_name });
@@ -21,4 +21,4 @@ class PermissionService {
 
 
 
-module.exports = new PermissionService();
+module.exports = new RoleService();

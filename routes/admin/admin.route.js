@@ -12,18 +12,18 @@ const {
 } = require("../../helpers/admin/permissionValidator");
 
 router.post(
-  "/add_permission",
+  "/create_permission",
   authMiddleware,
   onlyAdminAccess,
   permissionAddValidator,
   PermissionController.addPermission
 );
 router.post(
-  "/store_role",
+  "/create_role",
   authMiddleware,
   onlyAdminAccess,
   permissionAddValidator,
-  RoleController.storeRole
+  RoleController.CreateRole
 );
 router.post(
   "/create_user",
@@ -36,6 +36,18 @@ router.post(
   authMiddleware,
   onlyAdminAccess,
   UserController.GetUsers
+);
+router.post(
+  "/roles",
+  authMiddleware,
+  onlyAdminAccess,
+  UserController.GetRoles
+);
+router.post(
+  "/permissions",
+  authMiddleware,
+  onlyAdminAccess,
+  UserController.GetPermissions
 );
 
 module.exports = router;

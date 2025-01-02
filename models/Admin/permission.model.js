@@ -6,7 +6,7 @@ const PermissionSchema = new Schema(
       type: String,
       required: true,
     },
-    is_default: {
+    actions: {
       type: Array,
       default: [],
     },
