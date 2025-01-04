@@ -32,17 +32,19 @@ router.post(
   UserController.createUser
 );
 router.post(
-  "/users",
+  "/update_user",
   authMiddleware,
   onlyAdminAccess,
-  UserController.GetUsers
+  UserController.UpdateUser
 );
+router.post("/users", authMiddleware, onlyAdminAccess, UserController.GetUsers);
 router.post(
-  "/roles",
+  "/user",
   authMiddleware,
   onlyAdminAccess,
-  UserController.GetRoles
+  UserController.GetOneUser
 );
+router.post("/roles", authMiddleware, onlyAdminAccess, UserController.GetRoles);
 router.post(
   "/permissions",
   authMiddleware,

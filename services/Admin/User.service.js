@@ -38,6 +38,32 @@ class UserService {
       return err;
     }
   }
+  async UpdateUser(data) {
+    try {
+      const { _id, username, department, role, permissions, actions } = data;
+
+      let obj = {
+        _id,
+        username,
+        department,
+        role,
+        permissions,
+        actions,
+      };
+      if (role && role == 1000) {
+        return { success: false, msg: "You can't ceate Admin !" };
+      } else if (role) {
+        const data = await UserModel.findByIdAndUpdate(_id, obj, { new: true });
+        return {
+          success: true,
+          msg: "User Update Successfully !",
+          data,
+        };
+      }
+    } catch (err) {
+      return err;
+    }
+  }
   async GetUsers(data) {
     try {
       const users = await UserModel.find();
@@ -51,6 +77,14 @@ class UserService {
       // })
 
       return users;
+    } catch (error) {
+      return error.messages;
+    }
+  }
+  async GetOneUser(data) {
+    try {
+      const user = await UserModel.findOne({ _id: data.id });
+      return user;
     } catch (error) {
       return error.messages;
     }
