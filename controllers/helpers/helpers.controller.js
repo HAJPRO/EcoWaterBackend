@@ -1,17 +1,17 @@
 const HelpersService = require("../../services/Helpers/helpers.service");
 class HelpersController {
-  async CreateMaterialName(req, res, next) {
+  async CreateOption(req, res, next) {
     try {
-      const data = await HelpersService.CreateMaterialName(req.body);
+      const data = await HelpersService.CreateOption(req.body);
 
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-  async GetAllMaterialNames(req, res, next) {
+  async GetOptionsByType(req, res, next) {
     try {
-      const data = await HelpersService.GetAllMaterialNames(req.body);
+      const data = await HelpersService.GetOptionsByType(req.body);
       res.status(200).json(data);
     } catch (error) {
       next(error);

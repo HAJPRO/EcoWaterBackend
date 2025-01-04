@@ -1,25 +1,29 @@
 const mongoose = require("mongoose");
-const MaterialNameModel = require("../../models/Helpers/MaterialNames.model");
+const OptionsForSelectModel = require("../../models/Helpers/OptionsForSelect.model");
 
 class HelpersService {
-  async CreateMaterialName(data) {
+  async CreateOption(data) {
+    const newData = {
+      type: data.type,
+      name: data.model.name,
+      department: data.model.department
+    }
     try {
-      const matchName = await MaterialNameModel.findOne({ name: data.name });
+      const matchName = await OptionsForSelectModel.findOne({ name: data.model.name });
       if (matchName) {
-        return { msg: "Bunday nomli material mavjud" };
+        return { msg: "Bunday nom mavjud" };
       } else {
-        const materialName = await MaterialNameModel.create(data);
+        const option = await OptionsForSelectModel.create(newData);
         return { msg: "Muvaffaqiyatli qo'shildi" };
       }
     } catch (error) {
       return error.message;
     }
   }
-  async GetAllMaterialNames(data) {
+  async GetOptionsByType(data) {
     try {
-      const materiales = await MaterialNameModel.find();
-
-      return materiales;
+      const options = await OptionsForSelectModel.find({ type: data.type });
+      return options;
     } catch (error) {
       return error.message;
     }

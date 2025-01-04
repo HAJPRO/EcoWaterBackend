@@ -5,10 +5,10 @@ const HelpersController = require("../../controllers/helpers/helpers.controller.
 
 const router = express.Router();
 router.post(
-  "/create_material_name",
+  "/create_option",
   authMiddleware,
-  HelpersController.CreateMaterialName
+  HelpersController.CreateOption
 );
-router.post("/all", authMiddleware, HelpersController.GetAllMaterialNames);
+router.post("/options", authMiddleware, HelpersController.GetOptionsByType);
 
 module.exports = router;
