@@ -131,7 +131,6 @@ class SeamInClassificationService {
     // return { process_length, warehouse_length, classification_length };
   }
   async ConfirmAndCreteProcess(data) {
-    console.log(data);
     const form = await AddParamsToFormModel.findOne({ _id: data.data.id });
     const newData = {
       form_id: data.data.id,
@@ -183,7 +182,12 @@ class SeamInClassificationService {
     const item = await ClassificationProcess.findOne({ _id: data.id });
     const newItem = item;
     newItem.report_box.push(data.items);
-    newItem.processing = "Patokga yuborildi";
+    if (newItem.report_box.length <= 1) {
+      newItem.processing = "Patokga yuborildi";
+      newItem.status = "Patokga yuborildi";
+    } else {
+      newItem.processing = "Patokda";
+    }
     const res = await ClassificationProcess.findByIdAndUpdate(
       data.id,
       newItem,

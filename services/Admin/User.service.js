@@ -2,20 +2,21 @@ const UserModel = require("../../models/user.model");
 const RoleModel = require("../../models/Admin/role.model");
 const PermissionModel = require("../../models/Admin/permission.model");
 
-
-
 const bcrypt = require("bcryptjs");
 
 class UserService {
   async CreateUser(data) {
     try {
-      const { username, department, password, role } = data;
+      const { username, department, password, role, permissions, actions } =
+        data;
       const hashPassword = await bcrypt.hash(password, 10);
       let obj = {
         username,
         password: hashPassword,
         department,
         role,
+        permissions,
+        actions,
       };
       const isExists = await UserModel.findOne({ username });
       if (isExists) {
@@ -23,7 +24,7 @@ class UserService {
           success: false,
           msg: "Username name already exists",
         };
-      } else if (role && role == 1) {
+      } else if (role && role == 1000) {
         return { success: false, msg: "You can't ceate Admin !" };
       } else if (role) {
         const data = await UserModel.create(obj);

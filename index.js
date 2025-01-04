@@ -41,6 +41,10 @@ app.use(
   "/api/v1/seam/packing",
   require("./routes/seam/packing/packing.router.js")
 );
+app.use(
+  "/api/v1/seam/c_warehouse",
+  require("./routes/seam/c-warehouse/c-warehouse.router.js")
+);
 
 const START = async () => {
   try {

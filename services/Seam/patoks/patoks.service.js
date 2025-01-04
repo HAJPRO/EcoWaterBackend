@@ -183,6 +183,12 @@ class SeamInPatoksService {
     const item = await PatoksProcess.findById(data.id.id);
     const newItem = item;
     newItem.patoks_process.push(data.items);
+    if (newItem.report_box.length <= 1) {
+      newItem.processing = "Upakovkaga yuborildi";
+      newItem.status = "Upakovkaga yuborildi";
+    } else {
+      newItem.processing = "Upakovkada";
+    }
     const res = await PatoksProcess.findByIdAndUpdate(data.id.id, newItem, {
       new: true,
     });

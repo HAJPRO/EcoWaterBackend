@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
 const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
+const { report } = require("process");
 
 class SeamInFormService {
   async getAll(is_status) {
@@ -74,7 +75,11 @@ class SeamInFormService {
   async AllSentToClassification() {
     try {
       const allClassification = await AddParamsToFormModel.aggregate([
-        { $match: { processing: "Tasnifga yuborildi" } },
+        {
+          $match: {
+            $and: { processing: "Tasnifga yuborildi" },
+          },
+        },
         {
           $lookup: {
             from: "addtoforms",
@@ -162,8 +167,12 @@ class SeamInFormService {
     const item = await AddParamsToFormModel.findOne({ _id: data.id });
     const newItem = item;
     newItem.report_box.push(data.items);
-    newItem.processing = "Tasnifga yuborildi";
-    newItem.status = "Tasnifga yuborildi";
+    if (newItem.report_box.length <= 1) {
+      newItem.processing = "Tasnifga yuborildi";
+      newItem.status = "Tasnifga yuborildi";
+    } else {
+      newItem.processing = "Tasnifda";
+    }
     const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {
       new: true,
     });

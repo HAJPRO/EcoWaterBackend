@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const PackingProcess = require("../../../models/Seam/packing/Packing.model");
-const PatoksProcess = require("../../../models/Seam/patoks/Patoks.model");
+const CWarehouseProcess = require("../../../models/Seam/c-warehouse/C-Warehouse.model");
 
-class SeamInPackingService {
+class SeamInCWarehouseService {
   async getAll(is_status) {
     const status = is_status.status;
 
@@ -14,11 +14,7 @@ class SeamInPackingService {
         return { items, all_length };
       }
       if (status === 2) {
-        const items = await this.AllSentFromPatoks();
-        return { items, all_length };
-      }
-      if (status === 3) {
-        const items = await this.AllSentToSklad();
+        const items = await this.AllSentFromPacking();
         return { items, all_length };
       }
     } catch (error) {
@@ -29,14 +25,14 @@ class SeamInPackingService {
   async getAllInProcess(id) {
     try {
       let ID = new mongoose.Types.ObjectId(id);
-      const allProcess = await PackingProcess.aggregate([
+      const allProcess = await CWarehouseProcess.aggregate([
         { $match: {} },
         {
           $lookup: {
-            from: "patoksprocesses",
-            localField: "patoks_id",
+            from: "packingprocesses",
+            localField: "packing_id",
             foreignField: "_id",
-            as: "patoks_item",
+            as: "packing",
           },
         },
         {
@@ -52,13 +48,6 @@ class SeamInPackingService {
             status: 1,
             report_box: 1,
             createdAt: 1,
-            patoks_item: {
-              $cond: {
-                if: { $isArray: "$patoks_item" },
-                then: { $arrayElemAt: ["$patoks_item", 0] },
-                else: null,
-              },
-            },
             warehouse: {
               $cond: {
                 if: { $isArray: "$warehouse" },
@@ -66,9 +55,17 @@ class SeamInPackingService {
                 else: null,
               },
             },
+            packing: {
+              $cond: {
+                if: { $isArray: "$packing" },
+                then: { $arrayElemAt: ["$packing", 0] },
+                else: null,
+              },
+            },
           },
         },
       ]);
+      console.log(allProcess);
 
       return allProcess;
     } catch (error) {
@@ -76,10 +73,12 @@ class SeamInPackingService {
     }
   }
 
-  async AllSentFromPatoks() {
+  async AllSentFromPacking() {
     try {
-      const items = await PatoksProcess.aggregate([
-        { $match: { processing: "Upakovkaga yuborildi" } },
+      const items = await PackingProcess.aggregate([
+        {
+          $match: { processing: "Skladga yuborildi" },
+        },
         {
           $lookup: {
             from: "addtoforms",
@@ -110,12 +109,7 @@ class SeamInPackingService {
       return error.message;
     }
   }
-  async AllSentToPacking() {
-    try {
-    } catch (error) {
-      return error.message;
-    }
-  }
+
   async getAllLength() {
     // const process_length = await this.getAllInProcess().then(
     //   (data) => data.length
@@ -128,18 +122,18 @@ class SeamInPackingService {
     // );
     // return { process_length, warehouse_length, classification_length };
   }
-  async ConfirmAndCreteProcess(data) {
-    const form = await PatoksProcess.findOne({ _id: data.data.id });
+  async ConfirmAndCreateInProcess(data) {
+    const packing = await PackingProcess.findOne({ _id: data.data.id });
     const newData = {
-      patoks_id: data.data.id,
+      packing_id: data.data.id,
       author: data.user.id,
-      warehouse_id: form.warehouse_id,
+      warehouse_id: packing.warehouse_id,
     };
-    const res = await PackingProcess.create(newData);
+    const res = await CWarehouseProcess.create(newData);
     if (res) {
-      const update = await PatoksProcess.findByIdAndUpdate(
+      const update = await PackingProcess.findByIdAndUpdate(
         data.data.id,
-        { status: "Upakovka tasdiqladi", processing: "Upakovkada" },
+        { status: "Sklad tasdiqladi", processing: "Skladda" },
         { new: true }
       );
     }
@@ -150,12 +144,7 @@ class SeamInPackingService {
     const item = await PackingProcess.findOne({ _id: data.id.id });
     const newItem = item;
     newItem.report_box.push(data.items);
-    if (newItem.report_box.length <= 1) {
-      newItem.processing = "Skladga yuborildi";
-      newItem.status = "Skladga yuborildi";
-    } else {
-      newItem.processing = "Upakovkada";
-    }
+    newItem.processing = "Skladda";
     const res = await PackingProcess.findByIdAndUpdate(data.id.id, newItem, {
       new: true,
     });
@@ -218,4 +207,4 @@ class SeamInPackingService {
   }
 }
 
-module.exports = new SeamInPackingService();
+module.exports = new SeamInCWarehouseService();
