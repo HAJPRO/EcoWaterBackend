@@ -6,27 +6,8 @@ const InProcessPaintModel = require("../models/Paint/InProcess.model");
 const SaleDepPaintCardModel = require("../models/saleDepPaintCard.model");
 const SaleDepWeavingCardModel = require("../models/saleDepWeavingCard.model");
 const SaleDepSpinningCardModel = require("../models/SaleDepSpinningCardModel.model");
-const ProductName = require("../models/Sale/ProductName.model");
-const ProductType = require("../models/Sale/ProductType.model");
+
 class SaleLegalService {
-  async CreateProductName(payload) {
-    const name = await ProductName.create(payload);
-    return name;
-  }
-  async CreateProductType(payload) {
-    const type = await ProductType.create(payload);
-    return type;
-  }
-  async GetProName() {
-    const names = await ProductName.find();
-    console.log(names);
-    return names;
-  }
-  async GetProType() {
-    const types = await ProductType.find();
-    console.log(types);
-    return types;
-  }
   async getModel() {
     const order_num = randomstring.generate({
       length: 8,

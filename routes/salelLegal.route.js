@@ -4,26 +4,26 @@ const authorMiddleware = require("../middlewares/author.middleware.js");
 const saleLegalController = require("../controllers/saleLegal.controller.js");
 
 const router = express.Router();
-router.post(
-  "/add_pro_name",
-  authMiddleware,
-  saleLegalController.CreateProductName
-);
-router.post(
-  "/add_pro_type",
-  authMiddleware,
-  saleLegalController.CreateProductType
-);
-router.post(
-  "/pro_type",
-  authMiddleware,
-  saleLegalController.GetProType
-);
-router.post(
-  "/pro_name",
-  authMiddleware,
-  saleLegalController.GetProName
-);
+// router.post(
+//   "/add_pro_name",
+//   authMiddleware,
+//   saleLegalController.CreateProductName
+// );
+// router.post(
+//   "/add_pro_type",
+//   authMiddleware,
+//   saleLegalController.CreateProductType
+// );
+// router.post(
+//   "/pro_type",
+//   authMiddleware,
+//   saleLegalController.GetProType
+// );
+// router.post(
+//   "/pro_name",
+//   authMiddleware,
+//   saleLegalController.GetProName
+// );
 router.get("/legal_model", saleLegalController.getModel);
 router.post("/legal_proccess/:id", saleLegalController.AllOrderProccessById);
 router.post("/legal_all", authMiddleware, saleLegalController.getAll);

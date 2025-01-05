@@ -4,38 +4,38 @@ const path = require("path");
 const saleLegalCardModel = require("../models/saleLegalCard.model.js");
 
 class saleLegalController {
-  async CreateProductName(req, res, next) {
-    try {
-      const model = await SaleLegalService.CreateProductName(req.body);
-      res.status(200).json(model);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async CreateProductType(req, res, next) {
-    try {
-      const model = await SaleLegalService.CreateProductType(req.body);
-      res.status(200).json(model);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async GetProType(req, res, next) {
-    try {
-      const model = await SaleLegalService.GetProType(req.params);
-      res.status(200).json(model);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async GetProName(req, res, next) {
-    try {
-      const model = await SaleLegalService.GetProName(req.params);
-      res.status(200).json(model);
-    } catch (error) {
-      next(error);
-    }
-  }
+  // async CreateProductName(req, res, next) {
+  //   try {
+  //     const model = await SaleLegalService.CreateProductName(req.body);
+  //     res.status(200).json(model);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+  // async CreateProductType(req, res, next) {
+  //   try {
+  //     const model = await SaleLegalService.CreateProductType(req.body);
+  //     res.status(200).json(model);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+  // async GetProType(req, res, next) {
+  //   try {
+  //     const model = await SaleLegalService.GetProType(req.params);
+  //     res.status(200).json(model);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+  // async GetProName(req, res, next) {
+  //   try {
+  //     const model = await SaleLegalService.GetProName(req.params);
+  //     res.status(200).json(model);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
   async getModel(req, res, next) {
     try {
       const model = await SaleLegalService.getModel();

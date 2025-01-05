@@ -1,12 +1,12 @@
 const { model, Schema } = require("mongoose");
 
-const ProductNameSchema = new Schema(
+const MaterialTypesSchema = new Schema(
   {
-    code: {
+    department: {
       type: Number,
     },
     name: { type: String },
   },
   { timestamps: true }
 );
-module.exports = model("ProductName", ProductNameSchema);
+module.exports = model("MaterialTypes", MaterialTypesSchema);
