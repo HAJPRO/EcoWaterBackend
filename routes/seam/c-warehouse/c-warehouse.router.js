@@ -5,21 +5,21 @@ const SeamInCWarehouseController = require("../../../controllers/seam/c-warehous
 
 const router = express.Router();
 router.post("/all", authMiddleware, SeamInCWarehouseController.getAll);
-// router.post(
-//   "/get_one_report",
-//   authMiddleware,
-//   SeamInPackingController.GetOneReport
-// );
+router.post(
+  "/get_one_report",
+  authMiddleware,
+  SeamInCWarehouseController.GetOneReport
+);
 router.post(
   "/confirm_and_create",
   authMiddleware,
   SeamInCWarehouseController.ConfirmAndCreateInProcess
 );
-// router.post(
-//   "/accept_report_item",
-//   authMiddleware,
-//   SeamInPackingController.AcceptReportItem
-// );
+router.post(
+  "/accept_report_item",
+  authMiddleware,
+  SeamInCWarehouseController.AcceptReportItem
+);
 // router.post(
 //   "/create_day_report",
 //   authMiddleware,

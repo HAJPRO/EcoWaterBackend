@@ -65,7 +65,6 @@ class SeamInCWarehouseService {
           },
         },
       ]);
-      console.log(allProcess);
 
       return allProcess;
     } catch (error) {
@@ -140,17 +139,6 @@ class SeamInCWarehouseService {
     return res;
   }
 
-  async CreateDayReport(data) {
-    const item = await PackingProcess.findOne({ _id: data.id.id });
-    const newItem = item;
-    newItem.report_box.push(data.items);
-    newItem.processing = "Skladda";
-    const res = await PackingProcess.findByIdAndUpdate(data.id.id, newItem, {
-      new: true,
-    });
-
-    return res;
-  }
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
     const res = await PackingProcess.aggregate([
@@ -184,27 +172,20 @@ class SeamInCWarehouseService {
     return res;
   }
   async AcceptReportItem(data) {
-    const id = data.card_id.id;
+    const id = data.card_id;
     const index = data.index;
     const packing = await PackingProcess.findOne({ _id: id });
 
     if (await packing) {
-      const item = await PatoksProcess.findOne({
-        _id: packing.patoks_id,
-      });
-      const newData = item;
+      const newData = packing;
       newData.report_box[index].status = "Qabul qilindi";
-      const updateData = await PatoksProcess.findByIdAndUpdate(
-        packing.patoks_id,
-        newData,
-        {
-          new: true,
-        }
-      );
+      const updateData = await PackingProcess.findByIdAndUpdate(id, newData, {
+        new: true,
+      });
     }
-
-    return;
   }
+
+  return;
 }
 
 module.exports = new SeamInCWarehouseService();
