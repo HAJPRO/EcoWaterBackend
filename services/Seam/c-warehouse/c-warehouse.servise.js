@@ -153,6 +153,15 @@ class SeamInCWarehouseService {
       },
 
       {
+        $lookup: {
+          from: "addtoforms",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
+
+      {
         $project: {
           report_box: 1,
           status: 1,
@@ -162,6 +171,13 @@ class SeamInCWarehouseService {
             $cond: {
               if: { $isArray: "$patoks" },
               then: { $arrayElemAt: ["$patoks", 0] },
+              else: null,
+            },
+          },
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
               else: null,
             },
           },

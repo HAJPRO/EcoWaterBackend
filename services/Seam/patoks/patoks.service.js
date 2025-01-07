@@ -177,6 +177,14 @@ class SeamInPatoksService {
           as: "classification",
         },
       },
+      {
+        $lookup: {
+          from: "addtoforms",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
 
       {
         $project: {
@@ -189,6 +197,13 @@ class SeamInPatoksService {
             $cond: {
               if: { $isArray: "$classification" },
               then: { $arrayElemAt: ["$classification", 0] },
+              else: null,
+            },
+          },
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
               else: null,
             },
           },

@@ -185,6 +185,14 @@ class SeamInFormService {
     const res = await AddParamsToFormModel.aggregate([
       { $match: { _id: ID } },
       {
+        $lookup: {
+          from: "addtoforms",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
+      {
         $project: {
           status: 1,
           pastal_quantity: 1,
@@ -194,6 +202,13 @@ class SeamInFormService {
           createdAt: 1,
           report: 1,
           report_box: 1,
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
+              else: null,
+            },
+          },
         },
       },
     ]);

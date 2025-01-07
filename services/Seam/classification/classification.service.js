@@ -206,6 +206,14 @@ class SeamInClassificationService {
       { $match: { _id: ID } },
       {
         $lookup: {
+          from: "addtoforms",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
+      {
+        $lookup: {
           from: "addparamstoforms",
           localField: "form_id",
           foreignField: "_id",
@@ -221,6 +229,13 @@ class SeamInClassificationService {
             $cond: {
               if: { $isArray: "$form" },
               then: { $arrayElemAt: ["$form", 0] },
+              else: null,
+            },
+          },
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
               else: null,
             },
           },

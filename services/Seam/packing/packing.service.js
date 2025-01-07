@@ -153,8 +153,6 @@ class SeamInPackingService {
     if (newItem.report_box.length <= 1) {
       newItem.processing = "Skladga yuborildi";
       newItem.status = "Skladga yuborildi";
-    } else {
-      newItem.processing = "Upakovkada";
     }
     const res = await PackingProcess.findByIdAndUpdate(data.id.id, newItem, {
       new: true,
@@ -166,6 +164,14 @@ class SeamInPackingService {
     let ID = new mongoose.Types.ObjectId(data.id);
     const res = await PackingProcess.aggregate([
       { $match: { _id: ID } },
+      {
+        $lookup: {
+          from: "addtoforms",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
       {
         $lookup: {
           from: "patoksprocesses",
@@ -185,6 +191,13 @@ class SeamInPackingService {
             $cond: {
               if: { $isArray: "$patoks" },
               then: { $arrayElemAt: ["$patoks", 0] },
+              else: null,
+            },
+          },
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
               else: null,
             },
           },
