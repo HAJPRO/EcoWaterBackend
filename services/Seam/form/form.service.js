@@ -170,8 +170,6 @@ class SeamInFormService {
     if (newItem.report_box.length <= 1) {
       newItem.processing = "Tasnifga yuborildi";
       newItem.status = "Tasnifga yuborildi";
-    } else {
-      newItem.processing = "Tasnifda";
     }
 
     const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {

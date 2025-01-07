@@ -187,8 +187,6 @@ class SeamInClassificationService {
     if (newItem.report_box.length <= 1) {
       newItem.processing = "Patokga yuborildi";
       newItem.status = "Patokga yuborildi";
-    } else {
-      newItem.processing = "Patokda";
     }
     const res = await ClassificationProcess.findByIdAndUpdate(
       data.id,

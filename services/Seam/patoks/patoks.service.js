@@ -156,8 +156,6 @@ class SeamInPatoksService {
     if (newItem.report_box.length <= 1) {
       newItem.processing = "Upakovkaga yuborildi";
       newItem.status = "Upakovkaga yuborildi";
-    } else {
-      newItem.processing = "Upakovkada";
     }
     const res = await PatoksProcess.findByIdAndUpdate(data.id.id, newItem, {
       new: true,
