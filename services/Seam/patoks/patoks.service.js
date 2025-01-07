@@ -148,36 +148,6 @@ class SeamInPatoksService {
     }
     return res;
   }
-  // async CreaetInfoToForm(payload) {
-  //   const author = payload.user.id;
-  //   const warehouse_id = payload.data.id;
-  //   const head_pack = payload.data.data.head_pack;
-  //   const pastal_quantity = payload.data.data.pastal_quantity;
-  //   const waste_quantity = payload.data.data.waste_quantity;
-  //   const fact_gramage = payload.data.data.fact_gramage;
-
-  //   const model = {
-  //     author,
-  //     warehouse_id,
-  //     head_pack,
-  //     pastal_quantity,
-  //     waste_quantity,
-  //     fact_gramage,
-  //   };
-
-  //   const res = await AddParamsToFormModel.create(model);
-
-  //   if (await res) {
-  //     const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
-  //       res._id,
-  //       { status: "Jarayonda" },
-  //       { new: true }
-  //     );
-  //     this.AddToFormUpdate(warehouse_id);
-  //   }
-
-  //   return res;
-  // }
 
   async CreateDayReport(data) {
     const item = await PatoksProcess.findById(data.id.id);
@@ -256,6 +226,7 @@ class SeamInPatoksService {
     const report_box = {
       status: "Upakovkaga yuborildi",
       date: new Date(),
+      model_name: process_item.model_name,
       quantity: process_item.quantity,
       unit: process_item.unit,
       id: process_item.id,

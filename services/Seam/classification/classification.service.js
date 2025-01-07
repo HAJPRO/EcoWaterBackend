@@ -107,6 +107,8 @@ class SeamInClassificationService {
           },
         },
       ]);
+      console.log(items);
+
       return items;
     } catch (error) {
       return error.message;
@@ -147,36 +149,36 @@ class SeamInClassificationService {
     }
     return res;
   }
-  async CreaetInfoToForm(payload) {
-    const author = payload.user.id;
-    const warehouse_id = payload.data.id;
-    const head_pack = payload.data.data.head_pack;
-    const pastal_quantity = payload.data.data.pastal_quantity;
-    const waste_quantity = payload.data.data.waste_quantity;
-    const fact_gramage = payload.data.data.fact_gramage;
+  // async CreaetInfoToForm(payload) {
+  //   const author = payload.user.id;
+  //   const warehouse_id = payload.data.id;
+  //   const head_pack = payload.data.data.head_pack;
+  //   const pastal_quantity = payload.data.data.pastal_quantity;
+  //   const waste_quantity = payload.data.data.waste_quantity;
+  //   const fact_gramage = payload.data.data.fact_gramage;
 
-    const model = {
-      author,
-      warehouse_id,
-      head_pack,
-      pastal_quantity,
-      waste_quantity,
-      fact_gramage,
-    };
+  //   const model = {
+  //     author,
+  //     warehouse_id,
+  //     head_pack,
+  //     pastal_quantity,
+  //     waste_quantity,
+  //     fact_gramage,
+  //   };
 
-    const res = await AddParamsToFormModel.create(model);
+  //   const res = await AddParamsToFormModel.create(model);
 
-    if (await res) {
-      const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
-        res._id,
-        { status: "Jarayonda" },
-        { new: true }
-      );
-      this.AddToFormUpdate(warehouse_id);
-    }
+  //   if (await res) {
+  //     const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
+  //       res._id,
+  //       { status: "Jarayonda" },
+  //       { new: true }
+  //     );
+  //     this.AddToFormUpdate(warehouse_id);
+  //   }
 
-    return res;
-  }
+  //   return res;
+  // }
 
   async CreateDayReport(data) {
     const item = await ClassificationProcess.findOne({ _id: data.id });
