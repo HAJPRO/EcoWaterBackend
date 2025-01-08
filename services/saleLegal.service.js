@@ -29,40 +29,14 @@ class SaleLegalService {
     return model;
   }
   async create(data, author) {
-    const {
-      customer_name,
-      order_number,
-      pro_name,
-      pro_type,
-      pro_color,
-      pro_width,
-      grammaj,
-      delivery_time,
-      order_quantity,
-    } = data;
-    if (
-      customer_name &&
-      order_number &&
-      pro_name &&
-      pro_type &&
-      pro_color &&
-      pro_width &&
-      grammaj &&
-      delivery_time &&
-      order_quantity
-    ) {
-      const newData = await SaleLegalCardModel.create({ ...data, author });
-      return {
-        status: 200,
-        msg: "Sotuv karta  yaratildi !",
-        newData,
-      };
-    } else {
-      return {
-        status: 400,
-        msg: "Barcha qatorlarni to'ldiring !",
-      };
-    }
+    console.log(data);
+
+    const newData = await SaleLegalCardModel.create({ ...data, author });
+    return {
+      status: 200,
+      msg: "Sotuv karta  yaratildi !",
+      newData,
+    };
   }
 
   async confirm(id) {
