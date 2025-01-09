@@ -32,25 +32,33 @@ class DepSeamWarehouseController {
     }
   }
 
-  async GetFormMode(req, res, next) {
+  async GetModel(req, res, next) {
     try {
-      const data = await DepSeamWarehouseService.GetFormMode();
+      const data = await DepSeamWarehouseService.GetModel();
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-  async CreaetToForm(req, res, next) {
+  async GetOne(req, res, next) {
     try {
-      const data = await DepSeamWarehouseService.CreaetToForm(req.body);
+      const data = await DepSeamWarehouseService.GetOne(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async Create(req, res, next) {
+    try {
+      const data = await DepSeamWarehouseService.Create(req.body);
       res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi !", data });
     } catch (error) {
       next(error);
     }
   }
-  async GetAllForm(req, res, next) {
+  async GetAll(req, res, next) {
     try {
-      const data = await DepSeamWarehouseService.GetAllForm();
+      const data = await DepSeamWarehouseService.GetAll();
       res.status(200).json(data);
     } catch (error) {
       next(error);

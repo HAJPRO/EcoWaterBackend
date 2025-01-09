@@ -1,6 +1,6 @@
 const { model, Schema } = require("mongoose");
 
-const AddToFormSchema = new Schema(
+const WarehouseRawMaterialForSeamSchema = new Schema(
   {
     author: { type: Schema.ObjectId, ref: "User" },
     party_number: {
@@ -23,7 +23,14 @@ const AddToFormSchema = new Schema(
       type: String,
       required: true,
     },
-
+    // input: {
+    //   type: Array,
+    //   default: [],
+    // },
+    // output: {
+    //   type: Array,
+    //   default: [],
+    // },
     quantity: {
       type: Number,
       required: true,
@@ -50,4 +57,7 @@ const AddToFormSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model("AddToForm", AddToFormSchema);
+module.exports = model(
+  "WarehouseRawMaterialForSeam",
+  WarehouseRawMaterialForSeamSchema
+);

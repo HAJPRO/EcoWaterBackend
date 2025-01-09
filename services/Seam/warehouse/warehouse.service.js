@@ -2,16 +2,18 @@ const randomstring = require("randomstring");
 const QR = require("qrcode");
 const BarCodeModel = require("../../../models/Barcode/BarCode.model");
 const QRCodeModel = require("../../../models/Barcode/QRCode.model");
-const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
+const WarehouseRawMaterialForFormModel = require("../../../models/Seam/f-warehouse/WarehouseRawMaterialForForm.model");
+const WarehouseRawMaterialForSeamModel = require("../../../models/Seam/warehouse/WarehouseRawMaterialForSeam.model");
 
 const XLSX = require("xlsx");
 const path = require("path");
 class DepSeamWarehouseService {
-  async GetFormMode() {
+  async GetModel() {
     const model = {
       party_number: "",
       customer_name: "",
       material_name: "",
+      artikul: "",
       color: "",
       quantity: "",
       unit: "",
@@ -19,14 +21,21 @@ class DepSeamWarehouseService {
     };
     return model;
   }
-  async CreaetToForm(data) {
-    const res = await AddToFormModel.create(data);
+  async Create(data) {
+    const res = await WarehouseRawMaterialForSeamModel.create(data);
     return res;
   }
-  async GetAllForm() {
-    const res = await AddToFormModel.find();
+  async GetAll() {
+    const res = await WarehouseRawMaterialForSeamModel.find();
     return res;
   }
+  async GetOne(data) {
+    const res = await WarehouseRawMaterialForSeamModel.findOne({
+      _id: data.id,
+    });
+    return res;
+  }
+
   async ResponsiblesModel() {
     const invoice = randomstring.generate({
       length: 8,

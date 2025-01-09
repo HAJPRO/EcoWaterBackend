@@ -19,16 +19,9 @@ router.get(
   authMiddleware,
   DepSeamWarehouseController.ResponsiblesModel
 );
-router.post(
-  "/create_from",
-  authMiddleware,
-  DepSeamWarehouseController.CreaetToForm
-);
-router.post("/all_from", authMiddleware, DepSeamWarehouseController.GetAllForm);
-router.post(
-  "/model_form",
-  authMiddleware,
-  DepSeamWarehouseController.GetFormMode
-);
+router.post("/create", authMiddleware, DepSeamWarehouseController.Create);
+router.post("/all", authMiddleware, DepSeamWarehouseController.GetAll);
+router.post("/get_one", authMiddleware, DepSeamWarehouseController.GetOne);
+router.post("/get_model", authMiddleware, DepSeamWarehouseController.GetModel);
 
 module.exports = router;

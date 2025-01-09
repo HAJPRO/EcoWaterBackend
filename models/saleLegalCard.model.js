@@ -7,11 +7,8 @@ const SaleLegalCardSchema = new Schema(
     order_number: { type: String, required: true },
     products: { type: Array, default: [] },
     delivery_time: { type: Date, default: Date.now(), required: true },
-    in_department_order: { type: String, default: "Sotuv" },
-    isConfirm: { type: String },
     order_status: { type: String, default: "Tasdiqlanmagan" },
     process_status: { type: Array },
-    done_proccess: { type: Array },
     state: { type: Boolean, default: true },
     dep_paint_data: {
       type: Schema.ObjectId,

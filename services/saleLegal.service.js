@@ -29,8 +29,6 @@ class SaleLegalService {
     return model;
   }
   async create(data, author) {
-    console.log(data);
-
     const newData = await SaleLegalCardModel.create({ ...data, author });
     return {
       status: 200,
@@ -38,7 +36,6 @@ class SaleLegalService {
       newData,
     };
   }
-
   async confirm(id) {
     const dataById = await SaleLegalCardModel.findById(id).populate("author");
     const data = dataById;

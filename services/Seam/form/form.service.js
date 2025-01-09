@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
 const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
-const { report } = require("process");
 
 class SeamInFormService {
   async getAll(is_status) {
