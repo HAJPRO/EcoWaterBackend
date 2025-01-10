@@ -29,6 +29,10 @@ app.use(
   "/api/v1/seam/warehouse",
   require("./routes/seam/warehouse/warehouse.router.js")
 );
+app.use(
+  "/api/v1/seam/form_warehouse",
+  require("./routes/seam/form-warehouse/warehouse.router.js")
+);
 app.use("/api/v1/seam/form", require("./routes/seam/form/form.router.js"));
 app.use(
   "/api/v1/seam/classification",

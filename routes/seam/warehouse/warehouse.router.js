@@ -20,6 +20,11 @@ router.get(
   DepSeamWarehouseController.ResponsiblesModel
 );
 router.post("/create", authMiddleware, DepSeamWarehouseController.Create);
+// router.post(
+//   "/create_output",
+//   authMiddleware,
+//   DepSeamWarehouseController.CreateOutput
+// );
 router.post("/all", authMiddleware, DepSeamWarehouseController.GetAll);
 router.post("/get_one", authMiddleware, DepSeamWarehouseController.GetOne);
 router.post("/get_model", authMiddleware, DepSeamWarehouseController.GetModel);

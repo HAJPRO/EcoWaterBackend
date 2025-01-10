@@ -23,17 +23,20 @@ const WarehouseRawMaterialForSeamSchema = new Schema(
       type: String,
       required: true,
     },
-    // input: {
-    //   type: Array,
-    //   default: [],
-    // },
-    // output: {
-    //   type: Array,
-    //   default: [],
-    // },
+
     quantity: {
       type: Number,
       required: true,
+    },
+    output: {
+      type: Array,
+      required: true,
+      default: [],
+    },
+    input: {
+      type: Array,
+      required: true,
+      default: [],
     },
     unit: {
       type: String,
