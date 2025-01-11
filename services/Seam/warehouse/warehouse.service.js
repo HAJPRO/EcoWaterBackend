@@ -3,11 +3,13 @@ const output_id = randomstring.generate({
   length: 7,
   charset: ["numeric"],
 });
+const mongoose = require("mongoose");
 const QR = require("qrcode");
 const BarCodeModel = require("../../../models/Barcode/BarCode.model");
 const QRCodeModel = require("../../../models/Barcode/QRCode.model");
 const WarehouseRawMaterialForSeamModel = require("../../../models/Seam/warehouse/r-warehouse.model");
-// const OutputModel = require("../../../models/Seam/warehouse/output.model");
+const OutputModel = require("../../../models/Seam/warehouse/OutputSeamWarehouse.model");
+const InputModel = require("../../../models/Seam/warehouse/InputSeamWarehouse.model");
 
 const XLSX = require("xlsx");
 const path = require("path");
@@ -26,36 +28,42 @@ class DepSeamWarehouseService {
     return model;
   }
   async Create(data) {
-    if (data.output) {
-      const item = await WarehouseRawMaterialForSeamModel.findById(
-        data.model.id
-      );
+    const output = data.data.output;
+    const input = data.data.input;
+    const model = data.data.model;
+    const author = data.user.id;
+    if (output) {
+      const item = await WarehouseRawMaterialForSeamModel.findById(model.id);
       const newData = item;
-      if (newData.quantity - data.model.quantity < 0) {
+
+      if (newData.quantity - model.quantity < 0) {
         return { status: 404, msg: "Mahsulot yetarli emas" };
       } else {
-        newData.quantity = newData.quantity - data.model.quantity;
         const OutputData = {
-          id: output_id,
-          to_where: data.model.to_where,
-          quantity: data.model.quantity,
-          unit: data.model.unit,
-          created_date: data.model.created_date,
-          state: true,
-          status: data.model.to_where + " " + "yuborildi",
+          author,
+          warehouse_id: model.id,
+          to_where: model.to_where,
+          quantity: model.quantity,
+          unit: model.unit,
+          status: model.to_where + " " + "yuborildi",
         };
-        newData.output.push(OutputData);
-        const update = await WarehouseRawMaterialForSeamModel.findByIdAndUpdate(
-          data.model.id,
-          newData,
-          { new: true }
-        );
-        return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", update };
+        const output_res = await OutputModel.create(OutputData);
+        if (output_res) {
+          newData.quantity = newData.quantity - model.quantity;
+          newData.output = output_res._id;
+          const update =
+            await WarehouseRawMaterialForSeamModel.findByIdAndUpdate(
+              model.id,
+              newData,
+              { new: true }
+            );
+          return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", update };
+        }
       }
     }
 
-    if (data.input) {
-      const res = await WarehouseRawMaterialForSeamModel.create(data.model);
+    if (input) {
+      const res = await WarehouseRawMaterialForSeamModel.create(model);
       return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", res };
     }
   }
@@ -65,10 +73,13 @@ class DepSeamWarehouseService {
     return res;
   }
   async GetOne(data) {
-    const res = await WarehouseRawMaterialForSeamModel.findOne({
+    let ID = new mongoose.Types.ObjectId(data.id);
+    const warehouse = await WarehouseRawMaterialForSeamModel.findOne({
       _id: data.id,
     });
-    return res;
+    const output = await OutputModel.find({ warehouse_id: data.id });
+
+    return { warehouse, output };
   }
 
   async ResponsiblesModel() {

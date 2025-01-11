@@ -5,6 +5,11 @@ const FormWarehouseController = require("../../../controllers/seam/form-warehous
 
 const router = express.Router();
 router.post("/all", authMiddleware, FormWarehouseController.GetAll);
-router.post("/create", authMiddleware, FormWarehouseController.Create);
+router.post(
+  "/accept_and_create",
+  authMiddleware,
+  FormWarehouseController.AcceptAndCreate
+);
+router.post("/get_one", authMiddleware, FormWarehouseController.GetOne);
 
 module.exports = router;

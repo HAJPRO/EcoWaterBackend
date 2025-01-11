@@ -38,7 +38,12 @@ const FormWarehouseSchema = new Schema(
     status: {
       type: String,
       required: true,
-      default: "Bichuvga yuborildi",
+      default: "Skladda",
+    },
+    in_where: {
+      type: String,
+      required: true,
+      default: "Bichuv skladi",
     },
   },
   { timestamps: true }

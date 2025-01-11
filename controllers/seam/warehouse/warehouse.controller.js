@@ -50,7 +50,10 @@ class DepSeamWarehouseController {
   }
   async Create(req, res, next) {
     try {
-      const data = await DepSeamWarehouseService.Create(req.body);
+      const data = await DepSeamWarehouseService.Create({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);

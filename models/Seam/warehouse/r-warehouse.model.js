@@ -28,16 +28,7 @@ const WarehouseRawMaterialForSeamSchema = new Schema(
       type: Number,
       required: true,
     },
-    output: {
-      type: Array,
-      required: true,
-      default: [],
-    },
-    input: {
-      type: Array,
-      required: true,
-      default: [],
-    },
+
     unit: {
       type: String,
       required: true,
@@ -55,6 +46,11 @@ const WarehouseRawMaterialForSeamSchema = new Schema(
     state: {
       type: Boolean,
       default: true,
+    },
+    in_where: {
+      type: String,
+      required: true,
+      default: "Tikuv sklad",
     },
   },
   { timestamps: true }

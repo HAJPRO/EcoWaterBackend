@@ -1,8 +1,11 @@
 const FormWarehouseService = require("../../../services/Seam/form-warehouse/warehouse.service");
 class FormWarehouseController {
-  async Create(req, res, next) {
+  async AcceptAndCreate(req, res, next) {
     try {
-      const data = await FormWarehouseService.Create(req.body);
+      const data = await FormWarehouseService.AcceptAndCreate({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -11,6 +14,14 @@ class FormWarehouseController {
   async GetAll(req, res, next) {
     try {
       const data = await FormWarehouseService.GetAll(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async GetOne(req, res, next) {
+    try {
+      const data = await FormWarehouseService.GetOne(req.body);
       res.status(200).json(data);
     } catch (error) {
       next(error);
