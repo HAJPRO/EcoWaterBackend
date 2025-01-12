@@ -1,13 +1,4 @@
 const express = require("express");
-const TG_BOT = require("node-telegram-bot-api");
-const TG_TOKEN = "8153188682:AAEOCQtGELdVRbSAwafBh0XHRIWoRmDpiK8";
-const HRAppeals = require("./models/HR/Appeals/appeal.js");
-const bot = new TG_BOT(TG_TOKEN, { polling: true });
-bot.on("message", async (msg) => {
-  if (msg.text) {
-    const data = await HRAppeals.create({ description: msg.text });
-  }
-});
 require("dotenv").config();
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
@@ -23,7 +14,9 @@ app.use(express.static("./public"));
 app.use(fileUpload({}));
 app.use(cookie({}));
 app.use(errorMiddleware);
-
+// HR BOT
+require("./bot/bot.js");
+//
 const PORT = process.env.PORT || 3000;
 // Routes
 app.use("/api/v1/helpers", require("./routes/helpers/helpers.router.js"));
