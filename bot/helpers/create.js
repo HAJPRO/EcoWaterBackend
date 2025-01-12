@@ -5,6 +5,7 @@ const CreateMessage = async (msg) => {
   const chatId = msg.from.id;
   const text = msg.text;
   const data = await HRAppeals.create({ message: text });
+  console.log(data);
   if (data) {
     await bot.sendMessage(
       chatId,

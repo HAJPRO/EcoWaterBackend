@@ -20,7 +20,7 @@ require("./bot/bot.js");
 const PORT = process.env.PORT || 3000;
 // Routes
 app.use("/api/v1/helpers", require("./routes/helpers/helpers.router.js"));
-app.use("/api/v1/hr", require("./routes/HR/Appeals/appeals.router.js"));
+app.use("/api/v1/hr/appeals", require("./routes/HR/Appeals/appeals.router.js"));
 app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
 app.use("/api/v1/sale", require("./routes/salelLegal.route.js"));

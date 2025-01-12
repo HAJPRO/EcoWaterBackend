@@ -4,6 +4,11 @@ const authorMiddleware = require("../../../middlewares/author.middleware.js");
 const HRAppealsController = require("../../../controllers/hr/appeals/appeals.controller.js");
 
 const router = express.Router();
-router.post("/appeals/all", authMiddleware, HRAppealsController.GetAll);
+router.post("/all", authMiddleware, HRAppealsController.GetAll);
+router.post(
+  "/reply_message",
+  authMiddleware,
+  HRAppealsController.ReplyMessageCreate
+);
 
 module.exports = router;

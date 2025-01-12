@@ -23,6 +23,18 @@ class HRAppealsService {
     const items = await HRAppeals.find();
     return items;
   }
+  async ReplyMessageCreate(data) {
+    const message = await HRAppeals.findOne({ _id: data.id });
+    const newData = message;
+    newData.reply_message.push({
+      date: new Date(),
+      message: data.model.reply_message,
+    });
+    const items = await HRAppeals.findByIdAndUpdate(data.id, newData, {
+      new: true,
+    });
+    return { msg: "Yuborildi", items };
+  }
 }
 
 module.exports = new HRAppealsService();
