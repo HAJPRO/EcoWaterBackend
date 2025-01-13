@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const OutputFormModel = require("../../../models/Seam/form-warehouse/OutputFormWarehouse.model");
+const InputFormModel = require("../../../models/Seam/form-warehouse/InputFormWarehouse.model");
 const FormModel = require("../../../models/Seam/form/Form.model");
 
 class SeamInFormService {
@@ -155,7 +156,67 @@ class SeamInFormService {
     // return { process_length, warehouse_length, classification_length };
   }
   async AcceptAndCreate(data) {
-    console.log(data);
+    let ID = new mongoose.Types.ObjectId(data.data.id);
+    const user_id = data.user.id
+    const res = await OutputFormModel.aggregate([
+      { $match: { _id: ID } },
+      {
+        $lookup: {
+          from: "formwarehouses",
+          localField: "warehouse_id",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
+      {
+        $project: {
+          status: 1,
+          to_where: 1,
+          quantity: 1,
+          unit: 1,
+          transactionDateOutput: 1,
+          warehouse: {
+            $cond: {
+              if: { $isArray: "$warehouse" },
+              then: { $arrayElemAt: ["$warehouse", 0] },
+              else: null,
+            },
+          },
+        },
+      },
+
+    ]);
+    const form = await FormModel.find()
+    if (res && form.length > 0) {
+      const formData = await FormModel.findOne({ party_number: res[0].warehouse.party_number })
+      const inputData = {
+        author: user_id,
+        form_id: formData._id,
+        from_where: res[0].warehouse.in_where,
+        quantity: res[0].quantity,
+        unit: res[0].unit,
+        status: "Qabul qilindi"
+      }
+      if (formData) {
+        const newForm = formData
+        newForm.quantity = newForm.quantity + res[0].quantity
+        const data = await FormModel.findByIdAndUpdate(formData._id, newForm, { new: true })
+        const input = await InputFormModel.create(inputData)
+        const update = await OutputFormModel.findByIdAndUpdate(data.data.id, { status: "Qabul qilindi" }, { new: true })
+      }
+    } else {
+      const item = {
+        party_number: res[0].warehouse.party_number,
+        customer_name: res[0].warehouse.customer_name,
+        artikul: res[0].warehouse.artikul,
+        material_name: res[0].warehouse.material_name,
+        color: res[0].warehouse.color,
+        quantity: res[0].quantity,
+        unit: res[0].warehouse.unit,
+        sort: res[0].warehouse.sort
+      }
+      const data = await FormModel.create(item)
+    }
   }
   async AddToFormUpdate(id) {
     await AddToFormModel.findByIdAndUpdate(

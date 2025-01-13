@@ -52,6 +52,11 @@ const FormSchema = new Schema(
       type: String,
       required: true,
     },
+    in_where: {
+      type: String,
+      required: true,
+      default: "Bichuvda",
+    },
     processing: {
       type: String,
       required: true,
