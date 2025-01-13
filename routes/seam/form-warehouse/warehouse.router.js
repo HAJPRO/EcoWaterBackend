@@ -11,5 +11,10 @@ router.post(
   FormWarehouseController.AcceptAndCreate
 );
 router.post("/get_one", authMiddleware, FormWarehouseController.GetOne);
+router.post(
+  "/create_output",
+  authMiddleware,
+  FormWarehouseController.CreateOutput
+);
 
 module.exports = router;

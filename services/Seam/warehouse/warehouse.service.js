@@ -36,7 +36,7 @@ class DepSeamWarehouseService {
       const item = await WarehouseRawMaterialForSeamModel.findById(model.id);
       const newData = item;
 
-      if (newData.quantity - model.quantity < 0) {
+      if (newData.quantity - model.quantity < 0 || model.quantity < 0) {
         return { status: 404, msg: "Mahsulot yetarli emas" };
       } else {
         const OutputData = {

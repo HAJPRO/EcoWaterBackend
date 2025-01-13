@@ -8,7 +8,6 @@ const FormWarehouseModel = require("../../../models/Seam/form-warehouse/FormWare
 const SeamRowWarehouseModel = require("../../../models/Seam/warehouse/r-warehouse.model");
 const InputSeamFormModel = require("../../../models/Seam/form-warehouse/InputFormWarehouse.model");
 const OutputSeamFormModel = require("../../../models/Seam/form-warehouse/OutputFormWarehouse.model");
-
 const OutputSeamModel = require("../../../models/Seam/warehouse/OutputSeamWarehouse.model");
 
 class FormWarehouseService {
@@ -149,6 +148,13 @@ class FormWarehouseService {
             from_where: items[0].warehouse.in_where,
           };
           const input = await InputSeamFormModel.create(inputData);
+          const updateOutputSeam = await OutputSeamModel.findByIdAndUpdate(
+            ID,
+            {
+              status: "Qabul qilindi",
+            },
+            { new: true }
+          );
           return { status: 201, msg: "Muvaffaqiyatli tasdiqlandi" };
         }
       } else {
@@ -163,7 +169,6 @@ class FormWarehouseService {
 
         const newData = matchPartyNumber;
         newData.quantity = newData.quantity + items[0].quantity;
-
         const input = await InputSeamFormModel.create(inputData);
         const update = await FormWarehouseModel.findByIdAndUpdate(
           newData._id,
@@ -171,6 +176,13 @@ class FormWarehouseService {
           { new: true }
         );
 
+        const updateOutputSeam = await OutputSeamModel.findByIdAndUpdate(
+          ID,
+          {
+            status: "Qabul qilindi",
+          },
+          { new: true }
+        );
         return { status: 201, msg: "Muvaffaqiyatli tasdiqlandi" };
       }
     }
@@ -181,7 +193,40 @@ class FormWarehouseService {
       _id: data.id,
     });
     const input = await InputSeamFormModel.find({ warehouse_id: data.id });
-    return { warehouse, input };
+    const output = await OutputSeamFormModel.find({ warehouse_id: data.id });
+    return { warehouse, input, output };
+  }
+  async CreateOutput(data) {
+    const newModel = {
+      author: data.user.id,
+      warehouse_id: data.data.model.id,
+      to_where: data.data.model.to_where,
+      quantity: data.data.model.quantity,
+      unit: data.data.model.unit,
+      status: data.data.model.to_where + " " + "yuborildi",
+    };
+    const DataForm = await FormWarehouseModel.findOne({
+      _id: data.data.model.id,
+    });
+    if (
+      DataForm.quantity < data.data.model.quantity ||
+      data.data.model.quantity < 0
+    ) {
+      return { status: 404, msg: "Mahsulot yetarli emas" };
+    } else {
+      const res = await OutputSeamFormModel.create(newModel);
+      if (res) {
+        const UpdateData = DataForm;
+        DataForm.quantity = DataForm.quantity - data.data.model.quantity;
+        const UpdateForm = await FormWarehouseModel.findByIdAndUpdate(
+          data.data.model.id,
+          DataForm,
+          { new: true }
+        );
+      }
+
+      return { msg: "Muvaffaqiyatli yuborildi" };
+    }
   }
 }
 

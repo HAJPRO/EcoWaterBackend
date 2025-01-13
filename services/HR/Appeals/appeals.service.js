@@ -35,6 +35,11 @@ class HRAppealsService {
     });
     return { msg: "Yuborildi", items };
   }
+  async Delete(data) {
+    const item = await HRAppeals.findByIdAndDelete(data.id);
+
+    return { msg: "O'chirildi", item };
+  }
 }
 
 module.exports = new HRAppealsService();

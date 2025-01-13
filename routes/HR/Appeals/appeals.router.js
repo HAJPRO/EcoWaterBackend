@@ -10,5 +10,6 @@ router.post(
   authMiddleware,
   HRAppealsController.ReplyMessageCreate
 );
+router.post("/delete", authMiddleware, HRAppealsController.Delete);
 
 module.exports = router;

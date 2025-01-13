@@ -27,5 +27,16 @@ class FormWarehouseController {
       next(error);
     }
   }
+  async CreateOutput(req, res, next) {
+    try {
+      const data = await FormWarehouseService.CreateOutput({
+        data: req.body,
+        user: req.user,
+      });
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new FormWarehouseController();

@@ -12,7 +12,7 @@ const OutputSchema = new Schema(
     quantity: { type: Number, required: true },
     unit: { type: String, required: true },
     status: { type: String, required: true, default: "" },
-    transactionDateOutput: { type: Date, default: Date.now },
+    transactionDateOutput: { type: Date, default: new Date() },
     state: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }

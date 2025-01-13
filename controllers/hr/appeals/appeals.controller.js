@@ -16,5 +16,13 @@ class HRAppealsController {
       next(error);
     }
   }
+  async Delete(req, res, next) {
+    try {
+      const data = await HRAppealsService.Delete(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new HRAppealsController();
