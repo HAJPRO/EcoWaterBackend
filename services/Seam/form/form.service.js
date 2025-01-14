@@ -30,34 +30,8 @@ class SeamInFormService {
   async getAllInProcess(id) {
     let ID = new mongoose.Types.ObjectId(id);
     try {
-      const allInProcess = await FormModel.aggregate([
-        { $match: {} },
-        {
-          $lookup: {
-            from: "addtoforms",
-            localField: "warehouse_id",
-            foreignField: "_id",
-            as: "warehouse",
-          },
-        },
-        {
-          $project: {
-            status: 1,
-            head_pack: 1,
-            pastal_quantity: 1,
-            waste_quantity: 1,
-            fact_gramage: 1,
-            createdAt: 1,
-            warehouse: {
-              $cond: {
-                if: { $isArray: "$warehouse" },
-                then: { $arrayElemAt: ["$warehouse", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
+      const allInProcess = await FormModel.find();
+
       return allInProcess;
     } catch (error) {
       return error.message;
@@ -157,7 +131,7 @@ class SeamInFormService {
   }
   async AcceptAndCreate(data) {
     let ID = new mongoose.Types.ObjectId(data.data.id);
-    const user_id = data.user.id
+    const user_id = data.user.id;
     const res = await OutputFormModel.aggregate([
       { $match: { _id: ID } },
       {
@@ -184,25 +158,32 @@ class SeamInFormService {
           },
         },
       },
-
     ]);
-    const form = await FormModel.find()
+    const form = await FormModel.find();
     if (res && form.length > 0) {
-      const formData = await FormModel.findOne({ party_number: res[0].warehouse.party_number })
+      const formData = await FormModel.findOne({
+        party_number: res[0].warehouse.party_number,
+      });
       const inputData = {
         author: user_id,
         form_id: formData._id,
         from_where: res[0].warehouse.in_where,
         quantity: res[0].quantity,
         unit: res[0].unit,
-        status: "Qabul qilindi"
-      }
+        status: "Qabul qilindi",
+      };
       if (formData) {
-        const newForm = formData
-        newForm.quantity = newForm.quantity + res[0].quantity
-        const data = await FormModel.findByIdAndUpdate(formData._id, newForm, { new: true })
-        const input = await InputFormModel.create(inputData)
-        const update = await OutputFormModel.findByIdAndUpdate(data.data.id, { status: "Qabul qilindi" }, { new: true })
+        const newForm = formData;
+        newForm.quantity = newForm.quantity + res[0].quantity;
+        const data = await FormModel.findByIdAndUpdate(formData._id, newForm, {
+          new: true,
+        });
+        const input = await InputFormModel.create(inputData);
+        const update = await OutputFormModel.findByIdAndUpdate(
+          data.data.id,
+          { status: "Qabul qilindi" },
+          { new: true }
+        );
       }
     } else {
       const item = {
@@ -213,9 +194,9 @@ class SeamInFormService {
         color: res[0].warehouse.color,
         quantity: res[0].quantity,
         unit: res[0].warehouse.unit,
-        sort: res[0].warehouse.sort
-      }
-      const data = await FormModel.create(item)
+        sort: res[0].warehouse.sort,
+      };
+      const data = await FormModel.create(item);
     }
   }
   async AddToFormUpdate(id) {
