@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const AddToFormModel = require("../../../models/Seam/warehouse/AddToForm.model");
-const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
+const OutputFormModel = require("../../../models/Seam/form-warehouse/OutputFormWarehouse.model");
+const FormModel = require("../../../models/Seam/form/Form.model");
 
 class SeamInFormService {
   async getAll(is_status) {
@@ -29,7 +29,7 @@ class SeamInFormService {
   async getAllInProcess(id) {
     let ID = new mongoose.Types.ObjectId(id);
     try {
-      const allInProcess = await AddParamsToFormModel.aggregate([
+      const allInProcess = await FormModel.aggregate([
         { $match: {} },
         {
           $lookup: {
@@ -65,7 +65,37 @@ class SeamInFormService {
 
   async AllSentFromWarehouse() {
     try {
-      const items = await AddToFormModel.find({ status: "Bichuvga yuborildi" });
+      const items = await OutputFormModel.aggregate([
+        {
+          $match: {
+            status: "Bichuvga yuborildi",
+          },
+        },
+        {
+          $lookup: {
+            from: "formwarehouses",
+            localField: "warehouse_id",
+            foreignField: "_id",
+            as: "warehouse",
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            to_where: 1,
+            quantity: 1,
+            unit: 1,
+            transactionDateOutput: 1,
+            warehouse: {
+              $cond: {
+                if: { $isArray: "$warehouse" },
+                then: { $arrayElemAt: ["$warehouse", 0] },
+                else: null,
+              },
+            },
+          },
+        },
+      ]);
       return items;
     } catch (error) {
       return error.message;
@@ -73,7 +103,7 @@ class SeamInFormService {
   }
   async AllSentToClassification() {
     try {
-      const allClassification = await AddParamsToFormModel.aggregate([
+      const allClassification = await FormModel.aggregate([
         {
           $match: {
             $and: { processing: "Tasnifga yuborildi" },
@@ -124,35 +154,8 @@ class SeamInFormService {
     // );
     // return { process_length, warehouse_length, classification_length };
   }
-  async CreaetInfoToForm(payload) {
-    const author = payload.user.id;
-    const warehouse_id = payload.data.id;
-    const head_pack = payload.data.data.head_pack;
-    const pastal_quantity = payload.data.data.pastal_quantity;
-    const waste_quantity = payload.data.data.waste_quantity;
-    const fact_gramage = payload.data.data.fact_gramage;
-
-    const model = {
-      author,
-      warehouse_id,
-      head_pack,
-      pastal_quantity,
-      waste_quantity,
-      fact_gramage,
-    };
-
-    const res = await AddParamsToFormModel.create(model);
-
-    if (await res) {
-      const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
-        res._id,
-        { status: "Jarayonda" },
-        { new: true }
-      );
-      this.AddToFormUpdate(warehouse_id);
-    }
-
-    return res;
+  async AcceptAndCreate(data) {
+    console.log(data);
   }
   async AddToFormUpdate(id) {
     await AddToFormModel.findByIdAndUpdate(
@@ -163,7 +166,7 @@ class SeamInFormService {
   }
 
   async CreateDayReport(data) {
-    const item = await AddParamsToFormModel.findOne({ _id: data.id });
+    const item = await FormModel.findOne({ _id: data.id });
     const newItem = item;
     newItem.report_box.push(data.items);
     if (newItem.report_box.length <= 1) {
@@ -171,7 +174,7 @@ class SeamInFormService {
       newItem.status = "Tasnifga yuborildi";
     }
 
-    const res = await AddParamsToFormModel.findByIdAndUpdate(data.id, newItem, {
+    const res = await FormModel.findByIdAndUpdate(data.id, newItem, {
       new: true,
     });
 
@@ -179,7 +182,7 @@ class SeamInFormService {
   }
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
-    const res = await AddParamsToFormModel.aggregate([
+    const res = await FormModel.aggregate([
       { $match: { _id: ID } },
       {
         $lookup: {

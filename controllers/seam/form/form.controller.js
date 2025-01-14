@@ -8,13 +8,13 @@ class SeamInFormController {
       next(error);
     }
   }
-  async CreaetInfoToForm(req, res, next) {
+  async AcceptAndCreate(req, res, next) {
     try {
-      const data = await SeamInFormService.CreaetInfoToForm({
+      const data = await SeamInFormService.AcceptAndCreate({
         data: req.body,
         user: req.user,
       });
-      res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi ! ", data });
+      res.status(200).json({ msg: "Muvaffaqiyatli tasdiqlandi ! ", data });
     } catch (error) {
       next(error);
     }

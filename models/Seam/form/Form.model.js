@@ -1,8 +1,24 @@
 const { model, Schema } = require("mongoose");
 
-const WarehouseRawMaterialForSeamSchema = new Schema(
+const FormSchema = new Schema(
   {
     author: { type: Schema.ObjectId, ref: "User" },
+    // head_pack: {
+    //   type: Number,
+    //   required: true,
+    // },
+    // pastal_quantity: {
+    //   type: Number,
+    //   required: true,
+    // },
+    // waste_quantity: {
+    //   type: Number,
+    //   required: true,
+    // },
+    // fact_gramage: {
+    //   type: Number,
+    //   required: true,
+    // },
     party_number: {
       type: String,
       required: true,
@@ -36,26 +52,23 @@ const WarehouseRawMaterialForSeamSchema = new Schema(
       type: String,
       required: true,
     },
-
+    processing: {
+      type: String,
+      required: true,
+      default: "Bichimda",
+    },
     status: {
       type: String,
       required: true,
-      default: "Tasdiqlangan",
+      default: "Jarayonda",
     },
+
     state: {
       type: Boolean,
       default: true,
-    },
-    in_where: {
-      type: String,
-      required: true,
-      default: "Tikuv skladida",
     },
   },
   { timestamps: true }
 );
 
-module.exports = model(
-  "WarehouseRawMaterialForSeam",
-  WarehouseRawMaterialForSeamSchema
-);
+module.exports = model("Form", FormSchema);

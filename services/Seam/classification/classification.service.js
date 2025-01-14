@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const AddParamsToFormModel = require("../../../models/Seam/form/AddParamsToForm.model");
+const FormModel = require("../../../models/Seam/form/Form.model");
 const ClassificationProcess = require("../../../models/Seam/classification/ClassificationProcess.modal");
 
 class SeamInClassificationService {
@@ -76,7 +76,7 @@ class SeamInClassificationService {
 
   async AllSentFromForm() {
     try {
-      const items = await AddParamsToFormModel.aggregate([
+      const items = await FormModel.aggregate([
         { $match: { processing: "Tasnifga yuborildi" } },
         {
           $lookup: {
@@ -133,7 +133,7 @@ class SeamInClassificationService {
     // return { process_length, warehouse_length, classification_length };
   }
   async ConfirmAndCreteProcess(data) {
-    const form = await AddParamsToFormModel.findOne({ _id: data.data.id });
+    const form = await FormModel.findOne({ _id: data.data.id });
     const newData = {
       form_id: data.data.id,
       author: data.user.id,
@@ -141,7 +141,7 @@ class SeamInClassificationService {
     };
     const res = await ClassificationProcess.create(newData);
     if (res) {
-      const update = await AddParamsToFormModel.findByIdAndUpdate(
+      const update = await FormModel.findByIdAndUpdate(
         data.data.id,
         { status: "Tasnif tasdiqladi", processing: "Tasnifda" },
         { new: true }
@@ -166,10 +166,10 @@ class SeamInClassificationService {
   //     fact_gramage,
   //   };
 
-  //   const res = await AddParamsToFormModel.create(model);
+  //   const res = await FormModel.create(model);
 
   //   if (await res) {
-  //     const updateStatus = await AddParamsToFormModel.findByIdAndUpdate(
+  //     const updateStatus = await FormModel.findByIdAndUpdate(
   //       res._id,
   //       { status: "Jarayonda" },
   //       { new: true }
@@ -249,10 +249,10 @@ class SeamInClassificationService {
     const form = await ClassificationProcess.findOne({ _id: id });
 
     if (await form) {
-      const item = await AddParamsToFormModel.findOne({ _id: form.form_id });
+      const item = await FormModel.findOne({ _id: form.form_id });
       const newData = item;
       newData.report_box[index].status = "Qabul qilindi";
-      const updateData = await AddParamsToFormModel.findByIdAndUpdate(
+      const updateData = await FormModel.findByIdAndUpdate(
         form.form_id,
         newData,
         {

@@ -5,7 +5,11 @@ const SeamInFormController = require("../../../controllers/seam/form/form.contro
 
 const router = express.Router();
 router.post("/all", authMiddleware, SeamInFormController.getAll);
-router.post("/create", authMiddleware, SeamInFormController.CreaetInfoToForm);
+router.post(
+  "/accept_and_create",
+  authMiddleware,
+  SeamInFormController.AcceptAndCreate
+);
 router.post(
   "/create_day_report",
   authMiddleware,
