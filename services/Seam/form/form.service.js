@@ -3,6 +3,7 @@ const OutputFormModel = require("../../../models/Seam/form-warehouse/OutputFormW
 const InputFormModel = require("../../../models/Seam/form-warehouse/InputFormWarehouse.model");
 const FormModel = require("../../../models/Seam/form/Form.model");
 
+
 class SeamInFormService {
   async getAll(is_status) {
     const status = is_status.status;
@@ -208,19 +209,11 @@ class SeamInFormService {
   }
 
   async CreateDayReport(data) {
-    const item = await FormModel.findOne({ _id: data.id });
-    const newItem = item;
-    newItem.report_box.push(data.items);
-    if (newItem.report_box.length <= 1) {
-      newItem.processing = "Tasnifga yuborildi";
-      newItem.status = "Tasnifga yuborildi";
-    }
+    console.log(data);
+    const pastal = await OutputFormModel.create({ ...data.items, form_id: data.id })
+    console.log(pastal);
+    // const products = await OutputFormProducts.create()
 
-    const res = await FormModel.findByIdAndUpdate(data.id, newItem, {
-      new: true,
-    });
-
-    return res;
   }
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
