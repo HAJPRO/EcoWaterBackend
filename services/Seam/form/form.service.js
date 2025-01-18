@@ -224,36 +224,7 @@ class SeamInFormService {
   }
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
-    const res = await FormModel.aggregate([
-      { $match: { _id: ID } },
-      {
-        $lookup: {
-          from: "addtoforms",
-          localField: "warehouse_id",
-          foreignField: "_id",
-          as: "warehouse",
-        },
-      },
-      {
-        $project: {
-          status: 1,
-          pastal_quantity: 1,
-          waste_quantity: 1,
-          fact_gramage: 1,
-          head_pack: 1,
-          createdAt: 1,
-          report: 1,
-          report_box: 1,
-          warehouse: {
-            $cond: {
-              if: { $isArray: "$warehouse" },
-              then: { $arrayElemAt: ["$warehouse", 0] },
-              else: null,
-            },
-          },
-        },
-      },
-    ]);
+    const res = await FormModel.aggregate([{ $match: { _id: ID } }]);
     return res;
   }
 }
