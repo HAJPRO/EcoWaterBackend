@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const OutputFormModel = require("../../../models/Seam/form-warehouse/OutputFormWarehouse.model");
 const InputFormModel = require("../../../models/Seam/form-warehouse/InputFormWarehouse.model");
 const FormModel = require("../../../models/Seam/form/Form.model");
-
+const OutputForm = require("../../../models/Seam/form/OutputForm.model");
+const OutputFormProducts = require("../../../models/Seam/form/OutputFormProducts.model.js");
 
 class SeamInFormService {
   async getAll(is_status) {
@@ -209,16 +210,48 @@ class SeamInFormService {
   }
 
   async CreateDayReport(data) {
-    console.log(data);
-    const pastal = await OutputFormModel.create({ ...data.items, form_id: data.id })
-    console.log(pastal);
-    // const products = await OutputFormProducts.create()
+    const form_id = data.data.id;
+    const author = data.user.id;
+    const output = {
+      pastal_quantity: data.data.items.pastal_quantity,
+      head_pack: data.data.items.head_pack,
+      waste_quantity: data.data.items.waste_quantity,
+      fact_gramage: data.data.items.fact_gramage,
+      form_id: data.data.id,
+      author: data.user.id,
+    };
 
+    const res = await OutputForm.create(output);
+    if (await res) {
+      data.data.items.products.forEach((item) => {
+        const products = {
+          output: res._id,
+          form_id: data.data.id,
+          author: data.user.id,
+          ...item,
+        };
+        OutputFormProducts.create(products);
+      });
+    }
   }
+
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
-    const res = await FormModel.aggregate([{ $match: { _id: ID } }]);
-    return res;
+    const form = await OutputForm.aggregate([{ $match: { form_id: ID } }]);
+    const products = await OutputFormProducts.aggregate([
+      { $match: { form_id: ID } },
+    ]);
+
+    return { form, products };
+  }
+  async GetOneReportPastal(data) {
+    let ID = new mongoose.Types.ObjectId(data.id);
+    const form = await OutputForm.aggregate([{ $match: { _id: ID } }]);
+    const products = await OutputFormProducts.aggregate([
+      { $match: { output: ID } },
+    ]);
+
+    return { form, products };
   }
 }
 

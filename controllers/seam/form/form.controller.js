@@ -21,7 +21,10 @@ class SeamInFormController {
   }
   async CreateDayReport(req, res, next) {
     try {
-      const data = await SeamInFormService.CreateDayReport(req.body);
+      const data = await SeamInFormService.CreateDayReport({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi ! ", data });
     } catch (error) {
       next(error);
@@ -30,6 +33,14 @@ class SeamInFormController {
   async GetOneReport(req, res, next) {
     try {
       const data = await SeamInFormService.GetOneReport(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async GetOneReportPastal(req, res, next) {
+    try {
+      const data = await SeamInFormService.GetOneReportPastal(req.body);
       res.status(200).json(data);
     } catch (error) {
       next(error);

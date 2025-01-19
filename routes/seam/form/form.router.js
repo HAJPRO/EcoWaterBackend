@@ -20,5 +20,10 @@ router.post(
   authMiddleware,
   SeamInFormController.GetOneReport
 );
+router.post(
+  "/get_one_report_products",
+  authMiddleware,
+  SeamInFormController.GetOneReportPastal
+);
 
 module.exports = router;
