@@ -237,12 +237,13 @@ class SeamInFormService {
 
   async GetOneReport(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
+    const info = await FormModel.findOne({ _id: data.id });
     const form = await OutputForm.aggregate([{ $match: { form_id: ID } }]);
     const products = await OutputFormProducts.aggregate([
       { $match: { form_id: ID } },
     ]);
 
-    return { form, products };
+    return { form, products, info };
   }
   async GetOneReportPastal(data) {
     let ID = new mongoose.Types.ObjectId(data.id);

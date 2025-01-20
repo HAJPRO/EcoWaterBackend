@@ -32,5 +32,5 @@ jobs:
             cd /var/www/workers/haj_backend/
             git pull
             /usr/bin/npm install
-            /usr/local/bin/pm2 delete haj_backend
-            /usr/local/bin/pm2 start index.js --name "haj_backend"
+            /usr/bin/pm2 delete haj_backend
+            /usr/bin/pm2 start index.js --name "haj_backend"
