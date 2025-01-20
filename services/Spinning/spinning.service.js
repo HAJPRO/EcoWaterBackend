@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const SaleLegalCardModel = require("../../models/saleLegalCard.model.js");
+const SaleLegalCardModel = require("../../models/Sale/SaleCard.model.js");
 const SaleDepSpinningCardModel = require("../../models/SaleDepSpinningCardModel.model.js");
 const userModel = require("../../models/user.model.js");
 const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model.js");

@@ -1,5 +1,5 @@
 const DepProvideService = require("../../services/Provide/provide.service.js");
-const SaleLegalCardModel = require("../../models/saleLegalCard.model.js");
+const SaleLegalCardModel = require("../../models/Sale/SaleCard.model.js");
 const userModel = require("../../models/user.model.js");
 
 class DepProvideController {

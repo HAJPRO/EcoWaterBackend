@@ -23,7 +23,7 @@ app.use("/api/v1/helpers", require("./routes/helpers/helpers.router.js"));
 app.use("/api/v1/hr/appeals", require("./routes/HR/Appeals/appeals.router.js"));
 app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
-app.use("/api/v1/sale", require("./routes/salelLegal.route.js"));
+app.use("/api/v1/sale", require("./routes/sale/sale.router.js"));
 app.use("/api/v1/paint", require("./routes/paint/paint.route.js"));
 app.use("/api/v1/provide", require("./routes/provide/provide.route.js"));
 app.use("/api/v1/weaving", require("./routes/weaving/weaving.route.js"));

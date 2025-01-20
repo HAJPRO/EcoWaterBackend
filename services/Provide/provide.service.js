@@ -1,6 +1,4 @@
-const SaleLegalCardModel = require("../../models/saleLegalCard.model");
 const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
-const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model");
 const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model");
 const userModel = require("../../models/user.model");
 

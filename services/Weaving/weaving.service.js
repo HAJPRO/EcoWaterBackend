@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-const SaleLegalCardModel = require("../../models/saleLegalCard.model");
+const SaleLegalCardModel = require("../../models/Sale/SaleCard.model");
 const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
 const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model");
 const userModel = require("../../models/user.model");
 const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model");
-const InProcessPaintModel = require("../../models/Paint/InProcess.model");
 const InProcessWeavingModel = require("../../models/Weaving/InProcess.model");
 const SaleDepSpinningCardModel = require("../../models/SaleDepSpinningCardModel.model");
 
