@@ -46,5 +46,21 @@ class SeamInFormController {
       next(error);
     }
   }
+  async GetOneForUpdate(req, res, next) {
+    try {
+      const data = await SeamInFormService.GetOneForUpdate(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async Update(req, res, next) {
+    try {
+      const data = await SeamInFormService.Update(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new SeamInFormController();

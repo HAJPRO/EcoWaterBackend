@@ -25,5 +25,11 @@ router.post(
   authMiddleware,
   SeamInFormController.GetOneReportPastal
 );
+router.post(
+  "/get_for_update",
+  authMiddleware,
+  SeamInFormController.GetOneForUpdate
+);
+router.post("/update", authMiddleware, SeamInFormController.Update);
 
 module.exports = router;

@@ -223,6 +223,11 @@ class SeamInFormService {
 
     const res = await OutputForm.create(output);
     if (await res) {
+      const FormQuantityMatch = await FormModel.findById(form_id);
+      const newFormData = FormQuantityMatch;
+      FormQuantityMatch.quantity =
+        FormQuantityMatch.quantity - output.pastal_quantity;
+      await FormModel.findByIdAndUpdate(form_id, newFormData, { new: true });
       data.data.items.products.forEach((item) => {
         const products = {
           output: res._id,
@@ -253,6 +258,45 @@ class SeamInFormService {
     ]);
 
     return { form, products };
+  }
+  async GetOneForUpdate(data) {
+    const product = await OutputFormProducts.findById(data.id);
+    if (await product) {
+      const form = await OutputForm.findById(product.output);
+      return { form, product };
+    }
+  }
+  async Update(data) {
+    const product = await OutputFormProducts.findById(data.id);
+    if (await product) {
+      const updateProduct = await OutputFormProducts.findByIdAndUpdate(
+        data.id,
+        {
+          model_name: data.items.model_name,
+          quantity: data.items.quantity,
+          size: data.items.size,
+          unit: data.items.unit,
+          model_name: data.items.model_name,
+        },
+        {
+          new: true,
+        }
+      );
+      console.log(updateProduct);
+      await OutputForm.findByIdAndUpdate(
+        product.output,
+        {
+          pastal_quantity: data.items.pastal_quantity,
+          waste_quantity: data.items.waste_quantity,
+          head_pack: data.items.head_pack,
+          fact_gramage: data.items.fact_gramage,
+        },
+        {
+          new: true,
+        }
+      );
+      return { msg: "Muvaffaqiyatli yangilandi" };
+    }
   }
 }
 

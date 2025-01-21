@@ -9,7 +9,7 @@ const OutputFormProductsSchema = new Schema(
       ref: "Form",
       required: true,
     },
-
+    id: { type: String, required: true },
     model_name: { type: String, required: true },
     quantity: { type: Number, required: true },
     size: { type: String, required: true },
