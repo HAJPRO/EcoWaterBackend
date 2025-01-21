@@ -63,23 +63,26 @@ class SaleLegalService {
       };
     }
   }
-  async confirm(id) {
-    const dataById = await SaleCardModel.findById(id).populate("author");
-    const data = dataById;
-    data.in_department_order = "Bo'yoq";
-    data.order_status = "Bo'yoqqa yuborildi";
-    data.isConfirm = "Sotuv tasdiqladi";
+  async confirm(data) {
+    const dataById = await SaleCardModel.findById(data.data.id);
+    const NewData = dataById;
+
     const proccess_status = {
-      department: data.author.department,
-      author: data.author.username,
+      department: data.user.department,
+      author: data.user.username,
       is_confirm: { status: true, reason: "" },
       status: "Bo'yoqqa yuborildi",
       sent_time: new Date(),
     };
-    data.process_status.push(proccess_status);
-    const updatedData = await SaleCardModel.findByIdAndUpdate(id, data, {
-      new: true,
-    });
+    NewData.process_status.push(proccess_status);
+    NewData.status = "Bo'yoqqa yuborildi";
+    const updatedData = await SaleCardModel.findByIdAndUpdate(
+      data.data.id,
+      NewData,
+      {
+        new: true,
+      }
+    );
     return updatedData;
   }
   async AllOrderProccessById(id) {
@@ -372,10 +375,11 @@ class SaleLegalService {
     return updatedData;
   }
 
-  async getOne(id) {
-    const data = await SaleCardModel.findById(id);
+  async GetOne(data) {
+    const card = await SaleCardModel.findById(data.id);
+    const products = await SaleCardProductsModel.find({ sale_id: data.id });
 
-    return data;
+    return { card, products };
   }
 }
 

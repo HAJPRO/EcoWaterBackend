@@ -9,21 +9,21 @@ router.get("/get_card_model", SaleCardController.GetCardModel);
 router.post("/legal_proccess/:id", SaleCardController.AllOrderProccessById);
 router.post("/all", authMiddleware, SaleCardController.getAll);
 router.post(
-    "/legal_all_length",
-    authMiddleware,
-    SaleCardController.getAllLength
+  "/legal_all_length",
+  authMiddleware,
+  SaleCardController.getAllLength
 );
 router.post("/weaving_all", SaleCardController.getAllWeaving);
 router.post("/create", authMiddleware, SaleCardController.create);
 router.delete("/legal_delete/:id", authMiddleware, SaleCardController.delete);
-router.post("/legal_confirm", SaleCardController.confirm);
+router.post("/confirm", authMiddleware, SaleCardController.confirm);
 router.post("/legal_export_excel", SaleCardController.export_excel);
 router.put(
-    "/legal_edit/:id",
-    authMiddleware,
-    authorMiddleware,
-    SaleCardController.edit
+  "/legal_edit/:id",
+  authMiddleware,
+  authorMiddleware,
+  SaleCardController.edit
 );
-router.get("/legal_get_one/:id", authMiddleware, SaleCardController.getOne);
+router.post("/get_one", authMiddleware, SaleCardController.GetOne);
 
 module.exports = router;
