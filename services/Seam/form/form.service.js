@@ -282,7 +282,6 @@ class SeamInFormService {
           new: true,
         }
       );
-      console.log(updateProduct);
       await OutputForm.findByIdAndUpdate(
         product.output,
         {
