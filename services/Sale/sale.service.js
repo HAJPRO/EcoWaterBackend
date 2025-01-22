@@ -4,7 +4,7 @@ const SaleCardProductsModel = require("../../models/Sale/SaleCardProducts.model"
 
 const XLSX = require("xlsx");
 const randomstring = require("randomstring");
-const InProcessPaintModel = require("../../models/Paint/InProcess.model");
+const InProcessPaintModel = require("../../models/Paint/plan/InputPaintPlan.model");
 const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
 const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model");
 const SaleDepSpinningCardModel = require("../../models/SaleDepSpinningCardModel.model");

@@ -38,6 +38,27 @@ class DepPaintController {
       next(error);
     }
   }
+  async AcceptAndCreate(req, res, next) {
+    try {
+      const data = await DepPaintService.AcceptAndCreate({
+        data: req.body,
+        user: req.user,
+      });
+      res
+        .status(201)
+        .json({ status: 201, msg: "Muvaffaqiyatli qabul qilindi !" });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async GetOneFromSale(req, res, next) {
+    try {
+      const data = await DepPaintService.GetOneFromSale(req.body);
+      res.status(201).json({ stats: 200, msg: "ok", data });
+    } catch (error) {
+      next(error);
+    }
+  }
   async cencelReason(req, res, next) {
     try {
       const data = await DepPaintService.cancelReason(req.body, req.user.id);

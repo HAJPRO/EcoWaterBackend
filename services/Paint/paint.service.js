@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
-const SaleLegalCardModel = require("../../models/Sale/SaleCard.model.js");
+const SaleCardModel = require("../../models/Sale/SaleCard.model.js");
 const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
 const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model.js");
 const userModel = require("../../models/user.model");
-const InProcessPaintModel = require("../../models/Paint/InProcess.model.js");
+const InputPaintPlanModel = require("../../models/Paint/plan/InputPaintPlan.model.js");
+const InputPaintPlanProductsModel = require("../../models/Paint/plan/InputPaintPlanProducts.model.js");
 const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model.js");
+const SaleCardProductsModel = require("../../models/Sale/SaleCardProducts.model.js");
+const ProvideModel = require("../../models/Provide/provide.model.js");
 
 // const fileService = require("./file.service");
 
@@ -26,7 +29,7 @@ class DepPaintService {
   async cancelReason(data, author) {
     try {
       const userData = await userModel.findById(author);
-      const LegalDataById = await SaleLegalCardModel.findById(data.card_id);
+      const LegalDataById = await SaleCardModel.findById(data.card_id);
       const newLegalData = LegalDataById;
       newLegalData.order_status = "Bo'yoq bekor qildi";
       newLegalData.in_department_order = "Sotuv";
@@ -40,7 +43,7 @@ class DepPaintService {
       });
 
       if (data.card_id) {
-        const updateDataLegal = await SaleLegalCardModel.findByIdAndUpdate(
+        const updateDataLegal = await SaleCardModel.findByIdAndUpdate(
           data.card_id,
           newLegalData,
           { new: true }
@@ -81,7 +84,7 @@ class DepPaintService {
             order_id: data.card_id,
             department: user.department,
           };
-          const inProcess = await InProcessPaintModel.create(in_process_data);
+          const inProcess = await InputPaintPlanModel.create(in_process_data);
           const Data = await SaleDepPaintCardModel.create({
             in_process_id: inProcess._id,
             author,
@@ -93,7 +96,7 @@ class DepPaintService {
             weaving_delivery_time:
               data.items.ModelForWeaving.weaving_delivery_time,
           });
-          const LegalDataById = await SaleLegalCardModel.findById(data.card_id);
+          const LegalDataById = await SaleCardModel.findById(data.card_id);
           const newLegalData = LegalDataById;
           newLegalData.order_status = "To'quvga yuborildi";
           newLegalData.in_department_order = "To'quv";
@@ -108,7 +111,7 @@ class DepPaintService {
 
           if (Data._id) {
             newLegalData.dep_paint_data = Data._id;
-            const updateDataLegal = await SaleLegalCardModel.findByIdAndUpdate(
+            const updateDataLegal = await SaleCardModel.findByIdAndUpdate(
               data.card_id,
               newLegalData,
               { new: true }
@@ -121,6 +124,87 @@ class DepPaintService {
     } catch (error) {
       return error.message;
     }
+  }
+  async AcceptAndCreate(payload) {
+    try {
+      this.CreateInputPaintPlan(payload);
+      this.CreateProvide(payload);
+      return { status: 200, msg: "Muvaffaqiyatli qabul qilindi!" };
+    } catch (error) {
+      return error.message;
+    }
+  }
+  async CreateInputPaintPlan(payload) {
+    let initialValue = 0;
+    const total = payload.data.items.products.reduce(
+      (accumulator, currentValue) =>
+        accumulator + Number(currentValue.quantity),
+      initialValue
+    );
+    const saleCard = await SaleCardModel.findById(payload.data.items.card._id);
+    const NewData = saleCard;
+    const proccess_status = {
+      department: payload.user.department,
+      author: payload.user.username,
+      is_confirm: { status: true, reason: "" },
+      status: "Toquvga yuborildi",
+      sent_time: new Date(),
+    };
+    NewData.process_status.push(proccess_status);
+    NewData.status = "To'quvga yuborildi";
+    await SaleCardModel.findByIdAndUpdate(
+      payload.data.items.card._id,
+      NewData,
+      {
+        new: true,
+      }
+    );
+    const info = {
+      author: payload.user.id,
+      customer_name: payload.data.items.card.customer_name,
+      order_number: payload.data.items.card.order_number,
+      artikul: payload.data.items.card.artikul,
+      order_quantity: total,
+      delivery_time_sale: payload.data.items.card.delivery_time,
+      delivery_time_weaving: payload.data.provide.delivery_time_weaving,
+      weaving_qauntity: payload.data.provide.weaving_qauntity,
+    };
+
+    const res = await InputPaintPlanModel.create(info);
+    if (res) {
+      await this.CreateInputPaintPlanProducts(res, payload);
+    }
+  }
+  async CreateProvide(payload) {
+    const newData = {
+      author: payload.user.id,
+      department: payload.user.department,
+      delivery_product_box: {
+        pus: payload.data.provide.pus,
+        fike: payload.data.provide.fike,
+        color: payload.data.provide.color,
+        color_quantity: payload.data.provide.color_quantity,
+        delivery_time_provide: payload.data.provide.delivery_time_provide,
+      },
+    };
+    await ProvideModel.create(newData);
+  }
+  async CreateInputPaintPlanProducts(res, payload) {
+    payload.data.items.products.forEach((item) => {
+      let products = {
+        input_plan_id: res._id,
+        author: payload.user.id,
+        id: item.id,
+        product_name: item.product_name,
+        product_type: item.product_type,
+        color: item.color,
+        width: item.width,
+        grammage: item.grammage,
+        quantity: item.quantity,
+        unit: item.unit,
+      };
+      InputPaintPlanProductsModel.create(products);
+    });
   }
   async getAllLength(data) {
     const user_id = data.user.id;
@@ -168,33 +252,8 @@ class DepPaintService {
   async getAllInProcess(id) {
     let ID = new mongoose.Types.ObjectId(id);
     try {
-      const allInProcess = await SaleDepPaintCardModel.aggregate([
-        { $match: { author: ID } },
-        {
-          $lookup: {
-            from: "salecards",
-            localField: "sale_order_id",
-            foreignField: "_id",
-            as: "sale_order",
-          },
-        },
+      const allInProcess = await InputPaintPlanModel.find({ author: id });
 
-        {
-          $project: {
-            status: 1,
-            weaving_cloth_quantity: 1,
-            weaving_delivery_time: 1,
-            status_inprocess: 1,
-            sale_order: {
-              $cond: {
-                if: { $isArray: "$sale_order" },
-                then: { $arrayElemAt: ["$sale_order", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
       return allInProcess;
     } catch (error) {
       return error.message;
@@ -203,9 +262,10 @@ class DepPaintService {
 
   async AllSentToPaint() {
     try {
-      const all = await SaleLegalCardModel.find({
-        order_status: "Bo'yoqqa yuborildi",
+      const all = await SaleCardModel.find({
+        status: "Bo'yoqqa yuborildi",
       });
+
       return all;
     } catch (error) {
       return error.message;
@@ -261,6 +321,12 @@ class DepPaintService {
     } catch (error) {
       return error.message;
     }
+  }
+  async GetOneFromSale(data) {
+    const card = await SaleCardModel.findById(data.id);
+    const products = await SaleCardProductsModel.find({ sale_id: data.id });
+
+    return { card, products };
   }
 
   async delete(id) {
@@ -347,10 +413,10 @@ class DepPaintService {
     let order_report_at_progress = [];
     order_report_at_progress.push(data.items);
     const ID = data.id;
-    const Data = await InProcessPaintModel.findOne({ order_id: ID });
+    const Data = await InputPaintPlanModel.findOne({ order_id: ID });
     const newData = Data;
     newData.order_report_at_progress.push(data.items);
-    const updateData = await InProcessPaintModel.findByIdAndUpdate(
+    const updateData = await InputPaintPlanModel.findByIdAndUpdate(
       Data._id,
       newData,
       { new: true }
@@ -362,7 +428,7 @@ class DepPaintService {
     const paint = await SaleDepPaintCardModel.findOne({
       sale_order_id: data.id,
     });
-    const item = await InProcessPaintModel.aggregate([
+    const item = await InputPaintPlanModel.aggregate([
       { $match: { order_id: ID } },
       {
         $lookup: {
