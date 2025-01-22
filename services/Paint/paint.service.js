@@ -126,6 +126,7 @@ class DepPaintService {
     }
   }
   async AcceptAndCreate(payload) {
+    console.log(payload);
     try {
       this.CreateInputPaintPlan(payload);
       this.CreateProvide(payload);
@@ -182,8 +183,7 @@ class DepPaintService {
       delivery_product_box: {
         pus: payload.data.provide.pus,
         fike: payload.data.provide.fike,
-        color: payload.data.provide.color,
-        color_quantity: payload.data.provide.color_quantity,
+        colors: payload.data.provide.colors,
         delivery_time_provide: payload.data.provide.delivery_time_provide,
       },
     };
@@ -278,7 +278,6 @@ class DepPaintService {
       //     },
       //   },
       // ]);
-      console.log(allProvide);
 
       return allProvide;
     } catch (error) {
