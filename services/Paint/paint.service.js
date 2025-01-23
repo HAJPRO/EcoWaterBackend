@@ -213,14 +213,12 @@ class DepPaintService {
       (data) => data.length
     );
     const sale_length = await this.AllSentToPaint().then((data) => data.length);
-    const weaving_length = await this.AllSentToWeaving(user_id).then(
-      (data) => data.length
-    );
+
     const provide_length = await this.AllSentToProvide({
       id: user_id,
       department,
     }).then((data) => data.length);
-    return { process_length, sale_length, weaving_length, provide_length };
+    return { process_length, sale_length, provide_length };
   }
 
   async getAll(data) {
@@ -237,10 +235,7 @@ class DepPaintService {
         const items = await this.AllSentToPaint();
         return { items, all_length };
       }
-      if (is_status === 3) {
-        const items = await this.AllSentToWeaving(user_id);
-        return { items, all_length };
-      }
+
       if (is_status === 5) {
         const items = await this.AllSentToProvide({ id: user_id, department });
         return { items, all_length };
@@ -249,10 +244,10 @@ class DepPaintService {
       return error.message;
     }
   }
-  async getAllInProcess(id) {
-    let ID = new mongoose.Types.ObjectId(id);
+  async getAllInProcess(user_id) {
+    let ID = new mongoose.Types.ObjectId(user_id);
     try {
-      const allInProcess = await InputPaintPlanModel.find({ author: id });
+      const allInProcess = await InputPaintPlanModel.find({ author: user_id });
 
       return allInProcess;
     } catch (error) {
@@ -271,52 +266,20 @@ class DepPaintService {
       return error.message;
     }
   }
-  async AllSentToWeaving(id) {
-    let ID = new mongoose.Types.ObjectId(id);
-    try {
-      const allInProcess = await SaleDepPaintCardModel.aggregate([
-        { $match: { author: ID } },
-        {
-          $lookup: {
-            from: "salecards",
-            localField: "sale_order_id",
-            foreignField: "_id",
-            as: "sale_order",
-          },
-        },
-
-        {
-          $project: {
-            status: 1,
-            weaving_cloth_quantity: 1,
-            weaving_delivery_time: 1,
-            status_weaving: 1,
-            sale_order: {
-              $cond: {
-                if: { $isArray: "$sale_order" },
-                then: { $arrayElemAt: ["$sale_order", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
-      return allInProcess;
-    } catch (error) {
-      return error.message;
-    }
-  }
 
   async AllSentToProvide(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
     try {
-      const allProvide = await SaleDepProvideCardModel.aggregate([
-        {
-          $match: {
-            $and: [{ author: ID }, { department: data.department }],
-          },
-        },
-      ]);
+      const allProvide = await ProvideModel.find();
+      // const allProvide = await ProvideModel.aggregate([
+      //   {
+      //     $match: {
+      //       $and: [{ author: ID }, { department: data.department }],
+      //     },
+      //   },
+      // ]);
+      console.log(allProvide);
+
       return allProvide;
     } catch (error) {
       return error.message;
