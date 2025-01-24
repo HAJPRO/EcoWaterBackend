@@ -29,7 +29,17 @@ class DepPaintController {
       next(error);
     }
   }
-
+  async GetOneOrderReport(req, res, next) {
+    try {
+      const data = await DepPaintService.GetOneOrderReport({
+        id: req.body,
+        user: req.user,
+      });
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
   async create(req, res, next) {
     try {
       const data = await DepPaintService.create(req.body, req.user.id);
@@ -55,14 +65,6 @@ class DepPaintController {
     try {
       const data = await DepPaintService.GetOneFromSale(req.body);
       res.status(201).json({ stats: 200, msg: "ok", data });
-    } catch (error) {
-      next(error);
-    }
-  }
-  async cencelReason(req, res, next) {
-    try {
-      const data = await DepPaintService.cancelReason(req.body, req.user.id);
-      res.status(200).json({ msg: "Muvaffaqiyatli yuborildi !", data });
     } catch (error) {
       next(error);
     }

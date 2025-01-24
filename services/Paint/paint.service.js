@@ -26,34 +26,6 @@ class DepPaintService {
 
     return { ModelForProvide, ModelForWeaving };
   }
-  async cancelReason(data, author) {
-    try {
-      const userData = await userModel.findById(author);
-      const LegalDataById = await SaleCardModel.findById(data.card_id);
-      const newLegalData = LegalDataById;
-      newLegalData.order_status = "Bo'yoq bekor qildi";
-      newLegalData.in_department_order = "Sotuv";
-      newLegalData.isConfirm = "Bo'yoq bekor qildi";
-      newLegalData.process_status.push({
-        department: userData.department,
-        author: userData.username,
-        is_confirm: { status: false, reason: data.reason },
-        status: "Bo'yoq bekor qildi",
-        sent_time: new Date(),
-      });
-
-      if (data.card_id) {
-        const updateDataLegal = await SaleCardModel.findByIdAndUpdate(
-          data.card_id,
-          newLegalData,
-          { new: true }
-        );
-        return updateDataLegal;
-      }
-    } catch (error) {
-      return error.message;
-    }
-  }
   async create(data, author) {
     try {
       if (data.items.ModelForProvide && data.items.ModelForWeaving) {
@@ -125,8 +97,22 @@ class DepPaintService {
       return error.message;
     }
   }
+  async GetOneOrderReport(data) {
+    let ID = new mongoose.Types.ObjectId(data.id.id);
+    let User_id = new mongoose.Types.ObjectId(data.user.id);
+    const card = await InputPaintPlanModel.aggregate([
+      {
+        $match: {
+          $and: [{ author: User_id }, { _id: ID }],
+        },
+      },
+    ]);
+
+    return card;
+  }
   async AcceptAndCreate(payload) {
     console.log(payload);
+
     try {
       this.CreateInputPaintPlan(payload);
       this.CreateProvide(payload);
@@ -285,10 +271,19 @@ class DepPaintService {
     }
   }
   async GetOneFromSale(data) {
-    const card = await SaleCardModel.findById(data.id);
-    const products = await SaleCardProductsModel.find({ sale_id: data.id });
+    if (data.report) {
+      const card = await InputPaintPlanModel.findById(data.id);
+      const products = await InputPaintPlanProductsModel.find({
+        input_plan_id: data.id,
+      });
 
-    return { card, products };
+      return { card, products };
+    } else {
+      const card = await SaleCardModel.findById(data.id);
+      const products = await SaleCardProductsModel.find({ sale_id: data.id });
+
+      return { card, products };
+    }
   }
 
   async delete(id) {

@@ -6,7 +6,11 @@ const DepPaintController = require("../../controllers/paint/paint.controller.js"
 const router = express.Router();
 router.get("/paint_model", DepPaintController.getModel);
 router.post("/get_all", authMiddleware, DepPaintController.getAll);
-3;
+router.post(
+  "/get_one_order_report",
+  authMiddleware,
+  DepPaintController.GetOneOrderReport
+);
 router.post(
   "/get_one_from_sale",
   authMiddleware,
@@ -35,7 +39,6 @@ router.put(
   authorMiddleware,
   DepPaintController.edit
 );
-router.post("/cancel_reason", authMiddleware, DepPaintController.cencelReason);
 router.get("/paint_get-one/:id", authMiddleware, DepPaintController.getOne);
 router.post(
   "/paint_get_inprocess",
