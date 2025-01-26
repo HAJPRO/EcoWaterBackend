@@ -8,6 +8,7 @@ const InputPaintPlanProductsModel = require("../../models/Paint/plan/InputPaintP
 const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model.js");
 const SaleCardProductsModel = require("../../models/Sale/SaleCardProducts.model.js");
 const ProvideModel = require("../../models/Provide/provide.model.js");
+const DayReportPaintPlan = require("../../models/Paint/plan/DayReport.model.js");
 
 // const fileService = require("./file.service");
 
@@ -111,8 +112,6 @@ class DepPaintService {
     return card;
   }
   async AcceptAndCreate(payload) {
-    console.log(payload);
-
     try {
       this.CreateInputPaintPlan(payload);
       this.CreateProvide(payload);
@@ -191,6 +190,36 @@ class DepPaintService {
       };
       InputPaintPlanProductsModel.create(products);
     });
+  }
+  async CreateDayReport(payload) {
+    try {
+      const author = payload.user.id;
+      const data = payload.data;
+
+      const res = await DayReportPaintPlan.create({ ...data, author });
+      return { msg: "Muvaffaqiyatli qo'shildi!" };
+    } catch (error) {
+      return error.message;
+    }
+  }
+  async GetDayReport(payload) {
+    try {
+      const author = new mongoose.Types.ObjectId(payload.user.id);
+      const order_number = payload.data.order_number;
+
+      const res = await DayReportPaintPlan.aggregate([
+        {
+          $match: {
+            $and: [{ order_number: order_number }, { author: author }],
+          },
+        },
+      ]);
+      console.log(res);
+
+      return { status: 200, res };
+    } catch (error) {
+      return error.message;
+    }
   }
   async getAllLength(data) {
     const user_id = data.user.id;

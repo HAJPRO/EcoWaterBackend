@@ -69,7 +69,28 @@ class DepPaintController {
       next(error);
     }
   }
-
+  async CreateDayReport(req, res, next) {
+    try {
+      const data = await DepPaintService.CreateDayReport({
+        data: req.body,
+        user: req.user,
+      });
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async GetDayReport(req, res, next) {
+    try {
+      const data = await DepPaintService.GetDayReport({
+        data: req.body,
+        user: req.user,
+      });
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
   async delete(req, res, next) {
     try {
       const data = await DepPaintService.delete(req.params.id);

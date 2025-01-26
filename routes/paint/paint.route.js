@@ -22,6 +22,12 @@ router.post(
   DepPaintController.AcceptAndCreate
 );
 router.post(
+  "/create_day_report",
+  authMiddleware,
+  DepPaintController.CreateDayReport
+);
+router.post("/get_day_report", authMiddleware, DepPaintController.GetDayReport);
+router.post(
   "/paint_confirmed_orders",
   authMiddleware,
   DepPaintController.PaintConfirmedOrders
