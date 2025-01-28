@@ -6,45 +6,22 @@ const DepWeavingController = require("../../controllers/weaving/weaving.controll
 const router = express.Router();
 router.get("/weaving_model", DepWeavingController.getModel);
 router.post("/weaving_all", authMiddleware, DepWeavingController.getAll);
-router.post("/weaving_create", authMiddleware, DepWeavingController.create);
+router.post(
+  "/accept_and_create",
+  authMiddleware,
+  DepWeavingController.AcceptAndCreate
+);
 router.delete(
   "/weaving_delete/:id",
   authMiddleware,
   DepWeavingController.delete
 );
+
+router.put("/weaving_edit/:id", authMiddleware, DepWeavingController.edit);
 router.post(
-  "/cancel_reason",
+  "/get_one_from_paint",
   authMiddleware,
-  DepWeavingController.cencelReason
+  DepWeavingController.GetOneFromPaint
 );
-router.put(
-  "/weaving_edit/:id",
-  authMiddleware,
-  DepWeavingController.edit
-);
-router.get(
-  "/weaving_get_one/:id",
-  authMiddleware,
-  DepWeavingController.getOne
-);
-router.post(
-  "/weaving_get_inprocess",
-  authMiddleware,
-  DepWeavingController.getOneFromInProcess
-);
-router.post(
-  "/weaving_get_inprocess",
-  authMiddleware,
-  DepWeavingController.getOneFromInProcess
-);
-router.post(
-  "/weaving_add_day_report",
-  authMiddleware,
-  DepWeavingController.addDayReportInProcess
-);
-router.post(
-  "/weaving_get_report",
-  authMiddleware,
-  DepWeavingController.getDayReportFromWeaving
-);
+
 module.exports = router;

@@ -21,14 +21,6 @@ class DepPaintController {
     }
   }
 
-  async PaintConfirmedOrders(req, res, next) {
-    try {
-      const all = await DepPaintService.PaintConfirmedOrders(req.body);
-      res.status(200).json(all);
-    } catch (error) {
-      next(error);
-    }
-  }
   async GetOneOrderReport(req, res, next) {
     try {
       const data = await DepPaintService.GetOneOrderReport({
@@ -40,14 +32,7 @@ class DepPaintController {
       next(error);
     }
   }
-  async create(req, res, next) {
-    try {
-      const data = await DepPaintService.create(req.body, req.user.id);
-      res.status(201).json({ msg: "Muvaffaqiyatli tasdiqlandi !", data });
-    } catch (error) {
-      next(error);
-    }
-  }
+
   async AcceptAndCreate(req, res, next) {
     try {
       const data = await DepPaintService.AcceptAndCreate({
@@ -105,51 +90,6 @@ class DepPaintController {
       const { body, params } = req;
       const data = await DepPaintService.edit(body, params.id);
       res.status(200).json(data);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async getOne(req, res, next) {
-    try {
-      const data = await DepPaintService.getOne(req.params.id);
-      res.status(200).json(data);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async getOneFromInProcess(req, res, next) {
-    try {
-      const data = await DepPaintService.getOneFromInProcess(req.body);
-      res.status(200).json(data);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async addDayReportInProcess(req, res, next) {
-    try {
-      const data = await DepPaintService.addDayReportInProcess(req.body);
-      res.status(200).json(data);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async getDayReportFromPaint(req, res, next) {
-    try {
-      const data = await DepPaintService.getDayReportFromPaint(req.body);
-      res.status(200).json(data);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async Finish(req, res, next) {
-    try {
-      const data = await DepPaintService.Finish({
-        id: req.body,
-        user: req.user,
-      });
-      res.status(200).json({ msg: "Yakunlandi !", data });
     } catch (error) {
       next(error);
     }

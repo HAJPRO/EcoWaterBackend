@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
-const SaleLegalCardModel = require("../../models/Sale/SaleCard.model");
-const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
 const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model");
-const userModel = require("../../models/user.model");
 const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model");
-const InProcessWeavingModel = require("../../models/Weaving/InProcess.model");
-const SaleDepSpinningCardModel = require("../../models/SaleDepSpinningCardModel.model");
-
+const InputPaintPlan = require("../../models/Paint/plan/InputPaintPlan.model");
+const InputPaintPlanProducts = require("../../models/Paint/plan/InputPaintPlanProducts.model");
+const InputWeavingPlan = require("../../models/Weaving/InputWeavingPlan.model");
+const InputWeavingPlanProducts = require("../../models/Weaving/InputWeavingPlanProducts.model");
+const ProvideModel = require("../../models/Provide/provide.model");
 // const fileService = require("./file.service");
 class DepWeavingService {
   async getModel() {
@@ -24,125 +23,6 @@ class DepWeavingService {
     return { ModelForProvide, ModelForSpinning };
   }
 
-  async cancelReason(data, author) {
-    try {
-      const userData = await userModel.findById(author);
-      const LegalDataById = await SaleLegalCardModel.findById(data.card_id);
-      const newLegalData = LegalDataById;
-      newLegalData.order_status = "To'quv bekor qildi";
-      newLegalData.in_department_order = "Bo'yoq";
-      newLegalData.isConfirm = "To'quv bekor qildi";
-      newLegalData.process_status.push({
-        department: userData.department,
-        author: userData.username,
-        is_confirm: { status: false, reason: data.reason },
-        status: "To'quv bekor qilindi",
-        sent_time: new Date(),
-      });
-
-      if (data.card_id) {
-        const updateDataLegal = await SaleLegalCardModel.findByIdAndUpdate(
-          data.card_id,
-          newLegalData,
-          { new: true }
-        );
-        return updateDataLegal;
-      }
-    } catch (error) {
-      return error.message;
-    }
-  }
-  async create(data, author) {
-    try {
-      if (data.items.ModelForProvide && data.items.ModelForSpinning) {
-        const user = await userModel.findById(author);
-        const box_item = {
-          likra: data.items.ModelForProvide.likra,
-          polister: data.items.ModelForProvide.polister,
-          melaks_yarn: data.items.ModelForProvide.melaks_yarn,
-          duration_time: data.items.ModelForProvide.duration_time,
-        };
-        const newDataForProvide = {
-          department: user.department,
-          delivery_product_box: box_item,
-          author: author,
-          proccess_status: {
-            confirm: true,
-            reason: "",
-            status: "Taminotga yuborildi",
-          },
-        };
-        const provideData = await SaleDepProvideCardModel.create(
-          newDataForProvide
-        );
-
-        if (provideData) {
-          const provide_id = provideData._id;
-          const weaving_process_status = {
-            author: author,
-            is_confirm: { status: true, reason: "" },
-            sent_time: new Date(),
-          };
-          const in_process_data = {
-            author: author,
-            order_id: data.order_id,
-            department: user.department,
-          };
-          const inProcess = await InProcessWeavingModel.create(in_process_data);
-          const PaintData = await SaleDepPaintCardModel.findOne({
-            sale_order_id: data.order_id,
-          });
-          const newPaintData = PaintData;
-          newPaintData.status_weaving = "To'quv tasdiqladi";
-          const updateInProcessPaint =
-            await SaleDepPaintCardModel.findByIdAndUpdate(
-              PaintData._id,
-              newPaintData,
-              { new: true }
-            );
-          const Data = await SaleDepWeavingCardModel.create({
-            in_process_id: inProcess._id,
-            author,
-            sale_order_id: data.order_id,
-            weaving_process_status,
-            provide_id,
-            spinning_yarn_wrap_quantity:
-              data.items.ModelForSpinning.spinning_yarn_wrap_quantity,
-            spinning_delivery_time:
-              data.items.ModelForSpinning.spinning_delivery_time,
-            paint_id: PaintData._id,
-          });
-          const LegalDataById = await SaleLegalCardModel.findById(
-            data.order_id
-          );
-          const newLegalData = LegalDataById;
-          newLegalData.order_status = "Yigiruvga yuborildi";
-          newLegalData.in_department_order = "Yigiruv";
-          newLegalData.isConfirm = "To'quv tasdiqladi";
-          newLegalData.process_status.push({
-            department: user.department,
-            author: user.username,
-            is_confirm: { status: true, reason: "" },
-            status: "Yigiruvga yuborildi",
-            sent_time: new Date(),
-          });
-
-          if (Data._id) {
-            newLegalData.dep_weaving_data = Data._id;
-            const updateDataLegal = await SaleLegalCardModel.findByIdAndUpdate(
-              data.order_id,
-              newLegalData,
-              { new: true }
-            );
-          }
-        }
-      }
-
-      return provideData;
-    } catch (error) {
-      return error.message;
-    }
-  }
   async getAllLength(data) {
     const user_id = new mongoose.Types.ObjectId(data.user.id);
     const department = data.user.department;
@@ -229,40 +109,16 @@ class DepWeavingService {
       return error.message;
     }
   }
-
   async AllSentFromPaint() {
     try {
-      const allInProcess = await SaleDepPaintCardModel.aggregate([
-        { $match: { status_weaving: "To'quvga yuborildi" } },
-        {
-          $lookup: {
-            from: "salecards",
-            localField: "sale_order_id",
-            foreignField: "_id",
-            as: "in_process_detail",
-          },
-        },
-        {
-          $project: {
-            weaving_delivery_time: 1,
-            weaving_cloth_quantity: 1,
-            status_weaving: 1,
-            in_process_detail: {
-              $cond: {
-                if: { $isArray: "$in_process_detail" },
-                then: { $arrayElemAt: ["$in_process_detail", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
-      return allInProcess;
+      const all = await InputPaintPlan.find({
+        status: "Jarayonda",
+      });
+      return all;
     } catch (error) {
       return error.message;
     }
   }
-
   async AllSentToProvide(data) {
     try {
       const allProvide = await SaleDepProvideCardModel.aggregate([
@@ -277,7 +133,87 @@ class DepWeavingService {
       return error.message;
     }
   }
+  async AcceptAndCreate(payload) {
+    console.log(payload);
 
+    try {
+      this.CreateInputWeavingPlan(payload);
+      this.CreateProvide(payload);
+      return { status: 200, msg: "Muvaffaqiyatli qabul qilindi!" };
+    } catch (error) {
+      return error.message;
+    }
+  }
+  async CreateInputWeavingPlan(payload) {
+    const initialValue = 0;
+    const total_spinning = payload.data.spinning.reduce(
+      (accumulator, currentValue) =>
+        accumulator + Number(currentValue.yarn_quantity),
+      initialValue
+    );
+
+    const InputPaint = await InputPaintPlan.findById(payload.data.card._id);
+    const NewData = InputPaint;
+    const proccess_status = {
+      department: payload.user.department,
+      author: payload.user.username,
+      is_confirm: { status: true, reason: "" },
+      status: "Yigiruvga yuborildi",
+      sent_time: new Date(),
+    };
+    NewData.process_status.push(proccess_status);
+    NewData.status = "Yigiruvga yuborildi";
+    await InputPaintPlan.findByIdAndUpdate(payload.data.card._id, NewData, {
+      new: true,
+    });
+    const info = {
+      author: payload.user.id,
+      customer_name: payload.data.card.customer_name,
+      order_number: payload.data.card.order_number,
+      artikul: payload.data.card.artikul,
+      spinning_quantity: total_spinning,
+      weaving_quantity: payload.data.card.weaving_qauntity,
+      delivery_time_paint: payload.data.card.delivery_time_weaving,
+      delivery_time_spinning: payload.data.spinning[0].delivery_time_spinning,
+    };
+
+    const res = await InputWeavingPlan.create(info);
+    if (res) {
+      await this.CreateInputWeavingPlanProducts(res, payload);
+    }
+  }
+  async CreateProvide(payload) {
+    payload.data.products.forEach((item) => {
+      let product = {
+        author: payload.user.id,
+        department: payload.user.department,
+        delivery_product_box: {
+          likra_type: item.likra_type,
+          likra_quantity: item.likra_quantity,
+          melaks_type: item.melaks_type,
+          melaks_quantity: item.melaks_quantity,
+          polister_type: item.polister_type,
+          polister_quantity: item.polister_quantity,
+        },
+
+        delivery_time_provide: item.delivery_time_provide,
+      };
+      ProvideModel.create(product);
+    });
+  }
+  async CreateInputWeavingPlanProducts(res, payload) {
+    payload.data.spinning.forEach((item) => {
+      let spinning = {
+        input_plan_id: res._id,
+        author: payload.user.id,
+        id: item.id,
+        yarn_name: item.yarn_name,
+        yarn_type: item.yarn_type,
+        yarn_quantity: item.yarn_quantity,
+      };
+      InputWeavingPlanProducts.create(spinning);
+    });
+  }
   async delete(id) {
     const data = await SaleDepWeavingCardModel.findByIdAndDelete(id);
     return data;
@@ -298,142 +234,16 @@ class DepWeavingService {
     return updatedData;
   }
 
-  async getOne(id) {
-    let ID = new mongoose.Types.ObjectId(id);
+  async GetOneFromPaint(data) {
+    // let ID = new mongoose.Types.ObjectId(id);
     try {
-      const allInProcess = await SaleDepPaintCardModel.aggregate([
-        { $match: { _id: ID } },
-        {
-          $lookup: {
-            from: "salecards",
-            localField: "sale_order_id",
-            foreignField: "_id",
-            as: "in_process_detail",
-          },
-        },
-        {
-          $project: {
-            status: 1,
-            weaving_cloth_quantity: 1,
-            weaving_delivery_time: 1,
-            status_inprocess: 1,
-            in_process_detail: {
-              $cond: {
-                if: { $isArray: "$in_process_detail" },
-                then: { $arrayElemAt: ["$in_process_detail", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
-      return allInProcess;
+      const products = await InputPaintPlanProducts.find({
+        input_plan_id: data.id,
+      });
+      const card = await InputPaintPlan.findById(data.id);
+      return { card, products };
     } catch (error) {
       return error.message;
-    }
-  }
-  async getOneFromInProcess(payload) {
-    const weaving = await SaleDepWeavingCardModel.findOne({ _id: payload.id });
-    let ID = new mongoose.Types.ObjectId(weaving.sale_order_id);
-    const data = await SaleDepSpinningCardModel.aggregate([
-      { $match: { sale_order_id: ID } },
-      {
-        $lookup: {
-          from: "inprocessspinningmodels",
-          localField: "in_process_id",
-          foreignField: "_id",
-          as: "report",
-        },
-      },
-      {
-        $lookup: {
-          from: "salecards",
-          localField: "sale_order_id",
-          foreignField: "_id",
-          as: "order",
-        },
-      },
-      {
-        $project: {
-          sale_order_id: 1,
-          report: {
-            $cond: {
-              if: { $isArray: "$report" },
-              then: { $arrayElemAt: ["$report", 0] },
-              else: null,
-            },
-          },
-          order: {
-            $cond: {
-              if: { $isArray: "$order" },
-              then: { $arrayElemAt: ["$order", 0] },
-              else: null,
-            },
-          },
-        },
-      },
-    ]);
-    if (data.length > 0) {
-      return {
-        report: data[0].report.order_report_at_progress,
-        sale_order_id: data[0].sale_order_id,
-        order_number: data[0].order.order_number,
-        customer_name: data[0].order.customer_name,
-        quantity: weaving.spinning_yarn_wrap_quantity,
-      };
-    }
-  }
-
-  async addDayReportInProcess(data) {
-    let order_report_at_progress = [];
-    order_report_at_progress.push(data.items);
-    const ID = data.id;
-    const Data = await InProcessWeavingModel.findOne({ order_id: ID });
-    const newData = Data;
-    newData.order_report_at_progress.push(data.items);
-    const updateData = await InProcessWeavingModel.findByIdAndUpdate(
-      newData._id,
-      newData,
-      { new: true }
-    );
-    return updateData;
-  }
-  async getDayReportFromWeaving(data) {
-    let ID = new mongoose.Types.ObjectId(data.id);
-    const more_data = await SaleDepPaintCardModel.findOne({
-      sale_order_id: data.id,
-    });
-    const item = await InProcessWeavingModel.aggregate([
-      { $match: { order_id: ID } },
-      {
-        $lookup: {
-          from: "salecards",
-          localField: "order_id",
-          foreignField: "_id",
-          as: "order",
-        },
-      },
-      {
-        $project: {
-          order_report_at_progress: 1,
-          order: {
-            $cond: {
-              if: { $isArray: "$order" },
-              then: { $arrayElemAt: ["$order", 0] },
-              else: null,
-            },
-          },
-        },
-      },
-    ]);
-
-    if (item.length > 0) {
-      return {
-        report: item[0].order_report_at_progress,
-        order_quantity: more_data.weaving_cloth_quantity,
-        delivery_time: more_data.weaving_delivery_time,
-        order_number: more_data.order_number,
-      };
     }
   }
 }

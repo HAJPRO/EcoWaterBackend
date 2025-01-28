@@ -7,6 +7,7 @@ const ProvideSchema = new Schema(
     status: { type: String, default: "Tasdiqlanmagan" },
     proccess_status: { type: Array },
     state: { type: Boolean, default: true },
+    delivery_time_provide: { type: Date, required: true },
   },
   { timestamps: true }
 );
