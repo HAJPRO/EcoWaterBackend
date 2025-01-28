@@ -83,9 +83,8 @@ class DepPaintService {
       order_quantity: total,
       delivery_time_sale: payload.data.items.card.delivery_time,
       delivery_time_weaving: payload.data.provide.delivery_time_weaving,
-      weaving_qauntity: payload.data.provide.weaving_qauntity,
+      weaving_quantity: payload.data.provide.weaving_quantity,
     };
-
     const res = await InputPaintPlanModel.create(info);
     if (res) {
       await this.CreateInputPaintPlanProducts(res, payload);
@@ -101,6 +100,7 @@ class DepPaintService {
         colors: payload.data.provide.colors,
         delivery_time_provide: payload.data.provide.delivery_time_provide,
       },
+      delivery_time_provide: payload.data.provide.delivery_time_provide,
     };
     await ProvideModel.create(newData);
   }
@@ -192,8 +192,8 @@ class DepPaintService {
   async getAllInProcess(user_id) {
     let ID = new mongoose.Types.ObjectId(user_id);
     try {
-      const allInProcess = await InputPaintPlanModel.find({ author: user_id });
-
+      const allInProcess = await InputPaintPlanModel.find({ author: ID });
+      console.log(allInProcess);
       return allInProcess;
     } catch (error) {
       return error.message;
@@ -215,14 +215,14 @@ class DepPaintService {
   async AllSentToProvide(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
     try {
-      const allProvide = await ProvideModel.find();
-      // const allProvide = await ProvideModel.aggregate([
-      //   {
-      //     $match: {
-      //       $and: [{ author: ID }, { department: data.department }],
-      //     },
-      //   },
-      // ]);
+      // const allProvide = await ProvideModel.find();
+      const allProvide = await ProvideModel.aggregate([
+        {
+          $match: {
+            $and: [{ author: ID }, { department: "Bo'yoq" }],
+          },
+        },
+      ]);
 
       return allProvide;
     } catch (error) {

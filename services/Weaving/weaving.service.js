@@ -63,47 +63,10 @@ class DepWeavingService {
   }
   async getAllInProcess(id) {
     try {
-      const allInProcess = await SaleDepWeavingCardModel.aggregate([
-        { $match: { author: id } },
-        {
-          $lookup: {
-            from: "salecards",
-            localField: "sale_order_id",
-            foreignField: "_id",
-            as: "sale_order",
-          },
-        },
-        {
-          $lookup: {
-            from: "deppaintcards",
-            localField: "paint_id",
-            foreignField: "_id",
-            as: "paint",
-          },
-        },
-        {
-          $project: {
-            status: 1,
-            spinning_delivery_time: 1,
-            spinning_yarn_wrap_quantity: 1,
-            status_inprocess: 1,
-            sale_order: {
-              $cond: {
-                if: { $isArray: "$sale_order" },
-                then: { $arrayElemAt: ["$sale_order", 0] },
-                else: null,
-              },
-            },
-            paint: {
-              $cond: {
-                if: { $isArray: "$paint" },
-                then: { $arrayElemAt: ["$paint", 0] },
-                else: null,
-              },
-            },
-          },
-        },
-      ]);
+      const allInProcess = await InputWeavingPlan.find({
+        status: "Jarayonda", author: id
+      });
+
       return allInProcess;
     } catch (error) {
       return error.message;
@@ -112,7 +75,7 @@ class DepWeavingService {
   async AllSentFromPaint() {
     try {
       const all = await InputPaintPlan.find({
-        status: "Jarayonda",
+        status: "Jarayonda"
       });
       return all;
     } catch (error) {
@@ -121,10 +84,10 @@ class DepWeavingService {
   }
   async AllSentToProvide(data) {
     try {
-      const allProvide = await SaleDepProvideCardModel.aggregate([
+      const allProvide = await ProvideModel.aggregate([
         {
           $match: {
-            $and: [{ author: data.id }, { department: data.department }],
+            $and: [{ author: data.user_id }, { department: "To'quv" }],
           },
         },
       ]);
@@ -134,7 +97,6 @@ class DepWeavingService {
     }
   }
   async AcceptAndCreate(payload) {
-    console.log(payload);
 
     try {
       this.CreateInputWeavingPlan(payload);
@@ -172,7 +134,7 @@ class DepWeavingService {
       order_number: payload.data.card.order_number,
       artikul: payload.data.card.artikul,
       spinning_quantity: total_spinning,
-      weaving_quantity: payload.data.card.weaving_qauntity,
+      weaving_quantity: payload.data.card.weaving_quantity,
       delivery_time_paint: payload.data.card.delivery_time_weaving,
       delivery_time_spinning: payload.data.spinning[0].delivery_time_spinning,
     };
