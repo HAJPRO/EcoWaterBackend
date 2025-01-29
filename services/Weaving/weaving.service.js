@@ -53,7 +53,7 @@ class DepWeavingService {
         return { items, all_length };
       }
 
-      if (is_status === 5) {
+      if (is_status === 3) {
         const items = await this.AllSentToProvide({ id: user_id, department });
         return { items, all_length };
       }
@@ -64,7 +64,8 @@ class DepWeavingService {
   async getAllInProcess(id) {
     try {
       const allInProcess = await InputWeavingPlan.find({
-        status: "Jarayonda", author: id
+        status: "Jarayonda",
+        author: id,
       });
 
       return allInProcess;
@@ -75,7 +76,7 @@ class DepWeavingService {
   async AllSentFromPaint() {
     try {
       const all = await InputPaintPlan.find({
-        status: "Jarayonda"
+        status: "Jarayonda",
       });
       return all;
     } catch (error) {
@@ -97,7 +98,6 @@ class DepWeavingService {
     }
   }
   async AcceptAndCreate(payload) {
-
     try {
       this.CreateInputWeavingPlan(payload);
       this.CreateProvide(payload);
@@ -135,6 +135,7 @@ class DepWeavingService {
       artikul: payload.data.card.artikul,
       spinning_quantity: total_spinning,
       weaving_quantity: payload.data.card.weaving_quantity,
+      paint_products: payload.data.card.weaving_products,
       delivery_time_paint: payload.data.card.delivery_time_weaving,
       delivery_time_spinning: payload.data.spinning[0].delivery_time_spinning,
     };
@@ -165,7 +166,7 @@ class DepWeavingService {
   }
   async CreateInputWeavingPlanProducts(res, payload) {
     payload.data.spinning.forEach((item) => {
-      let spinning = {
+      let products = {
         input_plan_id: res._id,
         author: payload.user.id,
         id: item.id,
@@ -173,7 +174,7 @@ class DepWeavingService {
         yarn_type: item.yarn_type,
         yarn_quantity: item.yarn_quantity,
       };
-      InputWeavingPlanProducts.create(spinning);
+      InputWeavingPlanProducts.create(products);
     });
   }
   async delete(id) {
@@ -199,11 +200,19 @@ class DepWeavingService {
   async GetOneFromPaint(data) {
     // let ID = new mongoose.Types.ObjectId(id);
     try {
-      const products = await InputPaintPlanProducts.find({
-        input_plan_id: data.id,
-      });
-      const card = await InputPaintPlan.findById(data.id);
-      return { card, products };
+      if (data.report === true) {
+        const products = await InputWeavingPlanProducts.find({
+          input_plan_id: data.id,
+        });
+        const card = await InputWeavingPlan.findById(data.id);
+        return { card, products };
+      } else {
+        const products = await InputPaintPlanProducts.find({
+          input_plan_id: data.id,
+        });
+        const card = await InputPaintPlan.findById(data.id);
+        return { card, products };
+      }
     } catch (error) {
       return error.message;
     }

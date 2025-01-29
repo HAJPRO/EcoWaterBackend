@@ -51,12 +51,12 @@ class DepPaintService {
     }
   }
   async CreateInputPaintPlan(payload) {
-    let initialValue = 0;
-    const total = payload.data.items.products.reduce(
-      (accumulator, currentValue) =>
-        accumulator + Number(currentValue.quantity),
-      initialValue
-    );
+    // let initialValue = 0;
+    // const total = payload.data.products.reduce(
+    //   (accumulator, currentValue) =>
+    //     accumulator + Number(currentValue.quantity),
+    //   initialValue
+    // );
     const saleCard = await SaleCardModel.findById(payload.data.items.card._id);
     const NewData = saleCard;
     const proccess_status = {
@@ -75,19 +75,22 @@ class DepPaintService {
         new: true,
       }
     );
+
     const info = {
       author: payload.user.id,
       customer_name: payload.data.items.card.customer_name,
       order_number: payload.data.items.card.order_number,
       artikul: payload.data.items.card.artikul,
-      order_quantity: total,
+      weaving_quantity: payload.data.provide.weaving_quantity, // total
+      weaving_products: payload.data.provide.weaving, // weaving-product
       delivery_time_sale: payload.data.items.card.delivery_time,
       delivery_time_weaving: payload.data.provide.delivery_time_weaving,
-      weaving_quantity: payload.data.provide.weaving_quantity,
+      sale_quantity: payload.data.items.card.order_quantity,
     };
+
     const res = await InputPaintPlanModel.create(info);
     if (res) {
-      await this.CreateInputPaintPlanProducts(res, payload);
+      this.CreateInputPaintPlanProducts(res, payload);
     }
   }
   async CreateProvide(payload) {
@@ -144,7 +147,6 @@ class DepPaintService {
           },
         },
       ]);
-      console.log(res);
 
       return { status: 200, res };
     } catch (error) {
@@ -193,7 +195,6 @@ class DepPaintService {
     let ID = new mongoose.Types.ObjectId(user_id);
     try {
       const allInProcess = await InputPaintPlanModel.find({ author: ID });
-      console.log(allInProcess);
       return allInProcess;
     } catch (error) {
       return error.message;
