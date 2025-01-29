@@ -17,22 +17,8 @@ class DepSpinningController {
       next(error);
     }
   }
-  async cencelReason(req, res, next) {
-    try {
-      const data = await DepSpinningService.cancelReason(req.body, req.user.id);
-      res.status(200).json({ msg: "Muvaffaqiyatli yuborildi !", data });
-    } catch (error) {
-      next(error);
-    }
-  }
-  async create(req, res, next) {
-    try {
-      const data = await DepSpinningService.create(req.body, req.user.id);
-      res.status(201).json({ msg: "Muvaffaqiyatli yuborildi !", data });
-    } catch (error) {
-      next(error);
-    }
-  }
+
+
 
   async delete(req, res, next) {
     try {
@@ -77,14 +63,7 @@ class DepSpinningController {
       next(error);
     }
   }
-  // async getDayReportFromWeaving(req, res, next) {
-  //   try {
-  //     const data = await DepSpinningService.getDayReportFromWeaving(req.body);
-  //     res.status(200).json(data);
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+
 }
 
 module.exports = new DepSpinningController();

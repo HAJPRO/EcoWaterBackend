@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const SaleCardModel = require("../../models/Sale/SaleCard.model");
-const SaleCardProductsModel = require("../../models/Sale/SaleCardProducts.model");
 
 const XLSX = require("xlsx");
 const randomstring = require("randomstring");
@@ -18,13 +17,13 @@ class SaleLegalService {
     const model = {
       customer_name: "",
       order_number: order_num,
-      product_name: "",
+      material_name: "",
+      material_type: "",
       artikul: "",
-      product_type: "",
       color: "",
       width: "",
       grammage: "",
-      quantity: "",
+      order_quantity: "",
       unit: "",
       delivery_time: "",
     };
@@ -35,7 +34,7 @@ class SaleLegalService {
     let initialValue = 0;
     const total = payload.data.products.reduce(
       (accumulator, currentValue) =>
-        accumulator + Number(currentValue.quantity),
+        accumulator + Number(currentValue.order_quantity),
       initialValue
     );
     const info = {
@@ -45,23 +44,11 @@ class SaleLegalService {
       artikul: payload.data.artikul,
       order_quantity: total,
       delivery_time: payload.data.delivery_time,
+      sale_products: payload.data.products
     };
 
     const res = await SaleCardModel.create(info);
-    if (res) {
-      payload.data.products.forEach((item) => {
-        const products = {
-          sale_id: res._id,
-          author: payload.user.id,
-          ...item,
-        };
-        SaleCardProductsModel.create(products);
-      });
-      return {
-        status: 200,
-        msg: "Sotuv karta  yaratildi !",
-      };
-    }
+    return { msg: "Sotuv karta yaratildi" }
   }
   async confirm(data) {
     const dataById = await SaleCardModel.findById(data.data.id);
@@ -377,9 +364,7 @@ class SaleLegalService {
 
   async GetOne(data) {
     const card = await SaleCardModel.findById(data.id);
-    const products = await SaleCardProductsModel.find({ sale_id: data.id });
-
-    return { card, products };
+    return card;
   }
 }
 

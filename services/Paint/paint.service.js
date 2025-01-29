@@ -1,12 +1,8 @@
 const mongoose = require("mongoose");
 const SaleCardModel = require("../../models/Sale/SaleCard.model.js");
 const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
-const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model.js");
-const userModel = require("../../models/user.model");
 const InputPaintPlanModel = require("../../models/Paint/plan/InputPaintPlan.model.js");
 const InputPaintPlanProductsModel = require("../../models/Paint/plan/InputPaintPlanProducts.model.js");
-const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model.js");
-const SaleCardProductsModel = require("../../models/Sale/SaleCardProducts.model.js");
 const ProvideModel = require("../../models/Provide/provide.model.js");
 const DayReportPaintPlan = require("../../models/Paint/plan/DayReport.model.js");
 
@@ -43,6 +39,7 @@ class DepPaintService {
   }
   async AcceptAndCreate(payload) {
     try {
+      console.log(payload);
       this.CreateInputPaintPlan(payload);
       this.CreateProvide(payload);
       return { status: 200, msg: "Muvaffaqiyatli qabul qilindi!" };
@@ -51,13 +48,7 @@ class DepPaintService {
     }
   }
   async CreateInputPaintPlan(payload) {
-    // let initialValue = 0;
-    // const total = payload.data.products.reduce(
-    //   (accumulator, currentValue) =>
-    //     accumulator + Number(currentValue.quantity),
-    //   initialValue
-    // );
-    const saleCard = await SaleCardModel.findById(payload.data.items.card._id);
+    const saleCard = await SaleCardModel.findById(payload.data.items._id);
     const NewData = saleCard;
     const proccess_status = {
       department: payload.user.department,
@@ -69,7 +60,7 @@ class DepPaintService {
     NewData.process_status.push(proccess_status);
     NewData.status = "To'quvga yuborildi";
     await SaleCardModel.findByIdAndUpdate(
-      payload.data.items.card._id,
+      payload.data.items._id,
       NewData,
       {
         new: true,
@@ -78,20 +69,19 @@ class DepPaintService {
 
     const info = {
       author: payload.user.id,
-      customer_name: payload.data.items.card.customer_name,
-      order_number: payload.data.items.card.order_number,
-      artikul: payload.data.items.card.artikul,
-      weaving_quantity: payload.data.provide.weaving_quantity, // total
+      customer_name: payload.data.items.customer_name,
+      order_number: payload.data.items.order_number,
+      artikul: payload.data.items.artikul,
+      weaving_quantity: payload.data.provide.weaving_quantity, // total weaving
       weaving_products: payload.data.provide.weaving, // weaving-product
-      delivery_time_sale: payload.data.items.card.delivery_time,
+      sale_products: payload.data.items.sale_products, // sale-product
+      delivery_time_sale: payload.data.items.delivery_time,
       delivery_time_weaving: payload.data.provide.delivery_time_weaving,
-      sale_quantity: payload.data.items.card.order_quantity,
+      sale_quantity: payload.data.items.order_quantity,// total sale
     };
 
     const res = await InputPaintPlanModel.create(info);
-    if (res) {
-      this.CreateInputPaintPlanProducts(res, payload);
-    }
+
   }
   async CreateProvide(payload) {
     const newData = {
@@ -107,23 +97,7 @@ class DepPaintService {
     };
     await ProvideModel.create(newData);
   }
-  async CreateInputPaintPlanProducts(res, payload) {
-    payload.data.items.products.forEach((item) => {
-      let products = {
-        input_plan_id: res._id,
-        author: payload.user.id,
-        id: item.id,
-        product_name: item.product_name,
-        product_type: item.product_type,
-        color: item.color,
-        width: item.width,
-        grammage: item.grammage,
-        quantity: item.quantity,
-        unit: item.unit,
-      };
-      InputPaintPlanProductsModel.create(products);
-    });
-  }
+
   async CreateDayReport(payload) {
     try {
       const author = payload.user.id;
@@ -233,16 +207,10 @@ class DepPaintService {
   async GetOneFromSale(data) {
     if (data.report) {
       const card = await InputPaintPlanModel.findById(data.id);
-      const products = await InputPaintPlanProductsModel.find({
-        input_plan_id: data.id,
-      });
-
-      return { card, products };
+      return card
     } else {
       const card = await SaleCardModel.findById(data.id);
-      const products = await SaleCardProductsModel.find({ sale_id: data.id });
-
-      return { card, products };
+      return card
     }
   }
 

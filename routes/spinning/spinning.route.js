@@ -6,17 +6,12 @@ const DepSpinningController = require("../../controllers/spinning/spinning.contr
 const router = express.Router();
 router.get("/spinning_model", DepSpinningController.getModel);
 router.post("/spinning_all", authMiddleware, DepSpinningController.getAll);
-router.post("/spinning_create", authMiddleware, DepSpinningController.create);
 router.delete(
   "/spinning_delete/:id",
   authMiddleware,
   DepSpinningController.delete
 );
-router.post(
-  "/cancel_reason",
-  authMiddleware,
-  DepSpinningController.cencelReason
-);
+
 router.put(
   "/spinning_edit/:id",
   authMiddleware,
@@ -38,10 +33,6 @@ router.post(
   authMiddleware,
   DepSpinningController.addDayReportInProcess
 );
-// router.post(
-//   "/spinning_get_report",
-//   authMiddleware,
-//   DepSpinningController.getDayReportFromWeaving
-// );
+
 
 module.exports = router;

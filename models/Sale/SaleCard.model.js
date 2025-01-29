@@ -8,6 +8,21 @@ const SaleCardSchema = new Schema(
     order_quantity: { type: Number, required: true },
     artikul: { type: String, required: true },
     delivery_time: { type: Date, default: Date.now(), required: true },
+    sale_products: [
+      {
+        id: { type: String, required: true },
+        material_name: { type: String, required: true },
+        material_type: { type: String, required: true },
+        color: { type: String, required: true },
+        width: { type: Number, required: true },
+        color: { type: String, required: true },
+        grammage: { type: Number, required: true },
+        order_quantity: { type: Number, required: true },
+        unit: { type: String, required: true },
+        state: { type: Boolean, required: true, default: true },
+        status: { type: String, required: true, default: "Sotuv" },
+      }
+    ],
     status: { type: String, default: "Tasdiqlanmagan" },
     process_status: { type: Array },
     state: { type: Boolean, default: true },
