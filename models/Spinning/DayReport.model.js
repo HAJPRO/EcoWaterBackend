@@ -1,11 +1,11 @@
 const { Schema, model } = require("mongoose");
 
-const DayReportPaintPlanSchema = new Schema(
+const DayReportWeavingPlanSchema = new Schema(
   {
     author: { type: Schema.ObjectId, ref: "User", required: true },
     input_plan_id: {
       type: Schema.ObjectId,
-      ref: "InputweavingPlan",
+      ref: "InputPaintPlan",
       required: true,
     },
     order_number: { type: String, required: true },
@@ -13,10 +13,10 @@ const DayReportPaintPlanSchema = new Schema(
     material_type: { type: String, required: true },
     unit: { type: String, required: true },
     quantity: { type: Number, required: true },
-    status: { type: String, default: "To'quvga yuborildi", required: true },
+    status: { type: String, default: "Bo'yoqqa yuborildi", required: true },
     state: { type: Boolean, default: false, required: true },
   },
   { timestamps: true }
 );
 
-module.exports = model("DayReportPaintPlan", DayReportPaintPlanSchema);
+module.exports = model("DayReportWeavingPlan", DayReportWeavingPlanSchema);

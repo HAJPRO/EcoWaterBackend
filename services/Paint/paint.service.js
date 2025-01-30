@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const SaleCardModel = require("../../models/Sale/SaleCard.model.js");
 const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
 const InputPaintPlanModel = require("../../models/Paint/plan/InputPaintPlan.model.js");
-const InputPaintPlanProductsModel = require("../../models/Paint/plan/InputPaintPlanProducts.model.js");
 const ProvideModel = require("../../models/Provide/provide.model.js");
 const DayReportPaintPlan = require("../../models/Paint/plan/DayReport.model.js");
 
@@ -59,13 +58,9 @@ class DepPaintService {
     };
     NewData.process_status.push(proccess_status);
     NewData.status = "To'quvga yuborildi";
-    await SaleCardModel.findByIdAndUpdate(
-      payload.data.items._id,
-      NewData,
-      {
-        new: true,
-      }
-    );
+    await SaleCardModel.findByIdAndUpdate(payload.data.items._id, NewData, {
+      new: true,
+    });
 
     const info = {
       author: payload.user.id,
@@ -77,11 +72,10 @@ class DepPaintService {
       sale_products: payload.data.items.sale_products, // sale-product
       delivery_time_sale: payload.data.items.delivery_time,
       delivery_time_weaving: payload.data.provide.delivery_time_weaving,
-      sale_quantity: payload.data.items.order_quantity,// total sale
+      sale_quantity: payload.data.items.order_quantity, // total sale
     };
 
     const res = await InputPaintPlanModel.create(info);
-
   }
   async CreateProvide(payload) {
     const newData = {
@@ -202,15 +196,6 @@ class DepPaintService {
       return allProvide;
     } catch (error) {
       return error.message;
-    }
-  }
-  async GetOneFromSale(data) {
-    if (data.report) {
-      const card = await InputPaintPlanModel.findById(data.id);
-      return card
-    } else {
-      const card = await SaleCardModel.findById(data.id);
-      return card
     }
   }
 

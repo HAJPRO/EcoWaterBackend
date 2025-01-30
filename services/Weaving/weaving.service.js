@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 const SaleDepWeavingCardModel = require("../../models/saleDepWeavingCard.model");
-const SaleDepProvideCardModel = require("../../models/saleDepProvideCard.model");
 const InputPaintPlan = require("../../models/Paint/plan/InputPaintPlan.model");
-const InputPaintPlanProducts = require("../../models/Paint/plan/InputPaintPlanProducts.model");
 const InputWeavingPlan = require("../../models/Weaving/InputWeavingPlan.model");
-const InputWeavingPlanProducts = require("../../models/Weaving/InputWeavingPlanProducts.model");
 const ProvideModel = require("../../models/Provide/provide.model");
+const DayReportWeavingPlan = require("../../models/Weaving/DayReport.model");
+
 // const fileService = require("./file.service");
 class DepWeavingService {
   async getModel() {
@@ -135,15 +134,14 @@ class DepWeavingService {
       artikul: payload.data.card.artikul,
       spinning_quantity: total_spinning,
       weaving_quantity: payload.data.card.weaving_quantity,
+      spinning_products: payload.data.spinning,
       paint_products: payload.data.card.weaving_products,
       delivery_time_paint: payload.data.card.delivery_time_weaving,
       delivery_time_spinning: payload.data.spinning[0].delivery_time_spinning,
     };
 
     const res = await InputWeavingPlan.create(info);
-    if (res) {
-      await this.CreateInputWeavingPlanProducts(res, payload);
-    }
+    console.log(res);
   }
   async CreateProvide(payload) {
     payload.data.products.forEach((item) => {
@@ -164,19 +162,7 @@ class DepWeavingService {
       ProvideModel.create(product);
     });
   }
-  async CreateInputWeavingPlanProducts(res, payload) {
-    payload.data.spinning.forEach((item) => {
-      let products = {
-        input_plan_id: res._id,
-        author: payload.user.id,
-        id: item.id,
-        yarn_name: item.yarn_name,
-        yarn_type: item.yarn_type,
-        yarn_quantity: item.yarn_quantity,
-      };
-      InputWeavingPlanProducts.create(products);
-    });
-  }
+
   async delete(id) {
     const data = await SaleDepWeavingCardModel.findByIdAndDelete(id);
     return data;
@@ -196,22 +182,42 @@ class DepWeavingService {
     );
     return updatedData;
   }
+  async CreateDayReport(payload) {
+    try {
+      const author = payload.user.id;
+      const data = payload.data;
+      const res = await DayReportWeavingPlan.create({ ...data, author });
+      return { msg: "Muvaffaqiyatli qo'shildi!" };
+    } catch (error) {
+      return error.message;
+    }
+  }
+  async GetDayReport(payload) {
+    try {
+      const author = new mongoose.Types.ObjectId(payload.user.id);
+      const order_number = payload.data.order_number;
 
+      const res = await DayReportWeavingPlan.aggregate([
+        {
+          $match: {
+            $and: [{ order_number: order_number }, { author: author }],
+          },
+        },
+      ]);
+      return { status: 200, res };
+    } catch (error) {
+      return error.message;
+    }
+  }
   async GetOneFromPaint(data) {
     // let ID = new mongoose.Types.ObjectId(id);
     try {
       if (data.report === true) {
-        const products = await InputWeavingPlanProducts.find({
-          input_plan_id: data.id,
-        });
         const card = await InputWeavingPlan.findById(data.id);
-        return { card, products };
+        return card;
       } else {
-        const products = await InputPaintPlanProducts.find({
-          input_plan_id: data.id,
-        });
         const card = await InputPaintPlan.findById(data.id);
-        return { card, products };
+        return card;
       }
     } catch (error) {
       return error.message;

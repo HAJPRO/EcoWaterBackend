@@ -11,59 +11,56 @@ class DepSpinningController {
 
   async getAll(req, res, next) {
     try {
-      const data = await DepSpinningService.getAll({ status: req.body, user: req.user });
+      const data = await DepSpinningService.getAll({
+        status: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-
-
-
-  async delete(req, res, next) {
+  async AcceptAndCreate(req, res, next) {
     try {
-      const data = await DepSpinningService.delete(req.params.id);
+      const data = await DepSpinningService.AcceptAndCreate({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-
-  async edit(req, res, next) {
+  async CreateDayReport(req, res, next) {
     try {
-      const { body, params } = req;
-      const data = await DepSpinningService.edit(body, params.id);
+      const data = await DepSpinningService.CreateDayReport({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-
-  async getOne(req, res, next) {
+  async GetDayReport(req, res, next) {
     try {
-      const data = await DepSpinningService.getOne(req.body);
+      const data = await DepSpinningService.GetDayReport({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-  async getOneFromInProcess(req, res, next) {
+  async GetOneFromWeaving(req, res, next) {
     try {
-      const data = await DepSpinningService.getOneFromInProcess(req.body);
+      const data = await DepSpinningService.GetOneFromWeaving(req.body);
       res.status(200).json(data);
     } catch (error) {
       next(error);
     }
   }
-  async addDayReportInProcess(req, res, next) {
-    try {
-      const data = await DepSpinningService.addDayReportInProcess(req.body);
-      res.status(200).json(data);
-    } catch (error) {
-      next(error);
-    }
-  }
-
 }
 
 module.exports = new DepSpinningController();

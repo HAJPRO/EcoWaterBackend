@@ -20,7 +20,7 @@ const InputPaintPlanSchema = new Schema(
         unit: { type: String, required: true },
         state: { type: Boolean, required: true, default: true },
         status: { type: String, required: true, default: "Bo'yoq" },
-      }
+      },
     ],
     weaving_products: [
       {
@@ -33,11 +33,11 @@ const InputPaintPlanSchema = new Schema(
         // unit: { type: String, required: true },
         state: { type: Boolean, required: true, default: true },
         status: { type: String, required: true, default: "Bo'yoq" },
-      }
+      },
     ],
     delivery_time_weaving: { type: Date, required: true },
     delivery_time_sale: { type: Date, required: true },
-    status: { type: String, default: "Jarayonda", },
+    status: { type: String, default: "Jarayonda" },
     process_status: { type: Array },
     state: { type: Boolean, default: true },
     sale_id: {

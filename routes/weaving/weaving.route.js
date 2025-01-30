@@ -11,6 +11,21 @@ router.post(
   authMiddleware,
   DepWeavingController.AcceptAndCreate
 );
+router.post(
+  "/create_day_report",
+  authMiddleware,
+  DepWeavingController.CreateDayReport
+);
+router.post(
+  "/get_day_report",
+  authMiddleware,
+  DepWeavingController.GetDayReport
+);
+router.post(
+  "/get_one_from_paint",
+  authMiddleware,
+  DepWeavingController.GetOneFromPaint
+);
 router.delete(
   "/weaving_delete/:id",
   authMiddleware,
@@ -18,10 +33,5 @@ router.delete(
 );
 
 router.put("/weaving_edit/:id", authMiddleware, DepWeavingController.edit);
-router.post(
-  "/get_one_from_paint",
-  authMiddleware,
-  DepWeavingController.GetOneFromPaint
-);
 
 module.exports = router;
