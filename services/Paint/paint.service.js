@@ -38,7 +38,6 @@ class DepPaintService {
   }
   async AcceptAndCreate(payload) {
     try {
-      console.log(payload);
       this.CreateInputPaintPlan(payload);
       this.CreateProvide(payload);
       return { status: 200, msg: "Muvaffaqiyatli qabul qilindi!" };
@@ -81,14 +80,11 @@ class DepPaintService {
     const newData = {
       author: payload.user.id,
       department: payload.user.department,
-      delivery_product_box: {
-        pus: payload.data.provide.pus,
-        fike: payload.data.provide.fike,
-        colors: payload.data.provide.colors,
-        delivery_time_provide: payload.data.provide.delivery_time_provide,
-      },
-      delivery_time_provide: payload.data.provide.delivery_time_provide,
+      delivery_product_box: payload.data.provide.products,
+      delivery_time_provide:
+        payload.data.provide.products[0].delivery_time_provide,
     };
+
     await ProvideModel.create(newData);
   }
 
@@ -198,7 +194,20 @@ class DepPaintService {
       return error.message;
     }
   }
-
+  async GetOneFromSale(data) {
+    // let ID = new mongoose.Types.ObjectId(id);
+    try {
+      if (data.report === true) {
+        const card = await InputPaintPlanModel.findById(data.id);
+        return card;
+      } else {
+        const card = await SaleCardModel.findById(data.id);
+        return card;
+      }
+    } catch (error) {
+      return error.message;
+    }
+  }
   async delete(id) {
     const data = await SaleDepPaintCardModel.findByIdAndDelete(id);
     return data;

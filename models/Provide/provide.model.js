@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose");
 const ProvideSchema = new Schema(
   {
     department: { type: String },
-    delivery_product_box: { type: Object, required: true },
+    delivery_product_box: { type: Array, required: true, default: [] },
     author: { type: Schema.ObjectId, ref: "User" },
     status: { type: String, default: "Tasdiqlanmagan" },
     proccess_status: { type: Array },

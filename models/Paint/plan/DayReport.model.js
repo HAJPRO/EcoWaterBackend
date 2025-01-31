@@ -13,7 +13,7 @@ const DayReportPaintPlanSchema = new Schema(
     material_type: { type: String, required: true },
     unit: { type: String, required: true },
     quantity: { type: Number, required: true },
-    status: { type: String, default: "To'quvga yuborildi", required: true },
+    status: { type: String, default: "Sotuvga yuborildi", required: true },
     state: { type: Boolean, default: false, required: true },
   },
   { timestamps: true }

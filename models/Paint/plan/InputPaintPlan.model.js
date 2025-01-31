@@ -19,7 +19,7 @@ const InputPaintPlanSchema = new Schema(
         order_quantity: { type: Number, required: true },
         unit: { type: String, required: true },
         state: { type: Boolean, required: true, default: true },
-        status: { type: String, required: true, default: "Bo'yoq" },
+        status: { type: String, required: true, default: "Bo'yoqa yuborildi" },
       },
     ],
     weaving_products: [
@@ -32,7 +32,7 @@ const InputPaintPlanSchema = new Schema(
         order_quantity: { type: Number, required: true },
         // unit: { type: String, required: true },
         state: { type: Boolean, required: true, default: true },
-        status: { type: String, required: true, default: "Bo'yoq" },
+        status: { type: String, required: true, default: "To'quvga yuborildi" },
       },
     ],
     delivery_time_weaving: { type: Date, required: true },

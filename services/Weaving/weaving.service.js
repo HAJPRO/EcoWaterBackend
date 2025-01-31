@@ -4,6 +4,7 @@ const InputPaintPlan = require("../../models/Paint/plan/InputPaintPlan.model");
 const InputWeavingPlan = require("../../models/Weaving/InputWeavingPlan.model");
 const ProvideModel = require("../../models/Provide/provide.model");
 const DayReportWeavingPlan = require("../../models/Weaving/DayReport.model");
+const SaleCardModel = require("../../models/Sale/SaleCard.model");
 
 // const fileService = require("./file.service");
 class DepWeavingService {
@@ -63,7 +64,6 @@ class DepWeavingService {
   async getAllInProcess(id) {
     try {
       const allInProcess = await InputWeavingPlan.find({
-        status: "Jarayonda",
         author: id,
       });
 
@@ -107,12 +107,28 @@ class DepWeavingService {
   }
   async CreateInputWeavingPlan(payload) {
     const initialValue = 0;
-    const total_spinning = payload.data.spinning.reduce(
+    const total_spinning = payload.data.provide.spinning.reduce(
       (accumulator, currentValue) =>
         accumulator + Number(currentValue.yarn_quantity),
       initialValue
     );
+    const SaleCard = await SaleCardModel.findOne({
+      order_number: payload.data.card.order_number,
+    });
 
+    const newCard = SaleCard;
+    const proccess_status_sale = {
+      department: payload.user.department,
+      author: payload.user.username,
+      is_confirm: { status: true, reason: "" },
+      status: "Yigiruvga yuborildi",
+      sent_time: new Date(),
+    };
+    newCard.process_status.push(proccess_status_sale);
+    newCard.status = "Yigiruvga yuborildi";
+    await SaleCardModel.findByIdAndUpdate(newCard._id, newCard, {
+      new: true,
+    });
     const InputPaint = await InputPaintPlan.findById(payload.data.card._id);
     const NewData = InputPaint;
     const proccess_status = {
@@ -134,33 +150,25 @@ class DepWeavingService {
       artikul: payload.data.card.artikul,
       spinning_quantity: total_spinning,
       weaving_quantity: payload.data.card.weaving_quantity,
-      spinning_products: payload.data.spinning,
+      spinning_products: payload.data.provide.spinning,
       paint_products: payload.data.card.weaving_products,
       delivery_time_paint: payload.data.card.delivery_time_weaving,
-      delivery_time_spinning: payload.data.spinning[0].delivery_time_spinning,
+      delivery_time_spinning:
+        payload.data.provide.spinning[0].delivery_time_spinning,
     };
 
     const res = await InputWeavingPlan.create(info);
-    console.log(res);
   }
   async CreateProvide(payload) {
-    payload.data.products.forEach((item) => {
-      let product = {
-        author: payload.user.id,
-        department: payload.user.department,
-        delivery_product_box: {
-          likra_type: item.likra_type,
-          likra_quantity: item.likra_quantity,
-          melaks_type: item.melaks_type,
-          melaks_quantity: item.melaks_quantity,
-          polister_type: item.polister_type,
-          polister_quantity: item.polister_quantity,
-        },
+    const product = {
+      author: payload.user.id,
+      department: payload.user.department,
+      delivery_product_box: payload.data.provide.products,
 
-        delivery_time_provide: item.delivery_time_provide,
-      };
-      ProvideModel.create(product);
-    });
+      delivery_time_provide:
+        payload.data.provide.products[0].delivery_time_provide,
+    };
+    await ProvideModel.create(product);
   }
 
   async delete(id) {
