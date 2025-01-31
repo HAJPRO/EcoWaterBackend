@@ -80,7 +80,11 @@ class DepPaintService {
   async CreateProvide(payload) {
     const newData = {
       author: payload.user.id,
+      username: payload.user.username,
       department: payload.user.department,
+      customer_name: payload.data.items.customer_name,
+      order_number: payload.data.items.order_number,
+      artikul: payload.data.items.artikul,
       delivery_product_box: payload.data.provide.products,
       delivery_time_provide:
         payload.data.provide.products[0].delivery_time_provide,
@@ -227,9 +231,10 @@ class DepPaintService {
       const allProvide = await ProvideModel.aggregate([
         {
           $match: {
-            $and: [{ author: ID }, { department: "Bo'yoq" }],
+            $and: [{ author: ID }],
           },
         },
+
       ]);
 
       return allProvide;

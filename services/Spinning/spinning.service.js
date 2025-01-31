@@ -3,7 +3,7 @@ const InputWeavingPlanModel = require("../../models/Weaving/InputWeavingPlan.mod
 const InputSpinningPlanModel = require("../../models/Spinning/InputSpinningPlan.model");
 const DayReportSpinningPlan = require("../../models/Spinning/DayReport.model");
 
-const provideModel = require("../../models/Provide/provide.model");
+const ProvideModel = require("../../models/Provide/provide.model");
 const SaleCardModel = require("../../models/Sale/SaleCard.model");
 
 // const fileService = require("./file.service");
@@ -105,7 +105,18 @@ class DepSpinningService {
   }
 
   async AllSentToProvide(data) {
+    let ID = new mongoose.Types.ObjectId(data.id);
     try {
+      const allProvide = await ProvideModel.aggregate([
+        {
+          $match: {
+            $and: [{ author: ID }],
+          },
+        },
+
+      ]);
+
+      return allProvide;
     } catch (error) {
       return error.message;
     }
@@ -173,6 +184,10 @@ class DepSpinningService {
     const newData = {
       author: payload.user.id,
       department: payload.user.department,
+      username: payload.user.username,
+      customer_name: payload.data.items.customer_name,
+      order_number: payload.data.items.order_number,
+      artikul: payload.data.items.artikul,
       delivery_product_box: payload.data.provide,
       delivery_time_provide: payload.data.provide[0].delivery_time_provide,
     };

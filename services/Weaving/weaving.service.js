@@ -86,14 +86,17 @@ class DepWeavingService {
     }
   }
   async AllSentToProvide(data) {
+    let ID = new mongoose.Types.ObjectId(data.id);
     try {
       const allProvide = await ProvideModel.aggregate([
         {
           $match: {
-            $and: [{ author: data.user_id }, { department: "To'quv" }],
+            $and: [{ author: ID }],
           },
         },
+
       ]);
+
       return allProvide;
     } catch (error) {
       return error.message;
@@ -165,7 +168,11 @@ class DepWeavingService {
   async CreateProvide(payload) {
     const product = {
       author: payload.user.id,
+      username: payload.user.username,
       department: payload.user.department,
+      customer_name: payload.data.card.customer_name,
+      order_number: payload.data.card.order_number,
+      artikul: payload.data.card.artikul,
       delivery_product_box: payload.data.provide.products,
 
       delivery_time_provide:
