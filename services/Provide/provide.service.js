@@ -4,7 +4,6 @@ const userModel = require("../../models/user.model");
 // const fileService = require("./file.service");
 
 class DepProvideService {
-
   async getAllLength() {
     // const process_length = await this.getAllInProcess().then((data) => {
     //   if (data) {
@@ -48,12 +47,10 @@ class DepProvideService {
 
   async getAllPaint() {
     try {
-
       const allPaint = await ProvideModel.aggregate([
         {
           $match: {
             $or: [{ department: "Super Admin" }, { department: "Bo'yoq" }],
-
           },
         },
       ]);
@@ -84,7 +81,6 @@ class DepProvideService {
         {
           $match: {
             $or: [{ department: "Super Admin" }, { department: "Yigiruv" }],
-
           },
         },
       ]);
@@ -114,9 +110,20 @@ class DepProvideService {
   //   return updatedData;
   // }
   async getOne(payload) {
-    const data = await ProvideModel.findOne({ _id: payload.id });
+    const departmentName =
+      payload.data.department === 3
+        ? "To'quv"
+        : payload.data.department === 2
+        ? "Bo'yoq"
+        : payload.data.department === 4
+        ? "Yigiruv"
+        : "";
 
-    return { box: data.delivery_product_box };
+    const data = await ProvideModel.findOne({
+      _id: payload.data.id,
+      department: departmentName,
+    });
+    return data;
   }
   async cancelReason(data, author) {
     const id = data.card_id;
@@ -141,13 +148,23 @@ class DepProvideService {
     }
   }
 
-  async Confirm(id) {
+  async Confirm(payload) {
+    const proccess_status = {
+      author: payload.user.username,
+      department: payload.user.department,
+      status: payload.data.delivered
+        ? "Yetkazib berildi"
+        : "Taminot tasdiqladi",
+      date: new Date(),
+    };
     const data = await ProvideModel.findByIdAndUpdate(
-      id,
-      { status: "Jarayonda" },
+      payload.data.card_id,
+      {
+        status: payload.data.delivered ? `Yetkazib berildi` : `Jarayonda`,
+        proccess_status: proccess_status,
+      },
       { new: true }
     );
-
     return data;
   }
   async Delivered(data, author) {

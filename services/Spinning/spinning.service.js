@@ -96,7 +96,6 @@ class DepSpinningService {
     try {
       const data = await InputWeavingPlanModel.find({
         weaving_status: "Yigiruvga yuborildi",
-        author: id,
       });
       return data;
     } catch (error) {
@@ -113,7 +112,6 @@ class DepSpinningService {
             $and: [{ author: ID }],
           },
         },
-
       ]);
 
       return allProvide;
@@ -192,7 +190,7 @@ class DepSpinningService {
       delivery_time_provide: payload.data.provide[0].delivery_time_provide,
     };
 
-    await provideModel.create(newData);
+    await ProvideModel.create(newData);
   }
 
   async CreateDayReport(payload) {

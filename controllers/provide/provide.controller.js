@@ -20,8 +20,6 @@ class DepProvideController {
     }
   }
   async Delivered(req, res, next) {
-    console.log(req.body);
-
     try {
       const data = await DepProvideService.Delivered(req.body, req.user.id);
       res.status(200).json({ msg: "Muvaffaqiyatli tasdiqlandi !", data });
@@ -91,7 +89,10 @@ class DepProvideController {
 
   async getOne(req, res, next) {
     try {
-      const data = await DepProvideService.getOne(req.body);
+      const data = await DepProvideService.getOne({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -99,9 +100,11 @@ class DepProvideController {
   }
   async Confirm(req, res, next) {
     try {
-      const card_id = req.body.id;
-      const data = await DepProvideService.Confirm(card_id);
-      res.status(200).json({ msg: "Muvaffaqiyatli tasdiqlandi", data });
+      const data = await DepProvideService.Confirm({
+        data: req.body,
+        user: req.user,
+      });
+      res.status(200).json({ msg: "Muvaffaqiyatli tasdiqlandi" });
     } catch (error) {
       next(error);
     }
