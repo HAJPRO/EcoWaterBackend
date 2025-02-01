@@ -4,6 +4,7 @@ const SaleDepPaintCardModel = require("../../models/saleDepPaintCard.model");
 const InputPaintPlanModel = require("../../models/Paint/plan/InputPaintPlan.model.js");
 const ProvideModel = require("../../models/Provide/provide.model.js");
 const DayReportPaintPlan = require("../../models/Paint/plan/DayReport.model.js");
+const DayReportWeavingPlan = require("../../models/Weaving/DayReport.model.js");
 
 // const fileService = require("./file.service");
 
@@ -52,7 +53,7 @@ class DepPaintService {
       department: payload.user.department,
       author: payload.user.username,
       is_confirm: { status: true, reason: "" },
-      status: "Toquvga yuborildi",
+      status: "To'quvga yuborildi",
       sent_time: new Date(),
     };
     NewData.process_status.push(proccess_status);
@@ -103,18 +104,60 @@ class DepPaintService {
     try {
       const author = new mongoose.Types.ObjectId(payload.user.id);
       const order_number = payload.data.order_number;
-
-      const res = await DayReportPaintPlan.aggregate([
+      const weaving = await DayReportWeavingPlan.find({
+        order_number: order_number,
+      });
+      const paint = await DayReportPaintPlan.aggregate([
         {
           $match: {
             $and: [{ order_number: order_number }, { author: author }],
           },
         },
       ]);
-
-      return { status: 200, res };
+      this.FinishDayReport({ data: paint, user: payload.user });
+      return { status: 200, weaving, paint };
     } catch (error) {
       return error.message;
+    }
+  }
+  async FinishDayReport(payload) {
+    if (payload.data.length > 0) {
+      const id = payload.data[0].input_plan_id;
+      const PaintCard = await InputPaintPlanModel.findById(id);
+      const SaleCard = await SaleCardModel.findOne({
+        order_number: payload.data[0].order_number,
+      });
+
+      const initialValuePaint = 0;
+      const DonePaint = payload.data.reduce(
+        (a, b) => a + Number(b.quantity),
+        initialValuePaint
+      );
+
+      if (DonePaint === PaintCard.sale_quantity) {
+        const NewSale = SaleCard;
+        const NewPaint = PaintCard;
+        const proccess_status = {
+          department: payload.user.department,
+          author: payload.user.username,
+          is_confirm: { status: true, reason: "" },
+          status: "Bo'yoq yakunladi",
+          sent_time: new Date(),
+        };
+        NewPaint.process_status.push(proccess_status);
+        NewPaint.status = "Bo'yoq yakunladi";
+        NewSale.process_status.push(proccess_status);
+        NewSale.status = "Bo'yoq yakunladi";
+
+        await SaleCardModel.findByIdAndUpdate(SaleCard._id, NewSale, {
+          new: true,
+        });
+        await InputPaintPlanModel.findByIdAndUpdate(PaintCard._id, NewPaint, {
+          new: true,
+        });
+      }
+    } else {
+      return { status: 400, msg: "Bo'yoqda xatolik yuz berdi!" };
     }
   }
   async getAllLength(data) {

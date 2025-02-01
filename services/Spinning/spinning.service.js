@@ -95,7 +95,7 @@ class DepSpinningService {
   async AllSentFromWeaving(id) {
     try {
       const data = await InputWeavingPlanModel.find({
-        status: "Jarayonda",
+        weaving_status: "Yigiruvga yuborildi",
         author: id,
       });
       return data;
@@ -148,7 +148,7 @@ class DepSpinningService {
       sent_time: new Date(),
     };
     NewWeaving.process_status.push(proccess_status_weaving);
-    NewWeaving.status = "Yigiruvda jarayonda";
+    NewWeaving.weaving_status = "Yigiruv tasdiqladi";
     await InputWeavingPlanModel.findByIdAndUpdate(
       payload.data.items._id,
       NewWeaving,
@@ -209,50 +209,52 @@ class DepSpinningService {
     }
   }
   async FinishDayReport(payload) {
-    const id = payload.data[0].input_plan_id;
-    const SpinningCard = await InputSpinningPlanModel.findById(id);
-    const SaleCard = await SaleCardModel.findOne({
-      order_number: payload.data[0].order_number,
-    });
-    const WeavingCard = await InputWeavingPlanModel.findOne({
-      order_number: payload.data[0].order_number,
-    });
+    if (payload.data.length > 0) {
+      const id = payload.data[0].input_plan_id;
+      const SpinningCard = await InputSpinningPlanModel.findById(id);
+      const SaleCard = await SaleCardModel.findOne({
+        order_number: payload.data[0].order_number,
+      });
+      const WeavingCard = await InputWeavingPlanModel.findOne({
+        order_number: payload.data[0].order_number,
+      });
 
-    const initialValueSpinning = 0;
-    const DoneSpinning = payload.data.reduce(
-      (a, b) => a + Number(b.quantity),
-      initialValueSpinning
-    );
-    if (DoneSpinning === SpinningCard.weaving_quantity) {
-      const NewSpinning = SpinningCard;
-      const NewSale = SaleCard;
-      const NewWeaving = WeavingCard;
-      const proccess_status = {
-        department: payload.user.department,
-        author: payload.user.username,
-        is_confirm: { status: true, reason: "" },
-        status: "Yigiruv yakunladi",
-        sent_time: new Date(),
-      };
-      NewSpinning.process_status.push(proccess_status);
-      NewSpinning.status = "Yigiruv yakunladi";
-      NewSale.process_status.push(proccess_status);
-      NewSale.status = "Yigiruv yakunladi";
-      NewWeaving.process_status.push(proccess_status);
-      NewWeaving.status = "Yigiruv yakunladi";
-      await InputSpinningPlanModel.findByIdAndUpdate(id, NewSpinning, {
-        new: true,
-      });
-      await SaleCardModel.findByIdAndUpdate(SaleCard._id, NewSale, {
-        new: true,
-      });
-      await InputWeavingPlanModel.findByIdAndUpdate(
-        WeavingCard._id,
-        NewWeaving,
-        {
-          new: true,
-        }
+      const initialValueSpinning = 0;
+      const DoneSpinning = payload.data.reduce(
+        (a, b) => a + Number(b.quantity),
+        initialValueSpinning
       );
+
+      if (DoneSpinning === SpinningCard.weaving_quantity) {
+        const NewSpinning = SpinningCard;
+        const NewSale = SaleCard;
+        const NewWeaving = WeavingCard;
+        const proccess_status = {
+          department: payload.user.department,
+          author: payload.user.username,
+          is_confirm: { status: true, reason: "" },
+          status: "Yigiruv yakunladi",
+          sent_time: new Date(),
+        };
+        NewSpinning.process_status.push(proccess_status);
+        NewSpinning.status = "Yigiruv yakunladi";
+        NewSale.process_status.push(proccess_status);
+        NewSale.status = "Yigiruv yakunladi";
+        NewWeaving.process_status.push(proccess_status);
+        await InputSpinningPlanModel.findByIdAndUpdate(id, NewSpinning, {
+          new: true,
+        });
+        await SaleCardModel.findByIdAndUpdate(SaleCard._id, NewSale, {
+          new: true,
+        });
+        await InputWeavingPlanModel.findByIdAndUpdate(
+          WeavingCard._id,
+          NewWeaving,
+          {
+            new: true,
+          }
+        );
+      }
     } else {
       return { status: 400, msg: "Yigiruvda xatolik yuz berdi!" };
     }

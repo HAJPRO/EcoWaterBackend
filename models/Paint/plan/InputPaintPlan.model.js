@@ -38,6 +38,7 @@ const InputPaintPlanSchema = new Schema(
     delivery_time_weaving: { type: Date, required: true },
     delivery_time_sale: { type: Date, required: true },
     status: { type: String, default: "Jarayonda" },
+    paint_status: { type: String, default: "To'quvga yuborildi" },
     process_status: { type: Array },
     state: { type: Boolean, default: true },
     sale_id: {

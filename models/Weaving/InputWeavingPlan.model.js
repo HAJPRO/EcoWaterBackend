@@ -17,7 +17,7 @@ const InputWeavingPlanSchema = new Schema(
         order_quantity: { type: Number, required: true },
         // unit: { type: String, required: true },
         state: { type: Boolean, required: true, default: true },
-        status: { type: String, required: true, default: "Bo'yoqqa yuborildi" },
+        status: { type: String, required: true, default: "Bo'yoqdan keldi" },
       },
     ],
     spinning_products: [
@@ -34,6 +34,7 @@ const InputWeavingPlanSchema = new Schema(
     delivery_time_spinning: { type: Date, required: true },
     delivery_time_paint: { type: Date, required: true },
     status: { type: String, default: "Jarayonda" },
+    weaving_status: { type: String, default: "Yigiruvga yuborildi" },
     process_status: { type: Array },
     state: { type: Boolean, default: true },
   },

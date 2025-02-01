@@ -14,7 +14,7 @@ class SaleController {
   }
   async AllOrderProccessById(req, res, next) {
     try {
-      const proccess = await SaleService.AllOrderProccessById(req.params.id);
+      const proccess = await SaleService.AllOrderProccessById(req.body);
       res.status(200).json(proccess);
     } catch (error) {
       next(error);
@@ -30,7 +30,10 @@ class SaleController {
   }
   async getAll(req, res, next) {
     try {
-      const all = await SaleService.getAll(req.body, req.user);
+      const all = await SaleService.getAll({
+        status: req.body,
+        user: req.user,
+      });
       res.status(200).json(all);
     } catch (error) {
       next(error);
@@ -112,6 +115,17 @@ class SaleController {
       // const buffer = XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
       XLSX.writeFile(wb, down);
       res.attachment(down);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async FinishParty(req, res, next) {
+    try {
+      const data = await SaleService.FinishParty({
+        data: req.body,
+        user: req.user,
+      });
       res.status(200).json(data);
     } catch (error) {
       next(error);

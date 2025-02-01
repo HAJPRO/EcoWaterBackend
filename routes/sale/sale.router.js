@@ -6,7 +6,7 @@ const SaleCardController = require("../../controllers/Sale/salecard.controller.j
 const router = express.Router();
 
 router.get("/get_card_model", SaleCardController.GetCardModel);
-router.post("/legal_proccess/:id", SaleCardController.AllOrderProccessById);
+router.post("/get_proccess_status", SaleCardController.AllOrderProccessById);
 router.post("/all", authMiddleware, SaleCardController.getAll);
 router.post(
   "/legal_all_length",
@@ -25,5 +25,6 @@ router.put(
   SaleCardController.edit
 );
 router.post("/get_one", authMiddleware, SaleCardController.GetOne);
+router.post("/finish_party", authMiddleware, SaleCardController.FinishParty);
 
 module.exports = router;

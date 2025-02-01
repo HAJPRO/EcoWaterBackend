@@ -4,7 +4,10 @@ const InputPaintPlan = require("../../models/Paint/plan/InputPaintPlan.model");
 const InputWeavingPlan = require("../../models/Weaving/InputWeavingPlan.model");
 const ProvideModel = require("../../models/Provide/provide.model");
 const DayReportWeavingPlan = require("../../models/Weaving/DayReport.model");
+const DayReportSpinningPlan = require("../../models/Spinning/DayReport.model");
 const SaleCardModel = require("../../models/Sale/SaleCard.model");
+const InputWeavingPlanModel = require("../../models/Weaving/InputWeavingPlan.model");
+const InputPaintPlanModel = require("../../models/Paint/plan/InputPaintPlan.model");
 
 // const fileService = require("./file.service");
 class DepWeavingService {
@@ -75,7 +78,7 @@ class DepWeavingService {
   async AllSentFromPaint() {
     try {
       const all = await InputPaintPlan.find({
-        status: "Jarayonda",
+        paint_status: "To'quvga yuborildi",
       });
       return all;
     } catch (error) {
@@ -139,7 +142,7 @@ class DepWeavingService {
       sent_time: new Date(),
     };
     NewData.process_status.push(proccess_status);
-    NewData.status = "Yigiruvga yuborildi";
+    NewData.paint_status = "To'quv tasdiqladi";
     await InputPaintPlan.findByIdAndUpdate(payload.data.card._id, NewData, {
       new: true,
     });
@@ -204,17 +207,68 @@ class DepWeavingService {
     try {
       const author = new mongoose.Types.ObjectId(payload.user.id);
       const order_number = payload.data.order_number;
-
-      const res = await DayReportWeavingPlan.aggregate([
+      const spinning = await DayReportSpinningPlan.find({
+        order_number: order_number,
+      });
+      const weaving = await DayReportWeavingPlan.aggregate([
         {
           $match: {
             $and: [{ order_number: order_number }, { author: author }],
           },
         },
       ]);
-      return { status: 200, res };
+      this.FinishDayReport({ data: weaving, user: payload.user });
+      return { status: 200, weaving, spinning };
     } catch (error) {
       return error.message;
+    }
+  }
+  async FinishDayReport(payload) {
+    if (payload.data.length > 0) {
+      const id = payload.data[0].input_plan_id;
+      const WeavingCard = await InputWeavingPlanModel.findById(id);
+      const SaleCard = await SaleCardModel.findOne({
+        order_number: payload.data[0].order_number,
+      });
+      const PaintCard = await InputPaintPlanModel.findOne({
+        order_number: payload.data[0].order_number,
+      });
+
+      const initialValueWeaving = 0;
+      const DoneWeaving = payload.data.reduce(
+        (a, b) => a + Number(b.quantity),
+        initialValueWeaving
+      );
+
+      if (DoneWeaving === WeavingCard.weaving_quantity) {
+        const NewWeaving = WeavingCard;
+        const NewSale = SaleCard;
+        const NewPaint = PaintCard;
+        const proccess_status = {
+          department: payload.user.department,
+          author: payload.user.username,
+          is_confirm: { status: true, reason: "" },
+          status: "To'quv yakunladi",
+          sent_time: new Date(),
+        };
+        NewPaint.process_status.push(proccess_status);
+        // NewPaint.status = "Yigiruv yakunladi";
+        NewSale.process_status.push(proccess_status);
+        NewSale.status = "To'quv yakunladi";
+        NewWeaving.process_status.push(proccess_status);
+        NewWeaving.status = "To'quv yakunladi";
+        await InputWeavingPlanModel.findByIdAndUpdate(id, NewWeaving, {
+          new: true,
+        });
+        await SaleCardModel.findByIdAndUpdate(SaleCard._id, NewSale, {
+          new: true,
+        });
+        await InputPaintPlanModel.findByIdAndUpdate(PaintCard._id, NewPaint, {
+          new: true,
+        });
+      }
+    } else {
+      return { status: 400, msg: "To'quvda xatolik yuz berdi!" };
     }
   }
   async GetOneFromPaint(data) {
