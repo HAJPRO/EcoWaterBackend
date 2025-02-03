@@ -6,7 +6,8 @@ const {
   RequestPhoneNumber,
   RequestDepartment,
 } = require("../seam/helpers/start.js");
-const SeamUserModel = require("../../models/bots/seam/auth.model.js");
+const SeamService = require("./helpers/admin/seam.service.js")
+const SeamUserModel = require("../../models/bots/seam/seam_user.model.js");
 
 const { bot } = require("./bot.js");
 bot.on("message", async (msg) => {
@@ -26,12 +27,19 @@ bot.on("message", async (msg) => {
     CreateFullname({ msg, id: user._id });
   }
   if (user && user.action === "request_code") {
-    RequestCode({ msg, id: user._id });
+    RequestCode({ msg, user });
   }
   if (user && user.action === "request_phone_number") {
     RequestPhoneNumber({ msg, id: user._id });
   }
   if (user && user.action === "request_department") {
     RequestDepartment({ msg, id: user._id });
+  }
+
+  if (user && user.action === "menu") {
+    SeamService.AdminPanel({ msg, user });
+  }
+  if (user && user.action === "request_add_department") {
+    SeamService.AddDepartment({ msg, user });
   }
 });

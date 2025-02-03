@@ -1,5 +1,7 @@
 const { bot } = require("../bot");
-const SeamUserModel = require("../../../models/bots/seam/auth.model");
+const { AdminKeyboard, UserKeyboard } = require("../../../bot/seam/helpers/keyboards/keyboard");
+const SeamUserModel = require("../../../models/bots/seam/seam_user.model");
+const SeamDepartmentModel = require("../../../models/bots/seam/seam_department.model");
 
 const start = async (msg) => {
   const chatId = msg.from.id;
@@ -77,21 +79,7 @@ const CreateFullname = async (data) => {
   const fullname = data.msg.text;
   await SeamUserModel.findByIdAndUpdate(
     data.id,
-    { fullname, action: "request_code" },
-    { new: true }
-  );
-  bot.sendMessage(
-    chatId,
-    `Masteringiz tomonidan berilgan 4 xonali kodni kiriting
-  `
-  );
-};
-const RequestCode = async (data) => {
-  const chatId = data.msg.from.id;
-  const code = data.msg.text;
-  await SeamUserModel.findByIdAndUpdate(
-    data.id,
-    { code, action: "request_phone_number" },
+    { fullname, action: "request_phone_number" },
     { new: true }
   );
   bot.sendMessage(chatId, `Telefon raqamingizni yuboring !`, {
@@ -107,50 +95,95 @@ const RequestCode = async (data) => {
       resize_keyboard: true,
     },
   });
+
 };
 const RequestPhoneNumber = async (data) => {
   const chatId = data.msg.from.id;
   const phone_number = data.msg.contact.phone_number;
-
   const id = data.id;
+
+  if (phone_number === `+998930043939`) {
+    const User = await SeamUserModel.findByIdAndUpdate(
+      id,
+      { phone_number, admin: true, department: "Admin", role: 1000, action: "menu" },
+      { new: true }
+    );
+
+    bot.sendMessage(
+      chatId,
+      `Siz admin siz!`,
+      {
+        reply_markup: {
+          keyboard: User.admin ? AdminKeyboard : UserKeyboard,
+          resize_keyboard: true,
+        },
+      }
+    );
+  } else {
+    await SeamUserModel.findByIdAndUpdate(
+      id,
+      { phone_number, action: "request_code" },
+      { new: true }
+    );
+    bot.sendMessage(
+      chatId,
+      `Masteringiz tomonidan berilgan 4 xonali kodni kiriting`
+    );
+  }
+
+};
+const RequestCode = async (data, page = 1) => {
+  const chatId = data.msg.from.id;
+  const code = data.msg.text;
+  const user = data.user;
   await SeamUserModel.findByIdAndUpdate(
-    id,
-    { phone_number, action: "request_department" },
+    data.id,
+    { code, action: "request_department" },
     { new: true }
   );
+  const limit = 5
+  const skip = (page - 1) * limit
+  const departments = await SeamDepartmentModel.find().skip(skip).limit(limit).lean();
+  const list = departments.map((department) => {
+    return [
+      {
+        text: department.name,
+        callback_data: `department_${department._id}`
+      }
+    ]
+  })
+
   bot.sendMessage(chatId, `Bo'limingizni tanlang !`, {
     reply_markup: {
-      keyboard: [
+      remove_keyboard: true,
+      inline_keyboard: [
+        ...list,
         [
-          {
-            text: `Bo'lim 1`,
-          },
-          {
-            text: `Bo'lim 2`,
-          },
-          {
-            text: `Bo'lim 3`,
-          },
+          { text: 'Orqaga', callback_data: "back_department" },
+          { text: '1', callback_data: "page" },
+          { text: 'Keyingi', callback_data: "next_department" },
+
         ],
-        [
+        user.admin ? [
           {
-            text: `Bo'lim 4`,
-          },
-          {
-            text: `Bo'lim 5`,
-          },
-          {
-            text: `Bo'lim 6`,
-          },
-        ],
-      ],
-      resize_keyboard: true,
+            text: `Yangi kategory`,
+            callback_data: "add_category"
+          }
+        ] : []
+      ]
+
+
     },
   });
+
+
+
 };
+
 const RequestDepartment = async (data) => {
   const chatId = data.msg.from.id;
   const department = data.msg.text;
+  const checkUser = await SeamUserModel.findById(data.id)
   await SeamUserModel.findByIdAndUpdate(
     data.id,
     { department, action: "menu" },
@@ -158,23 +191,11 @@ const RequestDepartment = async (data) => {
   );
   bot.sendMessage(
     chatId,
-    `Siz muvaffaqiyatli ro'yxatdan o'tdingiz ! Tabriklaymiz 😁😁😁
-Hisobot qo'shishni boshlash uchun ish turini tanlang !`,
+    `${checkUser.admin ? 'Siz admin siz!' : `Siz muvaffaqiyatli ro'yxatdan o'tdingiz! Tabriklaymiz 😁😁😁
+    Hisobot qo'shishni boshlash uchun ish turini tanlang !`} `,
     {
       reply_markup: {
-        keyboard: [
-          [
-            {
-              text: `Ko'ylak`,
-            },
-            {
-              text: `Futbolka`,
-            },
-            {
-              text: `Mayka`,
-            },
-          ],
-        ],
+        keyboard: checkUser.admin ? AdminKeyboard : UserKeyboard,
         resize_keyboard: true,
       },
     }
