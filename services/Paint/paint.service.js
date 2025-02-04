@@ -165,36 +165,53 @@ class DepPaintService {
     }
   }
   async getAllLength(data) {
-    const user_id = data.user.id;
+    const user_id = new mongoose.Types.ObjectId(data.user.id);
     const department = data.user.department;
-    const process_length = await this.getAllInProcess(user_id).then(
-      (data) => data.length
-    );
-    const sale_length = await this.AllSentToPaint().then((data) => data.length);
-
+    const process_length = await this.getAllInProcess(user_id).then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
+    const sale_length = await this.AllSentToPaint().then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
     const provide_length = await this.AllSentToProvide({
       id: user_id,
       department,
-    }).then((data) => data.length);
+    }).then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
+
     return { process_length, sale_length, provide_length };
   }
-
   async getAll(data) {
     const is_status = data.status.status;
     const user_id = data.user.id;
     const department = data.user.department;
     try {
-      const all_length = await this.getAllLength(data);
       if (is_status === 1) {
+        const all_length = await this.getAllLength(data);
         const items = await this.getAllInProcess(user_id);
         return { items, all_length };
       }
       if (is_status === 2) {
+        const all_length = await this.getAllLength(data);
         const items = await this.AllSentToPaint();
         return { items, all_length };
       }
 
       if (is_status === 5) {
+        const all_length = await this.getAllLength(data);
         const items = await this.AllSentToProvide({ id: user_id, department });
         return { items, all_length };
       }
@@ -227,17 +244,18 @@ class DepPaintService {
   async AllSentToProvide(data) {
     let ID = new mongoose.Types.ObjectId(data.id);
     try {
-      // const allProvide = await ProvideModel.find();
-      const allProvide = await ProvideModel.aggregate([
+      const allPaint = await ProvideModel.aggregate([
         {
           $match: {
-            $and: [{ author: ID }],
+            $or: [
+              // { department: "Super Admin" },
+              { $and: [{ department: "Bo'yoq" }, { author: ID }] },
+            ],
           },
         },
-
       ]);
 
-      return allProvide;
+      return allPaint;
     } catch (error) {
       return error.message;
     }

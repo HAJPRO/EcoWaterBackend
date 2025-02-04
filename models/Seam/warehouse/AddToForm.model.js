@@ -11,6 +11,9 @@ const AddToFormSchema = new Schema(
       type: String,
       required: true,
     },
+    order_number: {
+      type: String,
+    },
     artikul: {
       type: String,
       required: true,
@@ -23,16 +26,15 @@ const AddToFormSchema = new Schema(
       type: String,
       required: true,
     },
-
+    material_type: {
+      type: String,
+      required: true,
+    },
     quantity: {
       type: Number,
       required: true,
     },
     unit: {
-      type: String,
-      required: true,
-    },
-    sort: {
       type: String,
       required: true,
     },

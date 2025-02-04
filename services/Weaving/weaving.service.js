@@ -29,16 +29,31 @@ class DepWeavingService {
   async getAllLength(data) {
     const user_id = new mongoose.Types.ObjectId(data.user.id);
     const department = data.user.department;
-    const process_length = await this.getAllInProcess(user_id).then(
-      (data) => data.length
-    );
-    const paint_length = await this.AllSentFromPaint().then(
-      (data) => data.length
-    );
+    const process_length = await this.getAllInProcess(user_id).then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
+    const paint_length = await this.AllSentFromPaint().then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
     const provide_length = await this.AllSentToProvide({
       id: user_id,
       department,
-    }).then((data) => data.length);
+    }).then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
+
     return { process_length, paint_length, provide_length };
   }
   async getAll(data) {
@@ -46,17 +61,19 @@ class DepWeavingService {
     const user_id = new mongoose.Types.ObjectId(data.user.id);
     const department = data.user.department;
     try {
-      const all_length = await this.getAllLength(data);
       if (is_status === 1) {
+        const all_length = await this.getAllLength(data);
         const items = await this.getAllInProcess(user_id);
         return { items, all_length };
       }
       if (is_status === 2) {
+        const all_length = await this.getAllLength(data);
         const items = await this.AllSentFromPaint();
         return { items, all_length };
       }
 
       if (is_status === 3) {
+        const all_length = await this.getAllLength(data);
         const items = await this.AllSentToProvide({ id: user_id, department });
         return { items, all_length };
       }
@@ -91,10 +108,12 @@ class DepWeavingService {
       const allProvide = await ProvideModel.aggregate([
         {
           $match: {
-            $and: [{ author: ID }],
+            $or: [
+              // { department: "Super Admin" },
+              { $and: [{ department: "To'quv" }, { author: ID }] },
+            ],
           },
         },
-
       ]);
 
       return allProvide;

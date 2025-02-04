@@ -15,7 +15,10 @@ app.use(fileUpload({}));
 app.use(cookie({}));
 app.use(errorMiddleware);
 // HR BOT
-require("./bot/bot.js");
+require("./bot/hr/bot.js");
+//
+// SEAM BOT
+require("./bot/seam/bot.js");
 //
 const PORT = process.env.PORT || 3000;
 // Routes

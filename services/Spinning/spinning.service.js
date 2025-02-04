@@ -109,7 +109,10 @@ class DepSpinningService {
       const allProvide = await ProvideModel.aggregate([
         {
           $match: {
-            $and: [{ author: ID }],
+            $or: [
+              // { department: "Super Admin" },
+              { $and: [{ department: "Yigiruv" }, { author: ID }] },
+            ],
           },
         },
       ]);

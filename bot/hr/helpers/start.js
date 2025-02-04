@@ -1,5 +1,5 @@
 const { bot } = require("../bot");
-const HRAppeals = require("../../models/HR/Appeals/appeal");
+const HRAppeals = require("../../../models/HR/Appeals/appeal");
 
 const start = async (msg) => {
   const chatId = msg.from.id;

@@ -90,25 +90,6 @@ class DepProvideService {
     }
   }
 
-  // async delete(id) {
-  //   const data = await SaleDepPaintCardModel.findByIdAndDelete(id);
-  //   return data;
-  // }
-
-  // async edit(data, id) {
-  //   if (!id) {
-  //     console.log("Id not found");
-  //   }
-
-  //   const updatedData = await SaleDepPaintCardModel.findByIdAndUpdate(
-  //     id,
-  //     data,
-  //     {
-  //       new: true,
-  //     }
-  //   );
-  //   return updatedData;
-  // }
   async getOne(payload) {
     const departmentName =
       payload.data.department === 3

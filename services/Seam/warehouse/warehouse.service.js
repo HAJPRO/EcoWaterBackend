@@ -9,7 +9,6 @@ const BarCodeModel = require("../../../models/Barcode/BarCode.model");
 const QRCodeModel = require("../../../models/Barcode/QRCode.model");
 const WarehouseRawMaterialForSeamModel = require("../../../models/Seam/warehouse/r-warehouse.model");
 const OutputModel = require("../../../models/Seam/warehouse/OutputSeamWarehouse.model");
-const InputModel = require("../../../models/Seam/warehouse/InputSeamWarehouse.model");
 
 const XLSX = require("xlsx");
 const path = require("path");
@@ -18,55 +17,56 @@ class DepSeamWarehouseService {
     const model = {
       party_number: "",
       customer_name: "",
+      order_number: "",
       material_name: "",
+      material_type: "",
       artikul: "",
       color: "",
       quantity: "",
       unit: "",
-      sort: "",
     };
     return model;
   }
-  async Create(data) {
-    const output = data.data.output;
-    const input = data.data.input;
-    const model = data.data.model;
-    const author = data.user.id;
-    if (output) {
-      const item = await WarehouseRawMaterialForSeamModel.findById(model.id);
-      const newData = item;
+  // async Create(data) {
+  //   const output = data.data.output;
+  //   const input = data.data.input;
+  //   const model = data.data.model;
+  //   const author = data.user.id;
+  //   if (output) {
+  //     const item = await WarehouseRawMaterialForSeamModel.findById(model.id);
+  //     const newData = item;
 
-      if (newData.quantity - model.quantity < 0 || model.quantity < 0) {
-        return { status: 404, msg: "Mahsulot yetarli emas" };
-      } else {
-        const OutputData = {
-          author,
-          warehouse_id: model.id,
-          to_where: model.to_where,
-          quantity: model.quantity,
-          unit: model.unit,
-          status: model.to_where + " " + "yuborildi",
-        };
-        const output_res = await OutputModel.create(OutputData);
-        if (output_res) {
-          newData.quantity = newData.quantity - model.quantity;
-          newData.output = output_res._id;
-          const update =
-            await WarehouseRawMaterialForSeamModel.findByIdAndUpdate(
-              model.id,
-              newData,
-              { new: true }
-            );
-          return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", update };
-        }
-      }
-    }
+  //     if (newData.quantity - model.quantity < 0 || model.quantity < 0) {
+  //       return { status: 404, msg: "Mahsulot yetarli emas" };
+  //     } else {
+  //       const OutputData = {
+  //         author,
+  //         warehouse_id: model.id,
+  //         to_where: model.to_where,
+  //         quantity: model.quantity,
+  //         unit: model.unit,
+  //         status: model.to_where + " " + "yuborildi",
+  //       };
+  //       const output_res = await OutputModel.create(OutputData);
+  //       if (output_res) {
+  //         newData.quantity = newData.quantity - model.quantity;
+  //         newData.output = output_res._id;
+  //         const update =
+  //           await WarehouseRawMaterialForSeamModel.findByIdAndUpdate(
+  //             model.id,
+  //             newData,
+  //             { new: true }
+  //           );
+  //         return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", update };
+  //       }
+  //     }
+  //   }
 
-    if (input) {
-      const res = await WarehouseRawMaterialForSeamModel.create(model);
-      return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", res };
-    }
-  }
+  //   if (input) {
+  //     const res = await WarehouseRawMaterialForSeamModel.create(model);
+  //     return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", res };
+  //   }
+  // }
 
   async GetAll() {
     const res = await WarehouseRawMaterialForSeamModel.find();
