@@ -34,29 +34,47 @@ class SaleLegalService {
     return model;
   }
   async create(payload) {
-    let initialValue = 0;
-    const total = payload.data.products.reduce(
-      (accumulator, currentValue) =>
-        accumulator + Number(currentValue.order_quantity),
-      initialValue
-    );
-    const info = {
-      author: payload.user.id,
-      customer_name: payload.data.customer_name,
-      order_number: payload.data.order_number,
-      artikul: payload.data.artikul,
-      order_quantity: total,
-      delivery_time: payload.data.delivery_time,
-      sale_products: payload.data.products,
-    };
+    if (payload.data.update) {
+      let initialValue = 0;
+      const total = payload.data.products.reduce(
+        (accumulator, currentValue) =>
+          accumulator + Number(currentValue.order_quantity),
+        initialValue
+      );
+      const newData = {
+        customer_name: payload.data.customer_name,
+        order_number: payload.data.order_number,
+        artikul: payload.data.artikul,
+        order_quantity: total,
+        delivery_time: payload.data.delivery_time,
+        sale_products: payload.data.products,
+      };
+      const update = await SaleCardModel.findByIdAndUpdate(payload.data.id, newData, { new: true });
+      return { msg: "Sotuv karta yangilandi" };
+    } else {
+      let initialValue = 0;
+      const total = payload.data.products.reduce(
+        (accumulator, currentValue) =>
+          accumulator + Number(currentValue.order_quantity),
+        initialValue
+      );
+      const info = {
+        author: payload.user.id,
+        customer_name: payload.data.customer_name,
+        order_number: payload.data.order_number,
+        artikul: payload.data.artikul,
+        order_quantity: total,
+        delivery_time: payload.data.delivery_time,
+        sale_products: payload.data.products,
+      };
 
-    const res = await SaleCardModel.create(info);
+      const res = await SaleCardModel.create(info);
 
-    return { msg: "Sotuv karta yaratildi" };
+      return { msg: "Sotuv karta yaratildi" };
+    }
+
   }
-  async UpdateById(data) {
-    console.log(data);
-  }
+
   async confirm(data) {
     const dataById = await SaleCardModel.findById(data.data.id);
     const NewData = dataById;
