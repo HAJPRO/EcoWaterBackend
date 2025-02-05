@@ -40,14 +40,12 @@ class DepPaintService {
   async AcceptAndCreate(payload) {
     try {
       this.CreateInputPaintPlan(payload);
-      this.CreateProvide(payload);
-      return { status: 200, msg: "Muvaffaqiyatli qabul qilindi!" };
     } catch (error) {
       return error.message;
     }
   }
   async CreateInputPaintPlan(payload) {
-    const saleCard = await SaleCardModel.findById(payload.data.items._id);
+    const saleCard = await SaleCardModel.findById(payload.data.id);
     const NewData = saleCard;
     const proccess_status = {
       department: payload.user.department,
@@ -58,7 +56,7 @@ class DepPaintService {
     };
     NewData.process_status.push(proccess_status);
     NewData.status = "To'quvga yuborildi";
-    await SaleCardModel.findByIdAndUpdate(payload.data.items._id, NewData, {
+    await SaleCardModel.findByIdAndUpdate(payload.data.id, NewData, {
       new: true,
     });
 
@@ -74,24 +72,23 @@ class DepPaintService {
       delivery_time_weaving: payload.data.provide.delivery_time_weaving,
       sale_quantity: payload.data.items.order_quantity, // total sale
     };
-
     const res = await InputPaintPlanModel.create(info);
   }
-  async CreateProvide(payload) {
-    const newData = {
-      author: payload.user.id,
-      username: payload.user.username,
-      department: payload.user.department,
-      customer_name: payload.data.items.customer_name,
-      order_number: payload.data.items.order_number,
-      artikul: payload.data.items.artikul,
-      delivery_product_box: payload.data.provide.products,
-      delivery_time_provide:
-        payload.data.provide.products[0].delivery_time_provide,
-    };
+  // async CreateProvide(payload) {
+  //   const newData = {
+  //     author: payload.user.id,
+  //     username: payload.user.username,
+  //     department: payload.user.department,
+  //     customer_name: payload.data.items.customer_name,
+  //     order_number: payload.data.items.order_number,
+  //     artikul: payload.data.items.artikul,
+  //     delivery_product_box: payload.data.provide.products,
+  //     delivery_time_provide:
+  //       payload.data.provide.products[0].delivery_time_provide,
+  //   };
 
-    await ProvideModel.create(newData);
-  }
+  //   await ProvideModel.create(newData);
+  // }
 
   async CreateDayReport(payload) {
     try {
