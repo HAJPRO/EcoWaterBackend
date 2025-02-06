@@ -43,10 +43,7 @@ class DepWeavingService {
         return 0;
       }
     });
-    const provide_length = await this.AllSentToProvide({
-      id: user_id,
-      department,
-    }).then((data) => {
+    const provide_length = await this.AllSentToProvide(user_id).then((data) => {
       if (data) {
         return data.length;
       } else {
@@ -74,7 +71,7 @@ class DepWeavingService {
 
       if (is_status === 3) {
         const all_length = await this.getAllLength(data);
-        const items = await this.AllSentToProvide({ id: user_id, department });
+        const items = await this.AllSentToProvide(user_id);
         return { items, all_length };
       }
     } catch (error) {
@@ -102,19 +99,11 @@ class DepWeavingService {
       return error.message;
     }
   }
-  async AllSentToProvide(data) {
-    let ID = new mongoose.Types.ObjectId(data.id);
+  async AllSentToProvide(user_id) {
     try {
-      const allProvide = await ProvideModel.aggregate([
-        {
-          $match: {
-            $or: [
-              // { department: "Super Admin" },
-              { $and: [{ department: "To'quv" }, { author: ID }] },
-            ],
-          },
-        },
-      ]);
+      const allProvide = await InputWeavingPlan.find({
+        author: user_id,
+      });
 
       return allProvide;
     } catch (error) {
@@ -124,7 +113,6 @@ class DepWeavingService {
   async AcceptAndCreate(payload) {
     try {
       this.CreateInputWeavingPlan(payload);
-      this.CreateProvide(payload);
       return { status: 200, msg: "Muvaffaqiyatli qabul qilindi!" };
     } catch (error) {
       return error.message;
@@ -150,7 +138,6 @@ class DepWeavingService {
       sent_time: new Date(),
     };
     newCard.process_status.push(proccess_status_sale);
-    newCard.status = "Yigiruvga yuborildi";
     await SaleCardModel.findByIdAndUpdate(newCard._id, newCard, {
       new: true,
     });
@@ -164,7 +151,7 @@ class DepWeavingService {
       sent_time: new Date(),
     };
     NewData.process_status.push(proccess_status);
-    NewData.paint_status = "To'quv tasdiqladi";
+    NewData.paint_status = "To'quv qabul qildi";
     await InputPaintPlan.findByIdAndUpdate(payload.data.card._id, NewData, {
       new: true,
     });
@@ -181,23 +168,7 @@ class DepWeavingService {
       delivery_time_spinning:
         payload.data.provide.spinning[0].delivery_time_spinning,
     };
-
     const res = await InputWeavingPlan.create(info);
-  }
-  async CreateProvide(payload) {
-    const product = {
-      author: payload.user.id,
-      username: payload.user.username,
-      department: payload.user.department,
-      customer_name: payload.data.card.customer_name,
-      order_number: payload.data.card.order_number,
-      artikul: payload.data.card.artikul,
-      delivery_product_box: payload.data.provide.products,
-
-      delivery_time_provide:
-        payload.data.provide.products[0].delivery_time_provide,
-    };
-    await ProvideModel.create(product);
   }
 
   async delete(id) {

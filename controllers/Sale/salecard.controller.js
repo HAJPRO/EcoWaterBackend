@@ -51,7 +51,18 @@ class SaleController {
   async create(req, res, next) {
     try {
       const data = await SaleService.create({ data: req.body, user: req.user });
-      console.log(data);
+
+      res.status(201).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async UpdateById(req, res, next) {
+    try {
+      const data = await SaleService.UpdateById({
+        data: req.body,
+        user: req.user,
+      });
 
       res.status(201).json(data);
     } catch (error) {

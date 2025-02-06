@@ -54,6 +54,9 @@ class SaleLegalService {
 
     return { msg: "Sotuv karta yaratildi" };
   }
+  async UpdateById(data) {
+    console.log(data);
+  }
   async confirm(data) {
     const dataById = await SaleCardModel.findById(data.data.id);
     const NewData = dataById;

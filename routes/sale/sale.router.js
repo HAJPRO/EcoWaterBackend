@@ -15,6 +15,7 @@ router.post(
 );
 router.post("/weaving_all", SaleCardController.getAllWeaving);
 router.post("/create", authMiddleware, SaleCardController.create);
+router.post("/update_card", authMiddleware, SaleCardController.UpdateById);
 router.delete("/legal_delete/:id", authMiddleware, SaleCardController.delete);
 router.post("/confirm", authMiddleware, SaleCardController.confirm);
 router.post("/legal_export_excel", SaleCardController.export_excel);

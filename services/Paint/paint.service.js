@@ -55,7 +55,7 @@ class DepPaintService {
       sent_time: new Date(),
     };
     NewData.process_status.push(proccess_status);
-    NewData.status = "To'quvga yuborildi";
+    NewData.status = "Bo'yoq qabul qildi";
     await SaleCardModel.findByIdAndUpdate(payload.data.id, NewData, {
       new: true,
     });
@@ -178,10 +178,7 @@ class DepPaintService {
         return 0;
       }
     });
-    const provide_length = await this.AllSentToProvide({
-      id: user_id,
-      department,
-    }).then((data) => {
+    const provide_length = await this.AllSentToProvide(user_id).then((data) => {
       if (data) {
         return data.length;
       } else {
@@ -209,7 +206,7 @@ class DepPaintService {
 
       if (is_status === 5) {
         const all_length = await this.getAllLength(data);
-        const items = await this.AllSentToProvide({ id: user_id, department });
+        const items = await this.AllSentToProvide(user_id);
         return { items, all_length };
       }
     } catch (error) {
@@ -217,9 +214,8 @@ class DepPaintService {
     }
   }
   async getAllInProcess(user_id) {
-    let ID = new mongoose.Types.ObjectId(user_id);
     try {
-      const allInProcess = await InputPaintPlanModel.find({ author: ID });
+      const allInProcess = await InputPaintPlanModel.find({ author: user_id });
       return allInProcess;
     } catch (error) {
       return error.message;
@@ -238,27 +234,26 @@ class DepPaintService {
     }
   }
 
-  async AllSentToProvide(data) {
-    let ID = new mongoose.Types.ObjectId(data.id);
+  async AllSentToProvide(user_id) {
     try {
-      const allPaint = await ProvideModel.aggregate([
-        {
-          $match: {
-            $or: [
-              // { department: "Super Admin" },
-              { $and: [{ department: "Bo'yoq" }, { author: ID }] },
-            ],
-          },
-        },
-      ]);
+      const allProvide = await InputPaintPlanModel.find({
+        author: user_id,
+        provide_status: `Taminotga yuborildi`,
+      });
+      // const allProvide = await InputPaintPlanModel.aggregate([
+      //   {
+      //     $match: {
+      //       $and: [{ provide_status: "Taminotga yuborildi" }, { author: ID }],
+      //     },
+      //   },
+      // ]);
 
-      return allPaint;
+      return allProvide;
     } catch (error) {
       return error.message;
     }
   }
   async GetOneFromSale(data) {
-    // let ID = new mongoose.Types.ObjectId(id);
     try {
       if (data.report === true) {
         const card = await InputPaintPlanModel.findById(data.id);
