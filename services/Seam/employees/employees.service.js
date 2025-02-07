@@ -4,7 +4,7 @@ const SeamWorkerDayReport = require("../../../models/bots/seam/SeamWorkerDayRepo
 const { SendReply } = require("../../../bot/seam/helpers/start");
 class SeamEmployeesService {
   async getAllLength(data) {
-    const employees_length = await this.getAllEmployees().then((data) => {
+    const employees_length = await this.getAllEmployees(data).then((data) => {
       if (data) {
         return data.length;
       } else {
@@ -23,11 +23,10 @@ class SeamEmployeesService {
   }
   async getAll(data) {
     const is_status = data.status;
-
     try {
       if (is_status === 1) {
         const all_length = await this.getAllLength(data);
-        const items = await this.getAllEmployees();
+        const items = await this.getAllEmployees(data);
         return { items, all_length };
       }
       if (is_status === 2) {
@@ -39,9 +38,11 @@ class SeamEmployeesService {
       return error.message;
     }
   }
-  async getAllEmployees() {
+  async getAllEmployees(data) {
+    const limit = (data.limit)
+    const skip = (+data.page - 1) * limit
     try {
-      const allEmloyees = await SeamUserModel.find({ admin: false });
+      const allEmloyees = await SeamUserModel.find({ admin: false }).skip(skip).limit(limit);
       return allEmloyees;
     } catch (error) {
       return error.message;
@@ -55,10 +56,13 @@ class SeamEmployeesService {
     }
   }
   async getOneEployeeReport(data) {
+    const limit = (data.limit)
+    const skip = (+data.page - 1) * limit
     const user = await SeamUserModel.findById(data.id);
-    const reports = await SeamWorkerDayReport.find({ author: user._id });
+    const reports = await SeamWorkerDayReport.find({ author: data.id }).skip(skip).limit(limit);
+    const items = await SeamWorkerDayReport.find({ author: data.id });
 
-    return { reports, employee: user.fullname };
+    return { reports, employee: user.fullname, total: items.length };
   }
   async ConfirmReportAndSendReply(data) {
     const user = await SeamUserModel.findById(data.user_id);
@@ -73,7 +77,6 @@ class SeamEmployeesService {
     );
 
     if (await update.received_time) {
-      console.log(update.received_time);
 
       await SendReply({ chatId: user.chatId, update });
     }

@@ -23,6 +23,7 @@ const SeamAuthSchema = new Schema(
     permissions: { type: Array, default: [] },
     action: { type: String, default: "request_fullname" },
     isActivated: { type: Boolean, default: false },
+    status: { type: String, default: "Aktiv xodim" },
   },
   { timestamps: true }
 );
