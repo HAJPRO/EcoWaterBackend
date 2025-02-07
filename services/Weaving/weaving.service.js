@@ -27,7 +27,7 @@ class DepWeavingService {
   }
 
   async getAllLength(data) {
-    const user_id = new mongoose.Types.ObjectId(data.user.id);
+    const user_id = data.user.id;
     const department = data.user.department;
     const process_length = await this.getAllInProcess(user_id).then((data) => {
       if (data) {
@@ -55,7 +55,7 @@ class DepWeavingService {
   }
   async getAll(data) {
     const is_status = data.status.is_active;
-    const user_id = new mongoose.Types.ObjectId(data.user.id);
+    const user_id = data.user.id;
     const department = data.user.department;
     try {
       if (is_status === 1) {

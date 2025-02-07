@@ -23,7 +23,7 @@ class DepSpinningService {
   }
 
   async getAllLength(data) {
-    const user_id = new mongoose.Types.ObjectId(data.user.id);
+    const user_id = data.user.id;
     const department = data.user.department;
     const process_length = await this.getAllInProcess(user_id).then((data) => {
       if (data) {
@@ -56,7 +56,7 @@ class DepSpinningService {
   }
   async getAll(data) {
     const is_status = data.status.status;
-    const user_id = new mongoose.Types.ObjectId(data.user.id);
+    const user_id = data.user.id;
     const department = data.user.department;
 
     try {
@@ -104,19 +104,9 @@ class DepSpinningService {
   }
 
   async AllSentToProvide(data) {
-    let ID = new mongoose.Types.ObjectId(data.id);
+    let ID = data.id;
     try {
-      const allProvide = await ProvideModel.aggregate([
-        {
-          $match: {
-            $or: [
-              // { department: "Super Admin" },
-              { $and: [{ department: "Yigiruv" }, { author: ID }] },
-            ],
-          },
-        },
-      ]);
-
+      const allProvide = await ProvideModel.find();
       return allProvide;
     } catch (error) {
       return error.message;

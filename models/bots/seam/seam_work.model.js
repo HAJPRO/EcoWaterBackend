@@ -1,6 +1,6 @@
 const { model, Schema } = require("mongoose");
 
-const SeamDepartmentSchema = new Schema(
+const SeamWorkSchema = new Schema(
   {
     name: {
       require: true,
@@ -14,4 +14,4 @@ const SeamDepartmentSchema = new Schema(
   },
   { timestamps: true }
 );
-module.exports = model("SeamDepartment", SeamDepartmentSchema);
+module.exports = model("SeamWork", SeamWorkSchema);

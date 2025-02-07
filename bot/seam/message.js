@@ -5,8 +5,10 @@ const {
   RequestCode,
   RequestPhoneNumber,
   RequestDepartment,
+  RequestQuantity,
+  RequestContinue,
 } = require("../seam/helpers/start.js");
-const SeamService = require("./helpers/admin/seam.service.js")
+const SeamService = require("./helpers/admin/seam.service.js");
 const SeamUserModel = require("../../models/bots/seam/seam_user.model.js");
 
 const { bot } = require("./bot.js");
@@ -41,5 +43,17 @@ bot.on("message", async (msg) => {
   }
   if (user && user.action === "request_add_department") {
     SeamService.AddDepartment({ msg, user });
+  }
+  if (user && user.action === "request_add_work") {
+    SeamService.AddWorkType({ msg, user });
+  }
+  if (user && user.action === "request_add_product") {
+    SeamService.AddProductType({ msg, user });
+  }
+  if (user && user.action === "request_quantity") {
+    RequestQuantity({ msg, user });
+  }
+  if (user && user.action === "request_create") {
+    RequestContinue({ msg, user });
   }
 });
