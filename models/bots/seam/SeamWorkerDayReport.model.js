@@ -22,6 +22,9 @@ const SeamWorkerDayReportSchema = new Schema(
     quantity: {
       type: String,
     },
+    received_time: {
+      type: Date,
+    },
     status: { type: String, default: "Tasdiqlanmagan" },
     state: { type: Boolean, default: true },
   },

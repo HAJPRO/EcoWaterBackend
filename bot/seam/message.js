@@ -5,7 +5,9 @@ const {
   RequestCode,
   RequestPhoneNumber,
   RequestDepartment,
+  RequestPartyNumber,
   RequestQuantity,
+  RequestCreate,
   RequestContinue,
 } = require("../seam/helpers/start.js");
 const SeamService = require("./helpers/admin/seam.service.js");
@@ -23,7 +25,6 @@ bot.on("message", async (msg) => {
   }
   if (text === "Ro'yxatdan o'tish") {
     RequestFullname(msg);
-    // await RequestCode(msg);
   }
   if (user && user.action === "request_fullname") {
     CreateFullname({ msg, id: user._id });
@@ -37,7 +38,9 @@ bot.on("message", async (msg) => {
   if (user && user.action === "request_department") {
     RequestDepartment({ msg, id: user._id });
   }
-
+  if (user && user.action === "request_party_number") {
+    RequestPartyNumber({ msg, user });
+  }
   if (user && user.action === "menu") {
     SeamService.AdminPanel({ msg, user });
   }
@@ -50,10 +53,17 @@ bot.on("message", async (msg) => {
   if (user && user.action === "request_add_product") {
     SeamService.AddProductType({ msg, user });
   }
+
   if (user && user.action === "request_quantity") {
     RequestQuantity({ msg, user });
   }
   if (user && user.action === "request_create") {
+    RequestCreate({ msg, user });
+  }
+  if (user && text === "Davom etish") {
+    RequestContinue({ msg, user });
+  }
+  if (user && text === "Hisobot yuborish") {
     RequestContinue({ msg, user });
   }
 });

@@ -1,8 +1,10 @@
 const { uuid } = require("uuidv4");
 const { bot } = require("../bot");
+const { format } = require("date-fns");
 const {
   AdminKeyboard,
   UserKeyboard,
+  UserKeyboardContinue,
 } = require("../../../bot/seam/helpers/keyboards/keyboard");
 const SeamUserModel = require("../../../models/bots/seam/seam_user.model");
 const SeamDepartmentModel = require("../../../models/bots/seam/seam_department.model");
@@ -10,9 +12,25 @@ const SeamProductModel = require("../../../models/bots/seam/seam_product.model")
 const SeamWorkModel = require("../../../models/bots/seam/seam_work.model");
 const SeamWorkerDayReport = require("../../../models/bots/seam/SeamWorkerDayReport.model");
 const model = {
+  party_number: "",
   product: "",
   work: "",
   quantity: "",
+};
+const SendReply = async (data) => {
+  console.log(data.update);
+
+  bot.sendMessage(
+    data.chatId,
+    `Partya nomer: ${data.update.party_number}
+Mahsulot: ${data.update.product}
+Ish turi: ${data.update.work}
+Miqdori: ${data.update.quantity}
+Yuborilgan vaqti: ${format(data.update.createdAt, "dd.MM.yyyy HH:mm")}
+Tasdiqlangan vaqti: ${format(data.update.received_time, "dd.MM.yyyy HH:mm")}
+
+Hisobtingiz ${data.update.status}.`
+  );
 };
 const start = async (msg) => {
   const chatId = msg.from.id;
@@ -21,16 +39,16 @@ const start = async (msg) => {
   if (CheckUser) {
     bot.sendMessage(
       chatId,
+      `Kunlik hisobot yubormoqchi bo'sangiz
+
+Hisobot yuborish tugmasni bosing.`,
 
       {
         reply_markup: {
           keyboard: [
             [
               {
-                text: `Kunlik hisobot yuborish`,
-              },
-              {
-                text: `Bekor qilish`,
+                text: `Hisobot yuborish`,
               },
             ],
           ],
@@ -108,86 +126,99 @@ const CreateFullname = async (data) => {
   });
 };
 const RequestPhoneNumber = async (data) => {
-  const chatId = data.msg.from.id;
-  const phone_number = data.msg.contact.phone_number;
-  const id = data.id;
+  if (data.msg.contact) {
+    const chatId = data.msg.from.id;
+    const phone_number = data.msg.contact.phone_number;
+    const id = data.id;
+    if (phone_number && phone_number === `998930043936`) {
+      const User = await SeamUserModel.findByIdAndUpdate(
+        id,
+        {
+          phone_number,
+          admin: true,
+          department: "Admin",
+          role: 1000,
+          action: "menu",
+        },
+        { new: true }
+      );
 
-  if (phone_number === `+998930043936`) {
-    const User = await SeamUserModel.findByIdAndUpdate(
-      id,
-      {
-        phone_number,
-        admin: true,
-        department: "Admin",
-        role: 1000,
-        action: "menu",
-      },
-      { new: true }
-    );
-
-    bot.sendMessage(chatId, `Siz admin siz!`, {
-      reply_markup: {
-        keyboard: User.admin ? AdminKeyboard : UserKeyboard,
-        resize_keyboard: true,
-      },
-    });
+      bot.sendMessage(chatId, `Siz admin siz!`, {
+        reply_markup: {
+          keyboard: User.admin ? AdminKeyboard : UserKeyboard,
+          resize_keyboard: true,
+        },
+      });
+    } else {
+      await SeamUserModel.findByIdAndUpdate(
+        id,
+        { phone_number, action: "request_code" },
+        { new: true }
+      );
+      bot.sendMessage(
+        chatId,
+        `Masteringiz tomonidan berilgan 4 xonali kodni kiriting`
+      );
+    }
   } else {
-    await SeamUserModel.findByIdAndUpdate(
-      id,
-      { phone_number, action: "request_code" },
-      { new: true }
-    );
     bot.sendMessage(
-      chatId,
-      `Masteringiz tomonidan berilgan 4 xonali kodni kiriting`
+      data.msg.from.id,
+      `Telefon nomerni yuborish tugmasini bosing !`
     );
   }
 };
 const RequestCode = async (data, page = 1) => {
-  const chatId = data.msg.from.id;
-  const code = data.msg.text;
-  const user = data.user;
-  await SeamUserModel.findByIdAndUpdate(
-    data.user.id,
-    { code, action: "request_department" },
-    { new: true }
-  );
-  // const limit = 5;
-  // const skip = (page - 1) * limit;
-  const departments = await SeamDepartmentModel.find();
-  // .skip(skip)
-  // .limit(limit)
-  // .lean();
-  const list = departments.map((department) => {
-    return [
-      {
-        text: department.name,
-        callback_data: `${department.name}`,
-      },
-    ];
-  });
+  if (data.msg.text) {
+    const chatId = data.msg.from.id;
+    const code = data.msg.text;
+    const user = data.user;
+    await SeamUserModel.findByIdAndUpdate(
+      data.user.id,
+      { code, action: "request_department" },
+      { new: true }
+    );
+    // const limit = 5;
+    // const skip = (page - 1) * limit;
+    const departments = await SeamDepartmentModel.find();
+    // .skip(skip)
+    // .limit(limit)
+    // .lean();
+    const list = departments.map((department) => {
+      return [
+        {
+          text: department.name,
+          callback_data: `${department.name}`,
+        },
+      ];
+    });
 
-  bot.sendMessage(chatId, `Bo'limingizni tanlang !`, {
-    reply_markup: {
-      remove_keyboard: true,
-      inline_keyboard: [
-        ...list,
-        [
-          { text: "Orqaga", callback_data: "back_department" },
-          { text: "1", callback_data: "page" },
-          { text: "Keyingi", callback_data: "next_department" },
+    bot.sendMessage(chatId, `Bo'limingizni tanlang !`, {
+      reply_markup: {
+        remove_keyboard: true,
+        inline_keyboard: [
+          ...list,
+          [
+            { text: "Orqaga", callback_data: "back_department" },
+            { text: "1", callback_data: "page" },
+            { text: "Keyingi", callback_data: "next_department" },
+          ],
+          user.admin
+            ? [
+                {
+                  text: `Yangi kategory`,
+                  callback_data: "add_category",
+                },
+              ]
+            : [],
         ],
-        user.admin
-          ? [
-              {
-                text: `Yangi kategory`,
-                callback_data: "add_category",
-              },
-            ]
-          : [],
-      ],
-    },
-  });
+      },
+    });
+  } else {
+    bot.sendMessage(
+      data.msg.from.id,
+      `Master tomonidan berilgan 4 xonali kodni yozing!`
+    );
+  }
 };
 
 const RequestDepartment = async (data) => {
@@ -196,7 +227,20 @@ const RequestDepartment = async (data) => {
   const user_id = data.user._id;
   await SeamUserModel.findByIdAndUpdate(
     user_id,
-    { department, action: "request_product" },
+    { department, action: "request_party_number" },
+    { new: true }
+  );
+
+  bot.sendMessage(chatId, `Partya nomerini kiriting !`);
+};
+const RequestPartyNumber = async (data) => {
+  const chatId = data.msg.from.id;
+  const user_id = data.user._id;
+  const party_number = data.msg.text;
+  model.party_number = party_number;
+  await SeamUserModel.findByIdAndUpdate(
+    user_id,
+    { action: "request_product" },
     { new: true }
   );
   // const limit = 5;
@@ -221,14 +265,6 @@ const RequestDepartment = async (data) => {
           { text: "1", callback_data: "page" },
           { text: "Keyingi", callback_data: "next_department" },
         ],
-        data.user.admin
-          ? [
-              {
-                text: `Yangi Mahsulot`,
-                callback_data: "add_product",
-              },
-            ]
-          : [],
       ],
     },
   });
@@ -301,7 +337,9 @@ const RequestQuantity = async (data) => {
   );
   bot.sendMessage(
     chatId,
-    `Hisobot muvaffaqiyatli shakillandi saqlang yoki bekor qiling !`,
+    `Hisobot muvaffaqiyatli shakillandi.
+Ma'muriyatga yuborish uchun Saqlash tugmasini bosing
+yoki Bekor qiling !`,
     {
       reply_markup: {
         keyboard: UserKeyboard,
@@ -310,7 +348,7 @@ const RequestQuantity = async (data) => {
     }
   );
 };
-const RequestContinue = async (data) => {
+const RequestCreate = async (data) => {
   const chatId = data.msg.from.id;
   const text = data.msg.text;
   const user_id = data.user._id;
@@ -322,43 +360,50 @@ const RequestContinue = async (data) => {
     });
     await SeamUserModel.findByIdAndUpdate(
       user_id,
-      { action: "request_product" },
+      { action: "request_finshed" },
       { new: true }
     );
-    const products = await SeamProductModel.find();
-    const list = products.map((product) => {
-      return [
-        {
-          text: product.name,
-          callback_data: `${product.name}`,
-        },
-      ];
-    });
-
-    bot.sendMessage(chatId, `Mahsulot tanlang !`, {
+    bot.sendMessage(chatId, `Hisobot muvaffaqiyatli yuborildi.`, {
       reply_markup: {
-        remove_keyboard: true,
-        inline_keyboard: [
-          ...list,
-          [
-            { text: "Orqaga", callback_data: "back_department" },
-            { text: "1", callback_data: "page" },
-            { text: "Keyingi", callback_data: "next_department" },
-          ],
-        ],
+        keyboard: UserKeyboardContinue,
+        resize_keyboard: true,
       },
     });
   }
 };
+const RequestContinue = async (data) => {
+  const chatId = data.msg.from.id;
+  const text = data.msg.text;
+  const user_id = data.user._id;
+  if (text === "Davom etish") {
+    await SeamUserModel.findByIdAndUpdate(
+      user_id,
+      { action: "request_party_number" },
+      { new: true }
+    );
+    bot.sendMessage(chatId, `Partya nomerini kiriting !`);
+  }
+  if (text === "Hisobot yuborish") {
+    await SeamUserModel.findByIdAndUpdate(
+      user_id,
+      { action: "request_party_number" },
+      { new: true }
+    );
+    bot.sendMessage(chatId, `Partya nomerini kiriting !`);
+  }
+};
 module.exports = {
+  SendReply,
   start,
   RequestFullname,
   CreateFullname,
   RequestCode,
   RequestPhoneNumber,
   RequestDepartment,
+  RequestPartyNumber,
   RequestProduct,
   RequestWork,
   RequestQuantity,
+  RequestCreate,
   RequestContinue,
 };

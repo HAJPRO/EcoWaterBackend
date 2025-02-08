@@ -32,6 +32,10 @@ app.use("/api/v1/provide", require("./routes/provide/provide.route.js"));
 app.use("/api/v1/weaving", require("./routes/weaving/weaving.route.js"));
 app.use("/api/v1/spinning", require("./routes/spinning/spinning.route.js"));
 app.use(
+  "/api/v1/seam/employees",
+  require("./routes/seam/employees/employees.router.js")
+);
+app.use(
   "/api/v1/seam/warehouse",
   require("./routes/seam/warehouse/warehouse.router.js")
 );

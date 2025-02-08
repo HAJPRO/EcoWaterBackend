@@ -33,5 +33,15 @@ const UserKeyboard = [
     },
   ],
 ];
+const UserKeyboardContinue = [
+  [
+    {
+      text: `Davom etish`,
+    },
+    {
+      text: `Yakunlash`,
+    },
+  ],
+];
 
-module.exports = { AdminKeyboard, UserKeyboard };
+module.exports = { AdminKeyboard, UserKeyboard, UserKeyboardContinue };
