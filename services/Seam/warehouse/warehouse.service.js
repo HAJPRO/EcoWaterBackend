@@ -27,50 +27,24 @@ class DepSeamWarehouseService {
     };
     return model;
   }
-  // async Create(data) {
-  //   const output = data.data.output;
-  //   const input = data.data.input;
-  //   const model = data.data.model;
-  //   const author = data.user.id;
-  //   if (output) {
-  //     const item = await WarehouseRawMaterialForSeamModel.findById(model.id);
-  //     const newData = item;
+  async Create(data) {
+    let initialValue = 0;
+    const total = data.data.input.reduce(
+      (accumulator, currentValue) =>
+        accumulator + Number(currentValue.quantity),
+      initialValue
+    );
+    const res = await WarehouseRawMaterialForSeamModel.create({ ...data.data, quantity: total, author: data.user.id })
+    return { status: 200, msg: "Muvaffaqiyatli qo'shildi" }
 
-  //     if (newData.quantity - model.quantity < 0 || model.quantity < 0) {
-  //       return { status: 404, msg: "Mahsulot yetarli emas" };
-  //     } else {
-  //       const OutputData = {
-  //         author,
-  //         warehouse_id: model.id,
-  //         to_where: model.to_where,
-  //         quantity: model.quantity,
-  //         unit: model.unit,
-  //         status: model.to_where + " " + "yuborildi",
-  //       };
-  //       const output_res = await OutputModel.create(OutputData);
-  //       if (output_res) {
-  //         newData.quantity = newData.quantity - model.quantity;
-  //         newData.output = output_res._id;
-  //         const update =
-  //           await WarehouseRawMaterialForSeamModel.findByIdAndUpdate(
-  //             model.id,
-  //             newData,
-  //             { new: true }
-  //           );
-  //         return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", update };
-  //       }
-  //     }
-  //   }
+  }
 
-  //   if (input) {
-  //     const res = await WarehouseRawMaterialForSeamModel.create(model);
-  //     return { status: 200, msg: "Muvaffaqiyatli ko'chirildi", res };
-  //   }
-  // }
-
-  async GetAll() {
+  async GetAll(data) {
+    const limit = data.limit
+    const skip = (data.page - 1) * limit
     const res = await WarehouseRawMaterialForSeamModel.find();
-    return res;
+    const items = await WarehouseRawMaterialForSeamModel.find().skip(skip).limit(limit);
+    return { items, total: res.length };
   }
   async GetOne(data) {
     let ID = new mongoose.Types.ObjectId(data.id);

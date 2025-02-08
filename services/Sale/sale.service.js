@@ -28,7 +28,6 @@ class SaleLegalService {
       grammage: "",
       order_quantity: "",
       unit: "",
-      delivery_time: "",
     };
 
     return model;

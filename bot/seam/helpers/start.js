@@ -18,8 +18,6 @@ const model = {
   quantity: "",
 };
 const SendReply = async (data) => {
-  console.log(data.update);
-
   bot.sendMessage(
     data.chatId,
     `Partya nomer: ${data.update.party_number}
@@ -39,7 +37,7 @@ const start = async (msg) => {
   if (CheckUser) {
     bot.sendMessage(
       chatId,
-      `Kunlik hisobot yubormoqchi bo'sangiz
+      `Kunlik hisobot yubormoqchi bo'lsangiz
 
 Hisobot yuborish tugmasni bosing.`,
 
@@ -230,8 +228,13 @@ const RequestDepartment = async (data) => {
     { department, action: "request_party_number" },
     { new: true }
   );
+  bot.sendMessage(
+    chatId,
+    `Tabriklaymiz siz muvaffaqiyatli ro'yxatdan o'tdingiz!
+Kunlik hisobot yubormoqchi bo'lsangiz
 
-  bot.sendMessage(chatId, `Partya nomerini kiriting !`);
+Mahsulot partya nomerini kiriting.`
+  );
 };
 const RequestPartyNumber = async (data) => {
   const chatId = data.msg.from.id;

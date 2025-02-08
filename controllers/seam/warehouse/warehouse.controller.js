@@ -59,17 +59,11 @@ class DepSeamWarehouseController {
       next(error);
     }
   }
-  // async CreateOutput(req, res, next) {
-  //   try {
-  //     const data = await DepSeamWarehouseService.CreateOutput(req.body);
-  //     res.status(200).json({ msg: "Muvaffaqiyatli qo'shildi !", data });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+
+
   async GetAll(req, res, next) {
     try {
-      const data = await DepSeamWarehouseService.GetAll();
+      const data = await DepSeamWarehouseService.GetAll(req.body);
       res.status(200).json(data);
     } catch (error) {
       next(error);
