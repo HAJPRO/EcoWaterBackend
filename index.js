@@ -15,51 +15,15 @@ app.use(fileUpload({}));
 app.use(cookie({}));
 app.use(errorMiddleware);
 // HR BOT
-require("./bot/hr/bot.js");
 //
 // SEAM BOT
-require("./bot/seam/bot.js");
 //
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 // Routes
-app.use("/api/v1/helpers", require("./routes/helpers/helpers.router.js"));
-app.use("/api/v1/hr/appeals", require("./routes/HR/Appeals/appeals.router.js"));
+
 app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
-app.use("/api/v1/sale", require("./routes/sale/sale.router.js"));
-app.use("/api/v1/paint", require("./routes/paint/paint.route.js"));
-app.use("/api/v1/provide", require("./routes/provide/provide.route.js"));
-app.use("/api/v1/weaving", require("./routes/weaving/weaving.route.js"));
-app.use("/api/v1/spinning", require("./routes/spinning/spinning.route.js"));
-app.use(
-  "/api/v1/seam/employees",
-  require("./routes/seam/employees/employees.router.js")
-);
-app.use(
-  "/api/v1/seam/warehouse",
-  require("./routes/seam/warehouse/warehouse.router.js")
-);
-app.use(
-  "/api/v1/seam/form_warehouse",
-  require("./routes/seam/form-warehouse/warehouse.router.js")
-);
-app.use("/api/v1/seam/form", require("./routes/seam/form/form.router.js"));
-app.use(
-  "/api/v1/seam/classification",
-  require("./routes/seam/classification/classification.router.js")
-);
-app.use(
-  "/api/v1/seam/patoks",
-  require("./routes/seam/patoks/patoks.router.js")
-);
-app.use(
-  "/api/v1/seam/packing",
-  require("./routes/seam/packing/packing.router.js")
-);
-app.use(
-  "/api/v1/seam/c_warehouse",
-  require("./routes/seam/c-warehouse/c-warehouse.router.js")
-);
+
 
 const START = async () => {
   try {
