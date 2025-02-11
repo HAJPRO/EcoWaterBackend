@@ -31,7 +31,7 @@ class SaleController {
   async getAll(req, res, next) {
     try {
       const all = await SaleService.getAll({
-        status: req.body,
+        data: req.body,
         user: req.user,
       });
       res.status(200).json(all);

@@ -8,6 +8,9 @@ const SaleCardSchema = new Schema(
     order_quantity: { type: Number, required: true },
     artikul: { type: String, required: true },
     delivery_time: { type: Date, default: Date.now(), required: true },
+    received_time: {
+      type: Date,
+    },
     sale_products: [
       {
         id: { type: String, required: true },

@@ -87,6 +87,8 @@ class SaleLegalService {
     };
     NewData.process_status.push(proccess_status);
     NewData.status = "Bo'yoqqa yuborildi";
+    NewData.received_time = new Date();
+
     const updatedData = await SaleCardModel.findByIdAndUpdate(
       data.data.id,
       NewData,
@@ -134,9 +136,9 @@ class SaleLegalService {
     }
   }
   async getAllLength(data) {
-    const user_id = new mongoose.Types.ObjectId(data.user.id);
+    const user_id = data.user.id;
     const department = data.user.department;
-    const sale_length = await this.getAllSale(user_id).then((data) => {
+    const sale_length = await SaleCardModel.find({ author: user_id }).then((data) => {
       if (data) {
         return data.length;
       } else {
@@ -158,13 +160,14 @@ class SaleLegalService {
   }
 
   async getAll(data) {
-    const is_status = data.status.status;
+
+    const is_status = data.data.status;
     const user_id = data.user.id;
     const department = data.user.department;
     try {
       if (is_status === 1) {
         const all_length = await this.getAllLength(data);
-        const items = await this.getAllSale(user_id);
+        const items = await this.getAllSale(data);
         return { items, all_length };
       } else if (is_status === 2) {
         const all_length = await this.getAllLength(data);
@@ -176,9 +179,11 @@ class SaleLegalService {
     }
   }
 
-  async getAllSale(user_id) {
+  async getAllSale(data) {
+    const limit = data.data.limit
+    const skip = (data.data.page - 1) * limit
     try {
-      const allSale = await SaleCardModel.find({ author: user_id });
+      const allSale = await SaleCardModel.find({ author: data.user.id }).skip(skip).limit(limit);
 
       return allSale;
     } catch (error) {
