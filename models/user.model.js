@@ -7,7 +7,7 @@ const userSchema = new Schema(
     },
     department: { type: String },
     password: { type: String },
-    role: { type: Number, default: 0 },
+    role: { type: Number, default: 1000 },
     permissions: { type: Array, default: [] },
     actions: { type: Array, default: [] },
     isActivated: { type: Boolean, default: false },
