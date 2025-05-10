@@ -1,0 +1,36 @@
+name: "CI/CD ECO SERVER APP"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Set up Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.18.1"
+
+      - name: "Install dependencies and build"
+        run: |
+          npm install
+
+      - name: "Deploy to local server"
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd /var/www/workers/EcoWaterBackend/
+            git pull --no-rebase origin main
+            /usr/bin/npm install
+            /usr/bin/pm2 delete EcoWaterBackend
+            /usr/bin/pm2 start index.js --name "EcoWaterBackend"
