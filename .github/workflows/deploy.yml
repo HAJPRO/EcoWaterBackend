@@ -27,7 +27,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
+          key: ${{ secrets.KEY_LS }}
           script: |
             cd /var/www/workers/EcoWaterBackend/
             git pull --no-rebase origin main
