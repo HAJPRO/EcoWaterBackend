@@ -1,4 +1,4 @@
-name: "CI/CD ECO SERVER APP"
+name: "CI/CD HAJ SERVER APP"
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: "20.18.1"
 
-      - name: "Install dependencies"
+      - name: "Install dependencies and build"
         run: |
           npm install
 
@@ -27,10 +27,10 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY_LS }}
+          key: ${{ secrets.KEY }}
           script: |
             cd /var/www/workers/EcoWaterBackend/
             git pull --no-rebase origin main
             /usr/bin/npm install
-            /usr/bin/pm2 delete EcoWaterBackend
-            /usr/bin/pm2 start index.js --name "EcoWaterBackend"
+            /usr/bin/pm2 delete eco_backend
+            /usr/bin/pm2 start index.js --name "eco_backend"
