@@ -30,7 +30,7 @@ jobs:
           key: ${{ secrets.KEY_LS }}
           script: |
             cd /var/www/workers/EcoWaterBackend/
-            git pull --no-rebase origin main
+            git pull --no-rebase origin eco-branch
             /usr/bin/npm install
-            /usr/bin/pm2 delete eco_backend
+            /usr/bin/pm2 delete eco_backend || true
             /usr/bin/pm2 start index.js --name "eco_backend"
