@@ -1,9 +1,9 @@
-name: "CI/CD HAJ SERVER APP"
+name: "CI/CD ECO SERVER APP"
 
 on:
   push:
     branches:
-      - main
+      - eco-branch
 
 jobs:
   build:
