@@ -14,9 +14,9 @@ class ReadyWarehouseService {
       receivedDate: new Date(), // Qabul qilingan sana (hozirgi vaqt)
       author: "", // Ushbu partiyani tizimga qo‘shgan foydalanuvchi
       notes: "", // Izohlar (ixtiyoriy maydon)
-      totalAmount : "",
+      totalAmount: "",
       products: [
-       
+
       ]
     };
 
@@ -26,7 +26,7 @@ class ReadyWarehouseService {
   // Yangi ReadyWarehouse yaratish
   async Create(data) {
     try {
-     await  ReadyWarehouse.create(data)
+      await ReadyWarehouse.create(data)
       return { msg: "Mahsulot muvaffaqiyatli qo'shildi!" };
     } catch (error) {
       return { msg: `Xatolik yuz berdi: ${error.message}` };
@@ -34,20 +34,31 @@ class ReadyWarehouseService {
   }
 
   // Barcha ReadyWarehouse uzunligini olish
-  async getAllLength() {
-    try {
-      const all = await ReadyWarehouse.find();
-      return { allLength: all.length };
-    } catch (error) {
-      return { msg: `Xatolik yuz berdi: ${error.message}`, allLength: 0 };
-    }
+  async getAllLength(data) {
+    const all = await ReadyWarehouse.find({ author: data.author }).then((data) => {
+      if (data) {
+        return data.length;
+      } else {
+        return 0;
+      }
+    });
+    return { all };
   }
 
   // Barcha ReadyWarehouse olish
   async GetAll(data) {
     try {
-      const warehouses = await ReadyWarehouse.find().lean();
-      return { warehouses };
+      const all_length = await this.getAllLength(data);
+      const products = await ReadyWarehouse.find({ author: data.author }).lean();
+      return { products, all_length };
+    } catch (error) {
+      return { msg: `Server xatosi: ${error.message}`, warehouses: [] };
+    }
+  }
+  async GetOne(data) {
+    try {
+      const product = await ReadyWarehouse.findById(data.id).lean();
+      return { product, msg: "Mahsulot topildi!" };
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}`, warehouses: [] };
     }

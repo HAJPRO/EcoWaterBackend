@@ -31,7 +31,15 @@ jobs:
           port: 22
           script: |
             cd /var/www/workers/EcoWaterBackend/
+<<<<<<< HEAD
             git pull --no-rebase origin eco-branch
             /usr/bin/npm install
             /usr/bin/pm2 delete eco_backend || true
             /usr/bin/pm2 start index.js --name "eco_backend"
+=======
+            git pull --no-rebase origin  eco-branch
+            /usr/bin/npm install
+            /usr/bin/pm2 delete eco_backend
+            /usr/bin/pm2 start index.js --name "eco_backend" --watch
+            /usr/bin/pm2 save
+>>>>>>> 32c71870adea90e5a20dc3a7fad855f282ff39dc

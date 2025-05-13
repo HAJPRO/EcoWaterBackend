@@ -5,12 +5,20 @@ const authorMiddleware = require("../../../middlewares/author.middleware.js");
 const onlyAdminAccess = require("../../../middlewares/admin.middleware.js");
 const ReadyWarehouseController = require("../../../controllers/warehouses/r-warehouse/warehouse.controller.js");
 router.post(
-    "/r-warehouse/model",
-    authMiddleware, ReadyWarehouseController.GetModel
-  );
+  "/r-warehouse/model",
+  authMiddleware, ReadyWarehouseController.GetModel
+);
 router.post(
   "/r-warehouse/create",
   authMiddleware, ReadyWarehouseController.Create
+);
+router.post(
+  "/r-warehouse/all",
+  authMiddleware, ReadyWarehouseController.GetAll
+);
+router.post(
+  "/r-warehouse/getone",
+  authMiddleware, ReadyWarehouseController.GetOne
 );
 
 
