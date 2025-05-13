@@ -8,7 +8,6 @@ const ProductSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
     pro_name: {
       type: String,
@@ -27,12 +26,20 @@ const ProductSchema = new Schema(
     },
     products: [
       {
-        id : {type: String },
+        id: { type: String },
         cost_price: {
           type: Number, // Tannarxi (so'mda)
           min: 0,
         },
         buying_price: {
+          type: Number, // Sotuv narxi (so'mda)
+          min: 0,
+        },
+        block_cost_price: {
+          type: Number, // Tannarxi (so'mda)
+          min: 0,
+        },
+        block_buying_price: {
           type: Number, // Sotuv narxi (so'mda)
           min: 0,
         },

@@ -10,11 +10,11 @@ const ReadyWarehouseSchema = new Schema({
   receivedDate: { type: Date, default: Date.now },                    // Qabul qilingan sana (default — hozirgi vaqt)
   author: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Ushbu partiyani tizimga qo‘shgan foydalanuvchi
   notes: { type: String },                                            // Izohlar (ixtiyoriy maydon)
-  totalAmount : { type: Number }, 
+  totalAmount: { type: Number },
   products: [                                                            // Partiyadagi mahsulotlar ro‘yxati
     {
-        id: { type: String }, 
-      product:{ type: String },  // Mahsulot ID (Product modeliga havola)
+      id: { type: String },
+      product: { type: String },  // Mahsulot ID (Product modeliga havola)
       category: { type: String },                                     // Mahsulot kategoriyasi (masalan: ichimlik, un, kiyim)
       quantity: { type: Number, required: true },                     // Mahsulot miqdori
       packagingType: { type: String },                                // Qadoqlash turi (masalan: quti, butilka, xalta)
@@ -26,8 +26,10 @@ const ReadyWarehouseSchema = new Schema({
       manufactureDate: { type: Date },                                // Ishlab chiqarilgan sana
       expireDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
     }
-  ]
-  
+  ],
+  status: { type: String, default: "Tasdiqlangan" },                       // Partiya holati (masalan: active, inactive)
+  state: { type: Boolean, default: true },                                   // Partiya holati (masalan: active, inactive)
+
 }, { timestamps: true });                                             // createdAt va updatedAt maydonlarini avtomatik qo‘shadi
 
 module.exports = model("ReadyWarehouse", ReadyWarehouseSchema);       // Modelni eksport qilamiz
