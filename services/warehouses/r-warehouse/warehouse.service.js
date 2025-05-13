@@ -1,5 +1,5 @@
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/r-warehouse.model");
-const generateUniquePartyNumber = require("../../../utils/generateUniquePartyNumber");
+const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
 
 class ReadyWarehouseService {
   // Modelni yaratish
