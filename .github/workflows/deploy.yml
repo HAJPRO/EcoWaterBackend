@@ -28,6 +28,7 @@ jobs:
           host: ${{ secrets.HOST_ECO }}
           username: ${{ secrets.USERNAME_ECO }}
           key: ${{ secrets.KEY_ECO }}
+          port: 222
           script: |
             cd /var/www/workers/EcoWaterBackend/
             git pull --no-rebase origin eco-branch
