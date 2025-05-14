@@ -8,7 +8,6 @@ const formatNumber = (num) => {
 
 let driverLocation = { latitude: null, longitude: null };
 const SentOrder = async (order, msg) => {
-
   const ID = order._id;
   const chatId = order.driverId.chatId;
   const products = order.products;

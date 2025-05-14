@@ -3,7 +3,7 @@ name: "CI/CD ECO SERVER APP"
 on:
   push:
     branches:
-      - eco-branch # Yangi branch nomini bu yerda ko'rsatamiz
+      - eco-branch # Yangi branch nomini bu yerda ko'rsatamiz //
 
 jobs:
   build:
