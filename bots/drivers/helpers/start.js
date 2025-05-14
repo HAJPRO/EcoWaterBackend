@@ -27,27 +27,27 @@ Agar sizda hali hisob qaydnomangiz bo'lmasa, ro'yxatdan o'tish tugmasini bosing 
 };
 const login = async (msg) => {
   const chatId = msg.from.id;
-  
+
   const driver = await DriverModel.findOne({ chatId });
-if(driver?.chatId === String(chatId) && driver?.role === 'driver' && driver?.action === 'login_successfully'){
-  bot.sendMessage(
-    chatId,
-    `Hurmatli foydalanuvchi! 
+  if (driver?.chatId === String(chatId) && driver?.role === 'driver' && driver?.action === 'login_successfully') {
+    bot.sendMessage(
+      chatId,
+      `Hurmatli foydalanuvchi! 
     
 ✅ Siz muavffaqiyatli kirish qildingiz.
 🎯Ishingizga omad tilaymiz.`,
-    {
-      reply_markup: {
-        keyboard: WorkKeyboard,
-        resize_keyboard: true,
-      },
-    }
-  );
-}
+      {
+        reply_markup: {
+          keyboard: WorkKeyboard,
+          resize_keyboard: true,
+        },
+      }
+    );
+  }
   if (driver?.chatId === String(chatId) && driver?.role === 'driver' && driver?.action === 'register_successfully') {
     driver.action = "login_username"; // Keyingi bosqich
     await driver.save();
-    
+
   } else {
     bot.sendMessage(
       chatId,
@@ -57,46 +57,46 @@ if(driver?.chatId === String(chatId) && driver?.role === 'driver' && driver?.act
     );
   }
 };
-const LoginUsername = async (msg)=>{
+const LoginUsername = async (msg) => {
   const chatId = msg.from.id;
   const username = msg.text.trim();
 
   const driver = await DriverModel.findOne({ chatId });
-  if(driver.username === username){
+  if (driver.username === username) {
     driver.action = "login_password"; // Keyingi bosqich
     await driver.save();
-     bot.sendMessage(
+    bot.sendMessage(
       chatId,
       `🔐 Parolingizni kiriting:\n\n📝 Namuna: 25369`)
-  }else{
+  } else {
     bot.sendMessage(
       chatId,
       `❗️ Bunday foydalanuvchi yo'q`)
   }
 }
-const LoginPassword = async (msg)=>{
+const LoginPassword = async (msg) => {
   const chatId = msg.from.id;
   const password = msg.text.trim();
 
   const driver = await DriverModel.findOne({ chatId });
-  if(driver.password === password){
+  if (driver.password === password) {
     driver.action = "login_successfully"; // Keyingi bosqich
     await driver.save();
-   
-     bot.sendMessage(
-       chatId,
-       `Hurmatli foydalanuvchi! 
+
+    bot.sendMessage(
+      chatId,
+      `Hurmatli foydalanuvchi! 
        
  ✅ Siz muavffaqiyatli kirish qildingiz.
  🎯Ishingizga omad tilaymiz.`,
-       {
-         reply_markup: {
-           keyboard: WorkKeyboard,
-           resize_keyboard: true,
-         },
-       }
-     );
-  }else{
+      {
+        reply_markup: {
+          keyboard: WorkKeyboard,
+          resize_keyboard: true,
+        },
+      }
+    );
+  } else {
     bot.sendMessage(
       chatId,
       `❗️ Kirish paroli noto'g'ri !`)
@@ -118,7 +118,7 @@ const register = async (msg) => {
       chatId,
       `Hurmatli foydalanuvchi, ro'yxatdan o'tish boshlandi! 👇\n\n✍️ Iltimos, F.I.O. (to‘liq ism-sharifingizni) kiriting:`
     );
-  } else if (driver?.chatId === String(chatId) ,driver.role === "driver" && driver.action === 'register_successfully') {
+  } else if (driver?.chatId === String(chatId), driver.role === "driver" && driver.action === 'register_successfully') {
     // Agar allaqachon mavjud bo‘lsa
     await bot.sendMessage(chatId, `📌 Siz allaqachon ro'yxatdan o'tgansiz!
 Tizimga kirish uchun 🔐 Kirish tugmasini bosing `);
@@ -248,7 +248,7 @@ const CreateUsername = async (msg) => {
 const CreatePassword = async (msg) => {
   const chatId = msg.from.id;
   const password = msg.text.trim();
-console.log(password);
+  console.log(password);
 
   let driver = await DriverModel.findOne({ chatId });
 

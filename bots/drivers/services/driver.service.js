@@ -8,19 +8,17 @@ const formatNumber = (num) => {
 
 let driverLocation = { latitude: null, longitude: null };
 const SentOrder = async (order, msg) => {
-  console.log(order);
-  
+
   const ID = order._id;
   const chatId = order.driverId.chatId;
   const products = order.products;
   const customer = order.customerId;
   const { lat, long } = order.customerId.location; // yoki order.location
-  if (order.status === 'Haydovchiga yuborildi' && order.isSent ){
-    console.log(order);
+  if (order.status === 'Haydovchiga yuborildi' && order.isSent) {
     return;
-  } 
+  }
 
-   // 📍 Haydovchidan joylashuv so‘rash
+  // 📍 Haydovchidan joylashuv so‘rash
   bot.sendMessage(chatId, `🚨 *Yangi buyurtma!* 🚨\n\n📦 Buyurtmani qabul qilish uchun hozirgi joylashuvingizni yuboring.\n\n👇 Pastdagi "📍 Yuborish" tugmasini bosing:`, {
     parse_mode: "Markdown",
     reply_markup: {
@@ -63,22 +61,22 @@ ${productLines}
 
     // Yandex navigatsiya URL (agar address mavjud bo'lsa)
     const yandexUrl = `https://yandex.com/maps/?rtext=~${driverLocation.latitude},${driverLocation.longitude}~${lat},${long}&rtt=auto`;
-// 📤 Xabarni yuborish (foto bilan, karta ko‘rinishida)
-await bot.sendPhoto(chatId, 'https://explorerbyx.org/assets/images/ecowater-logo.jpg', {
-  caption: text,
-  parse_mode: "HTML",
-  reply_markup: {
-    inline_keyboard: [
-      [
-        { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
-        { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
-      ],
-      [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
-    ],
-  },
-});
- // ✅ Xabar muvaffaqiyatli yuborilgandan keyin isSent = true qilish
- await Order.findByIdAndUpdate(ID, { isSent: true, status : "Haydovchiga yuborildi" });
+    // 📤 Xabarni yuborish (foto bilan, karta ko‘rinishida)
+    await bot.sendPhoto(chatId, 'https://explorerbyx.org/assets/images/ecowater-logo.jpg', {
+      caption: text,
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
+            { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
+          ],
+          [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
+        ],
+      },
+    });
+    // ✅ Xabar muvaffaqiyatli yuborilgandan keyin isSent = true qilish
+    await Order.findByIdAndUpdate(ID, { isSent: true, status: "Haydovchiga yuborildi" });
     if (msg && msg.message_id) {
       try {
         await bot.deleteMessage(chatId, msg.message_id); // Joylashuvni o'chirish
@@ -127,7 +125,7 @@ bot.on("callback_query", async (query) => {
       await bot.sendMessage(chatId, `❌ Buyurtma topilmadi !`);
     }
   }
-  if(callbackData.startsWith("cancel_")) {
+  if (callbackData.startsWith("cancel_")) {
     const orderId = callbackData.split("_")[1]; // order ID olish
     const order = await Order.findById(orderId).populate("customerId"); // customerId ni populate qilish
     if (order) {
@@ -139,15 +137,15 @@ bot.on("callback_query", async (query) => {
       await bot.sendMessage(chatId, `📦 *Buyurtma raqami:* ${order.orderNumber}\n\n❌ *Buyurtma bekor qilindi!*`, {
         parse_mode: "Markdown"
       });
-     // Tugmani va xabarni yangilash
-     await bot.editMessageReplyMarkup({
-      inline_keyboard: [
-        [{ text: "❌ Buyurtma bekor qilindi", callback_data: `cancelled_${orderId}` }] // Bekor qilindi degan xabar
-      ]
-    }, {
-      chat_id: chatId,
-      message_id: query.message.message_id
-    });
+      // Tugmani va xabarni yangilash
+      await bot.editMessageReplyMarkup({
+        inline_keyboard: [
+          [{ text: "❌ Buyurtma bekor qilindi", callback_data: `cancelled_${orderId}` }] // Bekor qilindi degan xabar
+        ]
+      }, {
+        chat_id: chatId,
+        message_id: query.message.message_id
+      });
     } else {
       await bot.sendMessage(chatId, `❌ Buyurtma topilmadi !`);
     }
@@ -164,7 +162,7 @@ bot.on("callback_query", async (query) => {
       });
 
       await bot.editMessageReplyMarkup({
-        inline_keyboard: [ [{ text: "✅ Buyurtma muvaffaqiyatli yetkazildi", callback_data: `Delivered_${order._id}` }],] 
+        inline_keyboard: [[{ text: "✅ Buyurtma muvaffaqiyatli yetkazildi", callback_data: `Delivered_${order._id}` }],]
       }, {
         chat_id: chatId,
         message_id: query.message.message_id

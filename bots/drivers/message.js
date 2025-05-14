@@ -21,7 +21,7 @@ const {
   LoginPassword
 } = require("../drivers/helpers/start.js");
 
-const {GetNewOrders} = require("../drivers/services/driver.service.js")
+const { GetNewOrders } = require("../drivers/services/driver.service.js")
 const DriverModel = require("../model/drivers/driver.model.js");
 const { handleDriverMessages } = require("./message/driver.message.js");
 const { bot } = require("./bot.js");
@@ -29,17 +29,17 @@ bot.on("message", async (msg) => {
   const chatId = msg.from.id;
   const text = msg.text;
   const driver = await DriverModel.findOne({ chatId: chatId });
-  await handleDriverMessages(msg); 
+  await handleDriverMessages(msg);
   if (text === "/start") {
     start(msg);
   }
   if (text === "🔐 Kirish") {
     login(msg);
   }
-  if (driver?.action === "login_username" && driver?.chatId ) {
+  if (driver?.action === "login_username" && driver?.chatId) {
     LoginUsername(msg);
   }
-  if (driver?.action === "login_password" && driver?.chatId ) {
+  if (driver?.action === "login_password" && driver?.chatId) {
     LoginPassword(msg);
   }
   if (text === "🆔 Ro'yxatdan o'tish") {
@@ -90,5 +90,5 @@ bot.on("message", async (msg) => {
   if (driver?.action === "register_car_number") {
     CreateCarNumber(msg);
   }
-  
+
 });

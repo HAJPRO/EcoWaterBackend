@@ -9,28 +9,33 @@ const errorMiddleware = require("./middlewares/error.middleware.js");
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const { initSocket } = require("./socket"); // ✅ Import qilyapmiz!
+const { setupSocket } = require("./socket/socket.js")
 app.use(cors({ credentials: true, origin: "*" }));
 // app.use(express.static(path.join(__dirname, "./public")));
 app.use(express.static("./public"));
 app.use(fileUpload({}));
 app.use(cookie({}));
 app.use(errorMiddleware);
-//Socket.io
+
 const http = require("http");
-const server = http.createServer(app); // ✅ Avval server yaratamiz!
-// ✅ **Socket.io ni boshlash**
-initSocket(server);
+const server = http.createServer(app);
+const io = setupSocket(server);
+// Global o‘rniga app ichida saqlash
+app.set("io", io);
 const PORT = process.env.PORT || 5000;
 // Routes
 // 📌 BOTLAR
 require("./bots/drivers/bot.js");
 
-
-app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
 app.use("/api/v1/helpers", require("./routes/helpers/address/address.route.js"));
+// Admin
+app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
+// HR
+app.use("/api/v1/hr/employees", require("./routes/hr/employee/employee.route.js"));
+// Drivers
 app.use("/api/v1/drivers", require("./routes/drivers/driver.route.js"));
+// Customers
 app.use("/api/v1/customers", require("./routes/customers/c-managment/managment.route.js"));
 // Sale
 app.use("/api/v1/sale", require("./routes/sale/orders/order.route.js"));

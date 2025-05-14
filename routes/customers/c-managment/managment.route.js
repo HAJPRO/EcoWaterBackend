@@ -10,17 +10,17 @@ router.post(
   authMiddleware, CustomerManagmentController.Create
 );
 router.post(
-    "/managment/customers",
-    authMiddleware, CustomerManagmentController.GetAll
-  );
-  router.post(
-    "/managment/deleted",
-    authMiddleware, CustomerManagmentController.DeleteById
-  );
-  router.post(
-    "/managment/getone",
-    authMiddleware, CustomerManagmentController.GetById
-  );
+  "/managment/customers",
+  authMiddleware, CustomerManagmentController.GetAll
+);
+router.post(
+  "/managment/deleted",
+  authMiddleware, CustomerManagmentController.DeleteById
+);
+router.post(
+  "/managment/getone",
+  authMiddleware, CustomerManagmentController.GetById
+);
 
 
 
