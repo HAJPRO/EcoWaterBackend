@@ -4,6 +4,7 @@ DB_URL = mongodb+srv://umidshomurodov265:XnhfHpS4sG4ru5hI@cluster0.3ujxc.mongodb
 JWT_REFRESH_TOKEN = backend_refresh_key
 JWT_ACCESS_TOKEN = backend_access_key
 
+TG_TOKEN_ORDER =  7601750934:AAGmtWQ-PpkHTDU4HgCZpyx55R4na3OIHek
 TG_TOKEN_HR = 8153188682:AAHpWAks8N8RPOdg2jdN_SQGsRGWjL0yzK8
 TG_TOKEN_SEAM = 7667697909:AAGvjmG4ZCG8UC5pesT4NEgYOxid8vP3QEc
 
