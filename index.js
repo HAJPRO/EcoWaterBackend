@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const { setupSocket } = require("./socket/socket.js")
 app.use(cors({ credentials: true, origin: "*" }));
-// app.use(express.static(path.join(__dirname, "./public")));
+// app.use(express.static(path.join(__dirname, "./public"))); /////
 app.use(express.static("./public"));
 app.use(fileUpload({}));
 app.use(cookie({}));
