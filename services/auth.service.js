@@ -9,7 +9,8 @@ const tokenService = require("../services/token.service");
 const BaseError = require("../errors/base.error");
 
 class AuthService {
-  async register(username, password, department) {
+  async register(data) {
+    const { username, password } = data;
     const existUser = await userModel.findOne({ username });
     if (existUser) {
       throw BaseError.BadRequest(
@@ -18,15 +19,12 @@ class AuthService {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-    const user = await userModel.create({
-      username,
-      password: hashPassword,
-      department,
-    });
+    data.password = hashPassword;
+    data.action = "login_successfully";
+    data.chatId = 1;
+    // Endi data to‘liq, shu jumladan password ham yangilangan holatda
+    const user = await userModel.create(data);
     const userDto = new UserDto(user);
-
-    // await mailService.sendMail(username, `${process.env.API_URL}/api/auth/activation/${userDto.id}`)
-
     // ASSIGN DEFAULT PERMISSIONS
     const defaultPermissions = await PermissionModel.find({ is_default: 1 });
     if (defaultPermissions.length > 0) {
@@ -52,7 +50,7 @@ class AuthService {
 
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-    return { user: userDto, ...tokens };
+    return { msg: "Muvaffaqiyatli qo'shildi", user: userDto, ...tokens };
   }
 
   async login(username, password) {

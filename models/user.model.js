@@ -4,11 +4,10 @@ const userSchema = new Schema(
   {
 
     department: { type: String },
-    permissions: { type: Array, default: [] },
     isActivated: { type: Boolean, default: false },
     chatId: {
       type: String,
-      unique: true,  // Har bir foydalanuvchining yoki haydovchining chat ID si unikaldir
+      // unique: true,  // Har bir foydalanuvchining yoki haydovchining chat ID si unikaldir
     },
     action: {
       type: String,
@@ -91,34 +90,21 @@ const userSchema = new Schema(
       house: { type: String },
     },
 
-    carNumber: {
-      type: String,
-    },
-    carType: {
-      type: String,
-      // enum: ["Damas", "Labo", "Porter", "Mers", "BMW", "Gentra","Boshqa"],
-    },
+
 
     role: {
       type: String,
-      enum: ["user", "customer", "admin", "driver"],
+      // enum: ["user", "customer", "admin", "driver", 'admin', 'buhgalter', 'manager', 'superadmin',],
       default: "user",
     },
     permission: {
       type: [String],
       default: [],
-      enum: [
-        "accept_orders",
-        "view_orders",
-        "add_orders",
-        "edit_profile",
-        "view_stats",
-        "admin_access",
-      ]
+
     },
     position: {
       type: String,
-      enum: ["Yosh haydovchi", "O'rta haydovchi", "Katta haydovchi"],
+      // enum: ["Yosh haydovchi", "O'rta haydovchi", "Katta haydovchi"],
       default: "Yosh haydovchi",
     },
     status: {
@@ -136,6 +122,24 @@ const userSchema = new Schema(
     },
 
     // Qo'shilgan maydonlar
+    driverLicenseNumber: {
+      type: String,
+      unique: true,
+    },
+    driverLicenseDate: {
+      type: Date,
+    },
+    carNumber: {
+      type: String,
+    },
+    carType: {
+      type: String,
+      // enum: ["Damas", "Labo", "Porter", "Mers", "BMW", "Gentra","Boshqa"],
+    },
+    carColor: {
+      type: String,
+      // enum: ["Qora", "Oq", "Qizil", "Yashil", "Moviy", "Boshqa"],
+    },
     profileImage: {
       type: String,
       default: "default_image_url",
@@ -146,15 +150,15 @@ const userSchema = new Schema(
     },
     lastLocation: {
       type: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: Number },
+        longitude: { type: Number },
       },
       default: { latitude: 0, longitude: 0 },
     },
     workingHours: {
       type: {
-        start: { type: Date, required: true },
-        end: { type: Date, required: true },
+        start: { type: Date },
+        end: { type: Date },
       },
     },
     ratings: {

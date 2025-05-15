@@ -17,7 +17,7 @@ const OrderSchema = new Schema(
     driverAcceptedTime: { type: Date },
     driverArrivedTime: { type: Date },
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    driverId: { type: Schema.Types.ObjectId, ref: "Driver" },
+    driverId: { type: Schema.Types.ObjectId, ref: "User" },
     customerId: {
       type: Schema.Types.ObjectId,
       ref: "Customer",

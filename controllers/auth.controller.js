@@ -5,12 +5,8 @@ const authService = require("../services/auth.service");
 class AuthController {
   async register(req, res, next) {
     try {
-      // const errors = validationResult(req)
-      // if (!errors.isEmpty()) {
-      // 	return next(BaseError.BadRequest('Error with validation', errors.array()))
-      // }
-      const { username, password, department } = req.body;
-      const data = await authService.register(username, password, department);
+
+      const data = await authService.register(req.body);
       res.cookie("refreshToken", data.refreshToken, {
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 1000,

@@ -1,6 +1,6 @@
 const { uuid } = require("uuidv4");
 const { bot } = require("../bot");
-const DriverModel = require("../../model/drivers/driver.model.js");
+const UserModel = require("../../../models/user.model");
 // import moment from "moment-timezone";
 const {
   AuthKeyboard,
@@ -28,7 +28,7 @@ Agar sizda hali hisob qaydnomangiz bo'lmasa, ro'yxatdan o'tish tugmasini bosing 
 const login = async (msg) => {
   const chatId = msg.from.id;
 
-  const driver = await DriverModel.findOne({ chatId });
+  const driver = await UserModel.findOne({ chatId });
   if (driver?.chatId === String(chatId) && driver?.role === 'driver' && driver?.action === 'login_successfully') {
     bot.sendMessage(
       chatId,
@@ -61,7 +61,7 @@ const LoginUsername = async (msg) => {
   const chatId = msg.from.id;
   const username = msg.text.trim();
 
-  const driver = await DriverModel.findOne({ chatId });
+  const driver = await UserModel.findOne({ chatId });
   if (driver.username === username) {
     driver.action = "login_password"; // Keyingi bosqich
     await driver.save();
@@ -78,7 +78,7 @@ const LoginPassword = async (msg) => {
   const chatId = msg.from.id;
   const password = msg.text.trim();
 
-  const driver = await DriverModel.findOne({ chatId });
+  const driver = await UserModel.findOne({ chatId });
   if (driver.password === password) {
     driver.action = "login_successfully"; // Keyingi bosqich
     await driver.save();
@@ -106,10 +106,10 @@ const LoginPassword = async (msg) => {
 const register = async (msg) => {
   const chatId = msg.from.id;
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
-    driver = await DriverModel.create({
+    driver = await UserModel.create({
       chatId,
       action: "register",
     });
@@ -128,11 +128,11 @@ const CreateFullname = async (msg) => {
   const chatId = msg.from.id;
   const fullname = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     // Foydalanuvchi yo'q bo‘lsa, yangi yaratamiz
-    driver = await DriverModel.create({
+    driver = await UserModel.create({
       chatId,
       fullname,
       action: "register_gender", // keyingi bosqich
@@ -158,7 +158,7 @@ const CreateFullname = async (msg) => {
     // Allaqachon ro‘yxatdan o‘tgan bo‘lsa
     await bot.sendMessage(chatId, `📌 Siz allaqachon ro'yxatdan o'tgansiz!`);
 
-    await DriverModel.findOneAndUpdate(
+    await UserModel.findOneAndUpdate(
       { chatId },
       { action: "login" },
       { new: true }
@@ -187,7 +187,7 @@ const CreateGender = async (msg) => {
     );
   }
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver.fullname) {
     // Avval fullname kiritilmagan — noto‘g‘ri oqim
@@ -211,7 +211,7 @@ const CreateAge = async (msg) => {
   const chatId = msg.from.id;
   const age = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver.gender) {
     return bot.sendMessage(chatId, `❗️ Iltimos, avval jinsingizni kiriting.`);
@@ -230,7 +230,7 @@ const CreateUsername = async (msg) => {
   const chatId = msg.from.id;
   const username = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver.age) {
     return bot.sendMessage(chatId, `❗️ Iltimos, avval yoshingizni kiriting.`);
@@ -250,7 +250,7 @@ const CreatePassword = async (msg) => {
   const password = msg.text.trim();
   console.log(password);
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver.username) {
     return bot.sendMessage(
@@ -272,7 +272,7 @@ const CreatePassport = async (msg) => {
   const chatId = msg.from.id;
   const passportNumber = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -297,7 +297,7 @@ const CreateRegion = async (msg) => {
   const chatId = msg.from.id;
   const region = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -320,7 +320,7 @@ const CreateDistrict = async (msg) => {
   const chatId = msg.from.id;
   const district = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -342,7 +342,7 @@ const CreateNeighborhood = async (msg) => {
   const chatId = msg.from.id;
   const neighborhood = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -363,7 +363,7 @@ const CreateStreet = async (msg) => {
   const chatId = msg.from.id;
   const street = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -384,7 +384,7 @@ const CreateHouse = async (msg) => {
   const chatId = msg.from.id;
   const house = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -405,7 +405,7 @@ const CreatePhoneNumber = async (msg) => {
   const chatId = msg.from.id;
   const phoneNumber = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -426,7 +426,7 @@ const CreateCarType = async (msg) => {
   const chatId = msg.from.id;
   const carType = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -447,7 +447,7 @@ const CreateCarNumber = async (msg) => {
   const chatId = msg.from.id;
   const carNumber = msg.text.trim();
 
-  let driver = await DriverModel.findOne({ chatId });
+  let driver = await UserModel.findOne({ chatId });
 
   if (!driver) {
     return bot.sendMessage(
@@ -471,7 +471,7 @@ const CreateCarNumber = async (msg) => {
 
 const cancel = async (msg) => {
   const chatId = msg.from.id;
-  await DriverModel.deleteOne({ chatId });
+  await UserModel.deleteOne({ chatId });
   // Foydalanuvchiga habar yuborish va klaviaturani olib tashlash
   bot.sendMessage(
     chatId,
