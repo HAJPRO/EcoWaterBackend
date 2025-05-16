@@ -1,7 +1,7 @@
 const PermissionModel = require("../../models/Admin/permission.model");
 
 class PermissionService {
-  async addPermission(data) {
+  async CreatePermission(data) {
     try {
       const permission_name = data.permission_name;
       const isExists = await PermissionModel.findOne({ permission_name });

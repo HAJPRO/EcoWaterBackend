@@ -29,7 +29,8 @@ require("./bots/drivers/bot.js");
 
 app.use("/api/v1/helpers", require("./routes/helpers/address/address.route.js"));
 // Admin
-app.use("/api/v1/admin", require("./routes/admin/admin.route.js"));
+app.use("/api/v1/admin/permission", require("./routes/admin/permission.route.js"));
+app.use("/api/v1/admin/role", require("./routes/admin/role.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
 // HR
 app.use("/api/v1/hr/employees", require("./routes/hr/employee/employee.route.js"));

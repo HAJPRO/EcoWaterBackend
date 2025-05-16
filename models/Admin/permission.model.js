@@ -2,16 +2,18 @@ const { model, Schema } = require("mongoose");
 
 const PermissionSchema = new Schema(
   {
-    permission_name: {
+    name: {
       type: String,
       required: true,
+      unique: true, // Masalan: 'user:create'
     },
-    actions: {
-      type: Array,
-      default: [],
+    description: {
+      type: String,
+      required: false,
     },
-  },
-  { timestamps: true }
+  }, {
+  timestamps: true,
+}
 );
 
 module.exports = model("Permission", PermissionSchema);

@@ -89,14 +89,9 @@ const userSchema = new Schema(
       street: { type: String },
       house: { type: String },
     },
-
-
-
-    role: {
-      type: String,
-      // enum: ["user", "customer", "admin", "driver", 'admin', 'buhgalter', 'manager', 'superadmin',],
-      default: "user",
-    },
+    roles: [{
+      type: Schema.Types.ObjectId, ref: "Role"
+    }],
     permission: {
       type: [String],
       default: [],

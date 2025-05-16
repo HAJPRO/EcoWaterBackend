@@ -2,16 +2,20 @@ const { model, Schema } = require("mongoose");
 
 const RoleSchema = new Schema(
   {
-    role_name: {
+    name: {
       type: String,
       required: true,
+      unique: true, // Masalan: 'admin', 'manager'
     },
-    value: {
-      type: Number,
-      required: true,
+    description: {
+      type: String,
     },
-  },
-  { timestamps: true }
+    permissions: [{
+      type: Schema.Types.ObjectId, ref: "Permission"
+    }],
+  }, {
+  timestamps: true,
+}
 );
 
 module.exports = model("Role", RoleSchema);
