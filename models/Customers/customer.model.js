@@ -70,6 +70,6 @@ const CustomerSchema = new Schema({
     type: Date,
     default: null,
   },
-}, {timestamps : true});
+}, { timestamps: true });
 
 module.exports = model("Customer", CustomerSchema);

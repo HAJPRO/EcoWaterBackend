@@ -36,13 +36,13 @@ class EmployeeManagmentService {
 
         try {
             if (data.status === 0) {
-                const customers = await User.find().lean()
-                return { customers }
+                const employees = await User.find().lean()
+                return { employees }
             }
             if (data.status === 1) {
                 const all_length = await this.getAllLength(data);
-                const customers = await this.GetAllCustomers(data);
-                return { customers, all_length };
+                const employees = await this.GetAllEmloyess(data);
+                return { employees, all_length };
             } else {
                 return { msg: `Server xatosi: ${error.message} `, customers: [] };
             }
@@ -51,7 +51,7 @@ class EmployeeManagmentService {
         }
     }
     // 📌 **Barcha mijozlar olish**
-    async GetAllCustomers(data) {
+    async GetAllEmloyess(data) {
         const page = Number(data.page);
         const limit = Number(data.limit)
         const skip = (page - 1) * limit;
