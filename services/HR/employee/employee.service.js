@@ -56,7 +56,7 @@ class EmployeeManagmentService {
         const limit = Number(data.limit)
         const skip = (page - 1) * limit;
         try {
-            const customers = await User.find({})
+            const customers = await User.find().populate("roles", "name permissions")
                 .skip(skip)
                 .limit(limit)
                 .lean();

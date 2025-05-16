@@ -14,5 +14,10 @@ router.post(
     authMiddleware,
     PermissionController.CreatePermission
 );
+router.post(
+    "/all",
+    authMiddleware,
+    PermissionController.GetAll
+);
 
 module.exports = router;

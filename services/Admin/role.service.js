@@ -1,19 +1,33 @@
 const RoleModel = require("../../models/Admin/role.model");
 
 class RoleService {
-  async CreateRole(data) {
+  async Create(data) {
     try {
-      const role_name = data.role_name;
-      const isExists = await RoleModel.findOne({ role_name });
+      const isExists = await RoleModel.findOne({
+        $or: [
+          { name: data.name },
+          { value: data.value }
+        ]
+      });
+
       if (!isExists) {
         const Role = new RoleModel(data);
         const role = await RoleModel.create(Role);
-        return { msg: "Role Added successfully !", role };
+        return { msg: "Rol muvaffaqiyatli qo‘shildi!", role };
       } else {
-        return { msg: "Role name already exists" };
+        return { msg: "Bunday nomdagi rol allaqachon mavjud." };
       }
     } catch (err) {
-      return err;
+      return { msg: "Xatolik yuz berdi", error: err };
+    }
+  }
+
+  async GetAll() {
+    try {
+      const roles = await RoleModel.find()
+      return { msg: "Barchasi", roles }
+    } catch (err) {
+      return { msg: "Xatolik yuz berdi", error: err };
     }
   }
 

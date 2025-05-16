@@ -7,11 +7,16 @@ const RoleSchema = new Schema(
       required: true,
       unique: true, // Masalan: 'admin', 'manager'
     },
+    value: {
+      type: String,
+      required: true,
+      unique: true, // Masalan: 'admin', 'manager'
+    },
     description: {
       type: String,
     },
     permissions: [{
-      type: Schema.Types.ObjectId, ref: "Permission"
+      type: String
     }],
   }, {
   timestamps: true,

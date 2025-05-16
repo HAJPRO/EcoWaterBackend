@@ -12,7 +12,13 @@ const {
 router.post(
     "/create",
     authMiddleware,
-    RoleController.CreateRole
+    RoleController.Create
+);
+
+router.post(
+    "/all",
+    authMiddleware,
+    RoleController.GetAll
 );
 
 module.exports = router;

@@ -92,11 +92,7 @@ const userSchema = new Schema(
     roles: [{
       type: Schema.Types.ObjectId, ref: "Role"
     }],
-    permission: {
-      type: [String],
-      default: [],
 
-    },
     position: {
       type: String,
       // enum: ["Yosh haydovchi", "O'rta haydovchi", "Katta haydovchi"],

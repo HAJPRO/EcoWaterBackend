@@ -7,6 +7,11 @@ const PermissionSchema = new Schema(
       required: true,
       unique: true, // Masalan: 'user:create'
     },
+    value: {
+      type: String,
+      required: true,
+      unique: true, // Masalan: 'user:create'
+    },
     description: {
       type: String,
       required: false,
