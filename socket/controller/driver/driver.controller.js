@@ -1,28 +1,31 @@
 const DriverService = require("../../../socket/service/drivers/driver.service");
 
 class DriverController {
-    // Haydovchi tizimga kirdi
+    // 🔌 Haydovchi tizimga ulandi
     static driverConnected(driver, socket, io) {
         if (!driver || !driver.id) {
-            console.error("Driver ma'lumotlari noto‘g‘ri");
+            console.error("❌ Xato: haydovchi ma'lumotlari yo‘q yoki noto‘g‘ri!");
             return;
         }
-        DriverService.addOrUpdateDriver(driver, socket.id);
-        io.emit("drivers:online", DriverService.GetOnlineDrivers());
+
+        // Ro‘yxatga olish yoki yangilash
+        DriverService.registerDriver(driver, socket.id, io);
     }
 
-    // Haydovchi koordinatalarini yangilash
+    // 📍 Haydovchi joylashuvini yangiladi
     static updateLocation(data, socket, io) {
-        if (!data || !data.id) return;
-        // socket.id uzatish, shunda xizmat socketId-ni yangilaydi (agar kerak bo‘lsa)
+        if (!data || !data.id) {
+            console.warn("⚠️ Koordinata yangilanishi uchun haydovchi ID kerak");
+            return;
+        }
+
         DriverService.addOrUpdateDriver(data, socket.id);
-        io.emit("drivers:online", DriverService.GetOnlineDrivers());
+        io.emit("drivers:online", DriverService.getOnlineDrivers());
     }
 
-    // Haydovchi tizimdan chiqdi
+    // 🔌 Haydovchi tizimdan chiqdi
     static driverDisconnected(socket, io) {
-        DriverService.RemoveDriver(socket.id);
-        io.emit("drivers:online", DriverService.GetOnlineDrivers());
+        DriverService.removeDriver(socket.id, io);
     }
 }
 
