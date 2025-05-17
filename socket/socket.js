@@ -5,10 +5,11 @@ const DriverController = require("./controller/driver/driver.controller");
 function setupSocket(server) {
     const io = new Server(server, {
         cors: {
-            origin: '*', // ✅ Faqat ruxsat etilgan frontend domeni
-            pingInterval: 25000,     // Har 25 sekundda ping yuboriladi
-            pingTimeout: 300000,      // 5  min ichida pong kelmasa uzadi
+            origin: "https://ecowater.company-erp.uz", // Frontend domeningiz
+            credentials: true, // Cookie va headerlar uchun
         },
+        pingInterval: 25000,
+        pingTimeout: 300000,
     });
 
     io.on("connection", (socket) => {
