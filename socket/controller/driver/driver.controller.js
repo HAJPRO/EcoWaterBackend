@@ -1,24 +1,29 @@
 const DriverService = require("../../../socket/service/drivers/driver.service");
 
-class UserController {
-    static RegisterDriver(socket, io) {
-        // 🔹 Frontenddan "register" hodisasi kelganida uni logga chiqarish
-        socket.on("register", (data) => {
-            console.log("📥 Frontenddan keldi:");
+class DriverController {
+    // Haydovchi tizimga kirdi
+    static driverConnected(driver, socket, io) {
+        if (!driver || !driver.id) {
+            console.error("Driver ma'lumotlari noto‘g‘ri");
+            return;
+        }
+        DriverService.addOrUpdateDriver(driver, socket.id);
+        io.emit("drivers:online", DriverService.getAllDrivers());
+    }
 
-            // 🔹 Foydalanuvchini ro‘yxatga olish
-            DriverService.RegisterDriver(data, socket, io);
+    // Haydovchi koordinatalarini yangilash
+    static updateLocation(data, socket, io) {
+        if (!data || !data.id) return;
+        // socket.id uzatish, shunda xizmat socketId-ni yangilaydi (agar kerak bo‘lsa)
+        DriverService.addOrUpdateDriver(data, socket.id);
+        io.emit("drivers:online", DriverService.getAllDrivers());
+    }
 
-            // 🔹 Foydalanuvchiga ro‘yxatga olingani haqida xabar yuborish
-            socket.emit("register_success", { message: "Haydovchi ro'yxatga olindi!" });
-        });
-
-        // 🔹 Foydalanuvchi uzilganda
-        socket.on("disconnect", () => {
-            console.log(`❌ Haydovchi uzildi: ${socket.id}`);
-            DriverService.RemoveDriver(socket, io);
-        });
+    // Haydovchi tizimdan chiqdi
+    static driverDisconnected(socket, io) {
+        DriverService.removeDriverBySocketId(socket.id);
+        io.emit("drivers:online", DriverService.getAllDrivers());
     }
 }
 
-module.exports = UserController;
+module.exports = DriverController;
