@@ -1,23 +1,24 @@
 const { uuid } = require("uuidv4");
 const Order = require("../../../models/Sale/orders/order.model");
 const { bot } = require("../bot");
-const formatNumber = (num) => {
-  return Number(num).toLocaleString("uz-UZ"); // 1 000 000
-};
 
+const formatNumber = (num) => Number(num).toLocaleString("uz-UZ");
 
-let driverLocation = { latitude: null, longitude: null };
+let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi uchun
+
 const SentOrder = async (order, msg) => {
   const ID = order._id;
   const chatId = order.driverId.chatId;
   const products = order.products;
   const customer = order.customerId;
-  const { lat, long } = order.customerId.location; // yoki order.location
-  if ((order.status === 'Haydovchiga yuborildi' || order.status === 'Yetkazib berilmoqda' || order.status === 'Yetkazildi') && order.isSent === true) {
-    return;
-  }
+  const { lat, long } = customer.location;
 
-  // 📍 Haydovchidan joylashuv so‘rash
+  if (
+    ["Haydovchiga yuborildi", "Yetkazib berilmoqda", "Yetkazildi"].includes(order.status) &&
+    order.isSent === true
+  ) return;
+
+  // 🧭 Joylashuv so'rash
   bot.sendMessage(chatId, `🚨 *Yangi buyurtma!* 🚨\n\n📦 Buyurtmani qabul qilish uchun hozirgi joylashuvingizni yuboring.\n\n👇 Pastdagi "📍 Yuborish" tugmasini bosing:`, {
     parse_mode: "Markdown",
     reply_markup: {
@@ -27,16 +28,12 @@ const SentOrder = async (order, msg) => {
     },
   });
 
-  // Haydovchi joylashuvni yuborganidan keyin
-  bot.on("location", async (msg) => {
+  // 📍 Haydovchi joylashuv yuborganidan keyin
+  const locationHandler = async (msg) => {
+    if (handledChatIds.has(chatId)) return; // faqat bir marta ishlashi uchun
+    handledChatIds.add(chatId);
+
     const { latitude, longitude } = msg.location;
-    const LastOrders = await Order.find({
-      "driverId.chatId": chatId,
-      status: "Haydovchiga yuborilmoqda",
-      isSent: false
-    }).sort({ createdAt: -1 }); // so'nggi buyurtmani olish
-    // Haydovchining joylashuvini saqlash
-    driverLocation = { latitude, longitude };
 
     await Order.findByIdAndUpdate(ID, {
       driverLocation: {
@@ -44,17 +41,18 @@ const SentOrder = async (order, msg) => {
         long: longitude,
       },
     });
-    // Mahsulotlar ro'yxatini tayyorlash
-    const productLines = LastOrders.products
-      .map(
-        (p) =>
-          `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
+
+    const productLines = products
+      .map((p) =>
+        `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
       )
       .join("\n");
 
     const text = `📦 Buyurtma nomeri: ${order.orderNumber}
-📍 Manzil: ${order.customerId.address.region}
-🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}
+📍 Manzil: ${customer.address.region}
+🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", {
+      timeZone: "Asia/Tashkent",
+    })}
 
 👤 Mijoz: ${customer.fullname}
 📞 Tel: ${customer.phoneNumber}
@@ -63,98 +61,92 @@ const SentOrder = async (order, msg) => {
 ${productLines}
 💰🟢 Jami: ${formatNumber(order.totalAmount)} so'm`;
 
-    // Yandex navigatsiya URL (agar address mavjud bo'lsa)
-    const yandexUrl = `https://yandex.com/maps/?rtext=~${driverLocation.latitude},${driverLocation.longitude}~${lat},${long}&rtt=auto`;
-    // 📤 Xabarni yuborish (foto bilan, karta ko‘rinishida)
-    await bot.sendPhoto(chatId, 'https://explorerbyx.org/assets/images/ecowater-logo.jpg', {
+    const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
+
+    await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
       caption: text,
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
           [
-            { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
-            { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
+            { text: "✅ Qabul qilish", callback_data: `accept_${ID}` },
+            { text: "❌ Bekor qilish", callback_data: `cancel_${ID}` },
           ],
           [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
         ],
       },
     });
-    // ✅ Xabar muvaffaqiyatli yuborilgandan keyin isSent = true qilish
+
     await Order.findByIdAndUpdate(ID, { isSent: true, status: "Haydovchiga yuborildi" });
-    if (msg && msg.message_id) {
+
+    if (msg?.message_id) {
       try {
-        await bot.deleteMessage(chatId, msg.message_id); // Joylashuvni o'chirish
+        await bot.deleteMessage(chatId, msg.message_id);
       } catch (error) {
         console.error("Xabarni o'chirishda xatolik:", error.message);
       }
-    } else {
-      console.error("Xabarni o'chirish uchun msg.message_id mavjud emas");
     }
-  });
+  };
+
+  bot.once("location", locationHandler); // faqat 1 marta ishlashi uchun
 };
-// Callback Queryni qabul qilish va backendga so'rov yuborish
+
+// 📦 Callback query handler
 bot.on("callback_query", async (query) => {
   const chatId = query.message.chat.id;
-  const callbackData = query.data; // "accept_<orderId>" yoki "cancel_<orderId>"
+  const callbackData = query.data;
 
   if (callbackData.startsWith("accept_")) {
-    const orderId = callbackData.split("_")[1]; // order ID olish
-    const order = await Order.findById(orderId).populate("customerId"); // customerId ni populate qilish
-    if (order) {
-      const UpdateOrder = await Order.findByIdAndUpdate(
-        orderId,
-        {
-          status: "Yetkazib berilmoqda",
-          driverAcceptedTime: new Date(),
-        },
-        { new: true }
-      );
-      const { lat: latitude, long: longitude } = UpdateOrder.driverLocation;
-      const { lat, long } = order.customerId.location;
+    const orderId = callbackData.split("_")[1];
+    const order = await Order.findById(orderId).populate("customerId");
 
-      const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
-      await bot.editMessageReplyMarkup(
-        {
-          inline_keyboard: [
-            [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
-            [{ text: "🤝 Mijozga yetkazildi", callback_data: `delivered_${order._id}` }],
-          ],
-        },
-        {
-          chat_id: chatId,
-          message_id: query.message.message_id,
-        }
-      );
-    } else {
-      await bot.sendMessage(chatId, `❌ Buyurtma topilmadi !`);
-    }
-  }
-  if (callbackData.startsWith("cancel_")) {
-    const orderId = callbackData.split("_")[1]; // order ID olish
-    const order = await Order.findById(orderId).populate("customerId"); // customerId ni populate qilish
     if (order) {
-      await Order.findByIdAndUpdate(
+      const updated = await Order.findByIdAndUpdate(
         orderId,
-        { status: "Bekor qilindi" },
+        { status: "Yetkazib berilmoqda", driverAcceptedTime: new Date() },
         { new: true }
       );
-      await bot.sendMessage(chatId, `📦 *Buyurtma raqami:* ${order.orderNumber}\n\n❌ *Buyurtma bekor qilindi!*`, {
-        parse_mode: "Markdown"
-      });
-      // Tugmani va xabarni yangilash
+
+      const { lat: latitude, long: longitude } = updated.driverLocation;
+      const { lat, long } = order.customerId.location;
+      const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
+
       await bot.editMessageReplyMarkup({
         inline_keyboard: [
-          [{ text: "❌ Buyurtma bekor qilindi", callback_data: `cancelled_${orderId}` }] // Bekor qilindi degan xabar
-        ]
+          [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
+          [{ text: "🤝 Mijozga yetkazildi", callback_data: `delivered_${orderId}` }],
+        ],
       }, {
         chat_id: chatId,
-        message_id: query.message.message_id
+        message_id: query.message.message_id,
       });
     } else {
-      await bot.sendMessage(chatId, `❌ Buyurtma topilmadi !`);
+      await bot.sendMessage(chatId, `❌ Buyurtma topilmadi!`);
     }
   }
-  // Buyurtma yetkazilganligini tasdiqlash
+
+  if (callbackData.startsWith("cancel_")) {
+    const orderId = callbackData.split("_")[1];
+    const order = await Order.findById(orderId).populate("customerId");
+
+    if (order) {
+      await Order.findByIdAndUpdate(orderId, { status: "Bekor qilindi" });
+
+      await bot.sendMessage(chatId, `📦 *Buyurtma raqami:* ${order.orderNumber}\n\n❌ *Buyurtma bekor qilindi!*`, {
+        parse_mode: "Markdown",
+      });
+
+      await bot.editMessageReplyMarkup({
+        inline_keyboard: [[{ text: "❌ Buyurtma bekor qilindi", callback_data: `cancelled_${orderId}` }]],
+      }, {
+        chat_id: chatId,
+        message_id: query.message.message_id,
+      });
+    } else {
+      await bot.sendMessage(chatId, `❌ Buyurtma topilmadi!`);
+    }
+  }
+
   if (callbackData.startsWith("delivered_")) {
     const orderId = callbackData.split("_")[1];
     const order = await Order.findById(orderId);
@@ -162,21 +154,21 @@ bot.on("callback_query", async (query) => {
     if (order) {
       await Order.findByIdAndUpdate(orderId, {
         status: "Yetkazib berildi",
-        driverArrivedTime: new Date()
+        driverArrivedTime: new Date(),
       });
 
       await bot.editMessageReplyMarkup({
-        inline_keyboard: [[{ text: "✅ Buyurtma muvaffaqiyatli yetkazildi", callback_data: `Delivered_${order._id}` }],]
+        inline_keyboard: [[{ text: "✅ Buyurtma muvaffaqiyatli yetkazildi", callback_data: `Delivered_${orderId}` }]],
       }, {
         chat_id: chatId,
-        message_id: query.message.message_id
+        message_id: query.message.message_id,
       });
 
       await bot.sendMessage(chatId, `📦 *Buyurtma raqami:* ${order.orderNumber}\n\n✅ *Buyurtma muvaffaqiyatli yetkazildi!*`, {
-        parse_mode: "Markdown"
+        parse_mode: "Markdown",
       });
     } else {
-      await bot.sendMessage(chatId, "❌ Buyurtma topilmadi!");
+      await bot.sendMessage(chatId, `❌ Buyurtma topilmadi!`);
     }
   }
 });
