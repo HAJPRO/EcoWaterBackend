@@ -30,6 +30,11 @@ const SentOrder = async (order, msg) => {
   // Haydovchi joylashuvni yuborganidan keyin
   bot.on("location", async (msg) => {
     const { latitude, longitude } = msg.location;
+    const LastOrders = await Order.find({
+      "driverId.chatId": chatId,
+      status: "Haydovchiga yuborilmoqda",
+      isSent: false
+    }).sort({ createdAt: -1 }); // so'nggi buyurtmani olish
     // Haydovchining joylashuvini saqlash
     driverLocation = { latitude, longitude };
 
@@ -40,7 +45,7 @@ const SentOrder = async (order, msg) => {
       },
     });
     // Mahsulotlar ro'yxatini tayyorlash
-    const productLines = products
+    const productLines = LastOrders.products
       .map(
         (p) =>
           `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
