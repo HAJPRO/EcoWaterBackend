@@ -8,7 +8,7 @@ class DriverController {
             return;
         }
         DriverService.addOrUpdateDriver(driver, socket.id);
-        io.emit("drivers:online", DriverService.getAllDrivers());
+        io.emit("drivers:online", DriverService.GetOnlineDrivers());
     }
 
     // Haydovchi koordinatalarini yangilash
@@ -16,13 +16,13 @@ class DriverController {
         if (!data || !data.id) return;
         // socket.id uzatish, shunda xizmat socketId-ni yangilaydi (agar kerak bo‘lsa)
         DriverService.addOrUpdateDriver(data, socket.id);
-        io.emit("drivers:online", DriverService.getAllDrivers());
+        io.emit("drivers:online", DriverService.GetOnlineDrivers());
     }
 
     // Haydovchi tizimdan chiqdi
     static driverDisconnected(socket, io) {
-        DriverService.removeDriverBySocketId(socket.id);
-        io.emit("drivers:online", DriverService.getAllDrivers());
+        DriverService.RemoveDriver(socket.id);
+        io.emit("drivers:online", DriverService.GetOnlineDrivers());
     }
 }
 

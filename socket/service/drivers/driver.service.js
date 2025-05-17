@@ -20,7 +20,31 @@ class DriverService {
         io.emit("OnlineDrivers", this.GetOnlineDrivers());
         // 📌 **Agar foydalanuvchida kutayotgan hujjatlar bo‘lsa, ularni jo‘natamiz**
     }
+    addOrUpdateDriver(driverData, socketId) {
+        if (!driverData || !driverData.id) {
+            console.log("❌ Xato: haydovchi ma'lumotlari noto‘g‘ri!");
+            return;
+        }
 
+        const existingDriver = this.drivers.get(socketId);
+
+        if (existingDriver) {
+            // 🔁 Mavjud haydovchining koordinatalarini yangilash
+            this.drivers.set(socketId, {
+                ...existingDriver,
+                ...driverData,
+                socketId,
+            });
+            console.log(`🔄 Haydovchi koordinatalari yangilandi: ${driverData.id}`);
+        } else {
+            // 🆕 Yangi haydovchini ro‘yxatga olish
+            this.drivers.set(socketId, {
+                ...driverData,
+                socketId,
+            });
+            console.log(`🆕 Yangi haydovchi qo‘shildi: ${driverData.id}`);
+        }
+    }
     // 📌 Foydalanuvchini tizimdan o‘chirish
     RemoveDriver(socket, io) {
         if (this.drivers.has(socket.id)) {
