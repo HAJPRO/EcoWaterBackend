@@ -6,3 +6,4 @@ module.exports = { bot };
 require("../drivers/message");
 
 require("../drivers/query");
+s
