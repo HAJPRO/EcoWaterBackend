@@ -1,31 +1,40 @@
+// 📌 Foydalanuvchilarni boshqarish uchun xizmat
 class DriverService {
     constructor() {
-        this.onlineDrivers = [];
+        this.drivers = new Map(); // 📌 Foydalanuvchilarni saqlash uchun xarita (Map)
     }
 
-    addOrUpdateDriver(driver, socketId) {
-        const index = this.onlineDrivers.findIndex(d => d.id === driver.id);
+    // 📌 Foydalanuvchini ro‘yxatga olish
+    RegisterDriver(data, socket, io) {
 
-        if (index !== -1) {
-            // Agar bor bo'lsa, faqat koordinatalarni yangilaymiz
-            this.onlineDrivers[index].lat = driver.lat;
-            this.onlineDrivers[index].lng = driver.lng;
-            this.onlineDrivers[index].socketId = socketId; // socketId yangilansa ham bo'ladi
-            console.log(`📍 Haydovchi (${driver.id}) koordinatasi yangilandi`);
-        } else {
-            // Yangi haydovchini qo'shamiz
-            this.onlineDrivers.push({ ...driver, socketId });
-            console.log(`🔹 Yangi haydovchi qo‘shildi: ${driver.id}`);
+        if (!data || !data.id) {
+            console.log("❌ Xatolik: foydalanuvchi ma'lumotlari noto‘g‘ri!");
+            return;
+        }
+
+        // 🔹 Foydalanuvchini saqlash
+        this.drivers.set(socket.id, { ...data, socketId: socket.id });
+        console.log("🔹 Yangi haydovchi qo‘shildi:");
+
+        // 📢 **Barcha foydalanuvchilarga yangilangan ro‘yxatni yuborish**
+        io.emit("OnlineDrivers", this.GetOnlineDrivers());
+        // 📌 **Agar foydalanuvchida kutayotgan hujjatlar bo‘lsa, ularni jo‘natamiz**
+    }
+
+    // 📌 Foydalanuvchini tizimdan o‘chirish
+    RemoveDriver(socket, io) {
+        if (this.drivers.has(socket.id)) {
+            this.drivers.delete(socket.id);
+            console.log(`❌ Haydovchi tizimdan chiqdi: ${socket.id}`);
+
+            // 📢 **Yangilangan foydalanuvchilar ro‘yxatini yuborish**
+            io.emit("OnlineDrivers", this.GetOnlineDrivers());
         }
     }
 
-    removeDriverBySocketId(socketId) {
-        this.onlineDrivers = this.onlineDrivers.filter(d => d.socketId !== socketId);
-        console.log(`❌ Haydovchi chiqdi: SocketID=${socketId}`);
-    }
-
-    getAllDrivers() {
-        return this.onlineDrivers;
+    // 📌 Hozirda tizimga kirgan foydalanuvchilar ro‘yxatini olish
+    GetOnlineDrivers() {
+        return Array.from(this.drivers.values());
     }
 }
 

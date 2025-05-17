@@ -41,7 +41,6 @@ module.exports = class UserDto {
     this.isActivated = model.isActivated;
     this.roles = model.roles;
     this.actions = model.actions;
-    this.permissions = model.permissions || [];
 
     this.chatId = model.chatId;
     this.action = model.action;
