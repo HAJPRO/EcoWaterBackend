@@ -13,7 +13,7 @@ const SentOrder = async (order, msg) => {
   const products = order.products;
   const customer = order.customerId;
   const { lat, long } = order.customerId.location; // yoki order.location
-  if (order.status === 'Haydovchiga yuborilmoqda' && order.isSent) {
+  if (order.status !== 'Haydovchiga yuborilmoqda' && order.isSent === true) {
     return;
   }
 
