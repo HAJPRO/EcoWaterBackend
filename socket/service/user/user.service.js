@@ -6,21 +6,26 @@ class UserService {
 
     // 📌 Foydalanuvchini ro‘yxatga olish
     RegisterUser(data, socket, io) {
-
         if (!data || !data.id) {
             console.log("❌ Xatolik: foydalanuvchi ma'lumotlari noto‘g‘ri!");
             return;
         }
 
-        // 🔹 Foydalanuvchini saqlash
+        // ✅ Agar foydalanuvchi allaqachon ro‘yxatda bo‘lsa, yana qo‘shilmaydi
+        if (this.users.has(socket.id)) {
+            console.log(`ℹ️ Foydalanuvchi allaqachon tizimda: ${data.id}`);
+            return;
+        }
+
+        // 🆕 Yangi foydalanuvchini saqlash
         this.users.set(socket.id, { ...data, socketId: socket.id });
-        console.log("🔹 Yangi foydalanuvchi qo‘shildi:");
+        console.log(`🆕 Yangi foydalanuvchi qo‘shildi: ${data.id}`);
 
-        // 📢 **Barcha foydalanuvchilarga yangilangan ro‘yxatni yuborish**
+        // 📢 Hamma foydalanuvchilarga ro‘yxatni yuboramiz
         io.emit("OnlineUsers", this.GetOnlineUsers());
-        // 📌 **Agar foydalanuvchida kutayotgan hujjatlar bo‘lsa, ularni jo‘natamiz**
-    }
 
+        // 📌 ❗ Bu yerda kutayotgan hujjatlar bo‘lsa, yuborish qismi joylashadi
+    }
     // 📌 Foydalanuvchini tizimdan o‘chirish
     RemoveUser(socket, io) {
         if (this.users.has(socket.id)) {

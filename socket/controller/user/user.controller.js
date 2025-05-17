@@ -5,11 +5,20 @@ class UserController {
     static RegisterUser(data, socket, io) {
         console.log("📥 Foydalanuvchi ma'lumoti keldi:", data);
 
-        // 🔹 Xizmat (service) orqali ro‘yxatga olish
-        UserService.RegisterUser(data, socket, io);
+        // 🔍 Ma’lumot to‘g‘riligini tekshirish
+        if (!data || !data.id) {
+            socket.emit("register_failed", { message: "❌ Ma'lumotlar noto‘g‘ri!" });
+            return;
+        }
 
-        // 🔹 Foydalanuvchiga javob yuborish
-        socket.emit("register_success", { message: "Foydalanuvchi ro‘yxatga olindi!" });
+        // 🔹 UserService orqali ro‘yxatga olish
+        const result = UserService.RegisterUser(data, socket, io);
+
+        if (result === false) {
+            socket.emit("register_failed", { message: "❌ Foydalanuvchi allaqachon tizimda." });
+        } else {
+            socket.emit("register_success", { message: "✅ Foydalanuvchi ro‘yxatga olindi!" });
+        }
     }
 
     // 🔹 Foydalanuvchi uzilganda chaqiriladi
