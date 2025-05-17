@@ -10,4 +10,8 @@ TG_TOKEN_SEAM = 7667697909:AAGvjmG4ZCG8UC5pesT4NEgYOxid8vP3QEc
 
 
 
+Server data
+IP  : 192.168.1.108
+administrator :: P@ssW0rd123
+
 
