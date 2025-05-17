@@ -29,7 +29,7 @@ function setupSocket(server) {
 
         // Foydalanuvchi uzilganda
         socket.on("disconnect", () => {
-            // UserController.userDisconnected(socket, io);
+            UserController.userDisconnected(socket, io);
             DriverController.driverDisconnected(socket, io);
             console.log(`Foydalanuvchi chiqdi: ${socket.id}`);
         });
