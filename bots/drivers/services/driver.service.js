@@ -6,15 +6,22 @@ const formatNumber = (num) => Number(num).toLocaleString("uz-UZ");
 
 let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi uchun
 
-
 const SentOrder = async (order, msg) => {
+  const ID = order._id;
   const chatId = order.driverId.chatId;
+  const products = order.products;
+  const customer = order.customerId;
+  const { lat, long } = customer.location;
 
+  // if (
+  //   ["Haydovchiga yuborildi", "Yetkazib berilmoqda", "Yetkazildi"].includes(order.status) &&
+  //   order.isSent === true
+  // ) return;
   // Agar bu haydovchiga ilgari yuborilgan zakazlar bo‘lsa va u hali qabul qilmagan bo‘lsa, location yuborganda barchasini tekshiradi
   const pendingOrders = await Order.find({
     driverId: order.driverId._id,
-    status: { $in: ["Yangi", "Haydovchiga yuborildi"] },
-    isSent: { $ne: true },
+    status: "Haydovchiga yuborilmoqda",
+    isSent: false,
   }).populate("customerId");
 
   if (!pendingOrders.length) return;
@@ -28,6 +35,7 @@ const SentOrder = async (order, msg) => {
       resize_keyboard: true,
     },
   });
+
 
   // ⏳ Har bir haydovchi uchun 1 marta location olaylik
   const locationHandler = async (msg) => {
@@ -103,7 +111,6 @@ ${productLines}
   // Har bir haydovchi uchun faqat 1 marta location olaylik
   bot.once("location", locationHandler);
 };
-
 
 // 📦 Callback query handler
 bot.on("callback_query", async (query) => {
