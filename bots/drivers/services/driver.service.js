@@ -8,14 +8,7 @@ let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi
 
 const SentOrder = async (order, msg) => {
   const chatId = order.driverId.chatId;
-  const driverId = order.driverId._id
-  const ID = order._id;
-  const products = order.products;
-  const customer = order.customerId;
-  const { lat, long } = customer.location;
-
-  if (handledChatIds.has(chatId)) return; // ⛔️ Allaqachon ishlangan bo‘lsa, chiqib ketamiz
-  handledChatIds.add(chatId); // ✅ Endi bu chatId ustida ishlayapmiz
+  const driverId = order.driverId._id;
 
   const pendingOrders = await Order.find({
     driverId,
@@ -23,9 +16,9 @@ const SentOrder = async (order, msg) => {
     isSent: false,
   }).populate("customerId");
 
-  if (!pendingOrders.length) return;
+  if (!pendingOrders.length || handledChatIds.has(chatId)) return;
 
-  // Haydovchidan location so‘rash
+  // Locationni kutishdan oldin keyboardni yuborish
   await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
     reply_markup: {
@@ -35,29 +28,24 @@ const SentOrder = async (order, msg) => {
     },
   });
 
-  // Location handler
   const locationHandler = async (msg) => {
-    if (msg.chat.id !== chatId || !msg.location) return; // Faqat shu haydovchiga tegishli location
+    if (msg.chat.id !== chatId || !msg.location) return;
 
     const { latitude, longitude } = msg.location;
 
     for (let order of pendingOrders) {
-      const ID = order._id;
       const customer = order.customerId;
       const { lat, long } = customer.location;
 
       const productLines = order.products
-        .map((p) =>
+        .map(p =>
           `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
         )
         .join("\n");
 
       const text = `📦 Buyurtma nomeri: ${order.orderNumber}
 📍 Manzil: ${customer.address.region}
-🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", {
-        timeZone: "Asia/Tashkent",
-      })}
-
+🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })}
 👤 Mijoz: ${customer.fullname}
 📞 Tel: ${customer.phoneNumber}
 🏢 Status: ${customer.category}
@@ -73,15 +61,15 @@ ${productLines}
         reply_markup: {
           inline_keyboard: [
             [
-              { text: "✅ Qabul qilish", callback_data: `accept_${ID}` },
-              { text: "❌ Bekor qilish", callback_data: `cancel_${ID}` },
+              { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
+              { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
             ],
             [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
           ],
         },
       });
 
-      await Order.findByIdAndUpdate(ID, {
+      await Order.findByIdAndUpdate(order._id, {
         driverLocation: {
           lat: latitude,
           long: longitude,
@@ -91,20 +79,10 @@ ${productLines}
       });
     }
 
-    // Klaviaturani o‘chirish
-    if (msg?.message_id) {
-      try {
-        await bot.deleteMessage(chatId, msg.message_id);
-      } catch (error) {
-        console.error("Xabarni o'chirishda xatolik:", error.message);
-      }
-    }
-
-    // Location faqat 1 marta ishlashi uchun listenerni o‘chiramiz
+    handledChatIds.add(chatId); // Faqat location yuborilganidan keyin belgilaymiz
     bot.removeListener("message", locationHandler);
   };
 
-  // 🧠 "message" eventni tinglab, locationni filtrlab olaylik
   bot.on("message", locationHandler);
 };
 
