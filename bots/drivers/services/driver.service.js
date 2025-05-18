@@ -8,6 +8,7 @@ let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi
 
 const SentOrder = async (order, msg) => {
   const chatId = order.driverId.chatId;
+  const driverId = order.driverId._id
   const ID = order._id;
   const products = order.products;
   const customer = order.customerId;
@@ -17,7 +18,7 @@ const SentOrder = async (order, msg) => {
   handledChatIds.add(chatId); // ✅ Endi bu chatId ustida ishlayapmiz
 
   const pendingOrders = await Order.find({
-    driverId: order.driverId._id,
+    driverId,
     status: "Haydovchiga yuborilmoqda",
     isSent: false,
   }).populate("customerId");
