@@ -7,17 +7,15 @@ const formatNumber = (num) => Number(num).toLocaleString("uz-UZ");
 let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi uchun
 
 const SentOrder = async (order, msg) => {
-  const ID = order._id;
   const chatId = order.driverId.chatId;
+  const ID = order._id;
   const products = order.products;
   const customer = order.customerId;
   const { lat, long } = customer.location;
 
-  // if (
-  //   ["Haydovchiga yuborildi", "Yetkazib berilmoqda", "Yetkazildi"].includes(order.status) &&
-  //   order.isSent === true
-  // ) return;
-  // Agar bu haydovchiga ilgari yuborilgan zakazlar bo‘lsa va u hali qabul qilmagan bo‘lsa, location yuborganda barchasini tekshiradi
+  if (handledChatIds.has(chatId)) return; // ⛔️ Allaqachon ishlangan bo‘lsa, chiqib ketamiz
+  handledChatIds.add(chatId); // ✅ Endi bu chatId ustida ishlayapmiz
+
   const pendingOrders = await Order.find({
     driverId: order.driverId._id,
     status: "Haydovchiga yuborilmoqda",
@@ -26,7 +24,7 @@ const SentOrder = async (order, msg) => {
 
   if (!pendingOrders.length) return;
 
-  // 🧭 Haydovchidan joylashuv so‘rash
+  // Haydovchidan location so‘rash
   await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
     reply_markup: {
@@ -36,18 +34,17 @@ const SentOrder = async (order, msg) => {
     },
   });
 
-
-  // ⏳ Har bir haydovchi uchun 1 marta location olaylik
+  // Location handler
   const locationHandler = async (msg) => {
+    if (msg.chat.id !== chatId || !msg.location) return; // Faqat shu haydovchiga tegishli location
+
     const { latitude, longitude } = msg.location;
 
-    // Har bir zakazga location bo‘yicha ishlov berish
     for (let order of pendingOrders) {
       const ID = order._id;
       const customer = order.customerId;
       const { lat, long } = customer.location;
 
-      // Mahsulotlar formati
       const productLines = order.products
         .map((p) =>
           `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
@@ -69,7 +66,6 @@ ${productLines}
 
       const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
 
-      // Yuborish
       await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
         caption: text,
         parse_mode: "HTML",
@@ -84,7 +80,6 @@ ${productLines}
         },
       });
 
-      // Ma'lumotni yangilash
       await Order.findByIdAndUpdate(ID, {
         driverLocation: {
           lat: latitude,
@@ -104,13 +99,14 @@ ${productLines}
       }
     }
 
-    // Location faqat 1 marta ishlashi uchun
-    bot.removeListener("location", locationHandler);
+    // Location faqat 1 marta ishlashi uchun listenerni o‘chiramiz
+    bot.removeListener("message", locationHandler);
   };
 
-  // Har bir haydovchi uchun faqat 1 marta location olaylik
-  bot.once("location", locationHandler);
+  // 🧠 "message" eventni tinglab, locationni filtrlab olaylik
+  bot.on("message", locationHandler);
 };
+
 
 // 📦 Callback query handler
 bot.on("callback_query", async (query) => {
