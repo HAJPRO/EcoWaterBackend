@@ -11,8 +11,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const { setupSocket } = require("./socket/socket.js")
 app.use(cors({
-  origin: "https://ecowater.company-erp.uz",
-  credentials: true,
+  origin: '*'
+  // origin: "https://ecowater.company-erp.uz",
+  // credentials: true,
 }));
 // app.use(express.static(path.join(__dirname, "./public"))); /////
 app.use(express.static("./public"));

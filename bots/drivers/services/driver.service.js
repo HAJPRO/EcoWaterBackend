@@ -1,4 +1,3 @@
-const { uuid } = require("uuidv4");
 const Order = require("../../../models/Sale/orders/order.model");
 const { bot } = require("../bot");
 
@@ -16,9 +15,9 @@ const SentOrder = async (order, msg) => {
     isSent: false,
   }).populate("customerId");
 
-  if (!pendingOrders.length || handledChatIds.has(chatId)) return;
+  if (!pendingOrders.length) return;
+  if (handledChatIds.has(chatId)) return;
 
-  // Locationni kutishdan oldin keyboardni yuborish
   await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
     reply_markup: {
@@ -29,21 +28,28 @@ const SentOrder = async (order, msg) => {
   });
 
   const locationHandler = async (msg) => {
-    if (msg.chat.id !== chatId || !msg.location) return;
 
-    const { latitude, longitude } = msg.location;
+    try {
+      // if (msg.chat.id !== chatId) return; // Boshqa chatlardan kelgan xabarlarni o'tkazib yuborish
 
-    for (let order of pendingOrders) {
-      const customer = order.customerId;
-      const { lat, long } = customer.location;
+      if (!msg.location) {
+        await bot.sendMessage(chatId, "❗ Iltimos, faqatgina joylashuv yuboring.");
+        return;
+      }
 
-      const productLines = order.products
-        .map(p =>
-          `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
-        )
-        .join("\n");
+      const { latitude, longitude } = msg.location;
 
-      const text = `📦 Buyurtma nomeri: ${order.orderNumber}
+      for (let order of pendingOrders) {
+        const customer = order.customerId;
+        const { lat, long } = customer.location;
+
+        const productLines = order.products
+          .map(p =>
+            `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
+          )
+          .join("\n");
+
+        const text = `📦 Buyurtma nomeri: ${order.orderNumber}
 📍 Manzil: ${customer.address.region}
 🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })}
 👤 Mijoz: ${customer.fullname}
@@ -53,38 +59,47 @@ const SentOrder = async (order, msg) => {
 ${productLines}
 💰🟢 Jami: ${formatNumber(order.totalAmount)} so'm`;
 
-      const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
+        const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
 
-      await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
-        caption: text,
-        parse_mode: "HTML",
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
-              { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
+        await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
+          caption: text,
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
+                { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
+              ],
+              [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
             ],
-            [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
-          ],
-        },
-      });
+          },
+        });
 
-      await Order.findByIdAndUpdate(order._id, {
-        driverLocation: {
-          lat: latitude,
-          long: longitude,
-        },
-        isSent: true,
-        status: "Haydovchiga yuborildi",
-      });
+        await Order.findByIdAndUpdate(order._id, {
+          driverLocation: {
+            lat: latitude,
+            long: longitude,
+          },
+          isSent: true,
+          status: "Haydovchiga yuborildi",
+        });
+      }
+      await bot.deleteMessage(chatId, msg.message_id);
+      handledChatIds.add(chatId);  // Faqat location qabul qilingandan keyin
+      bot.removeListener("message", locationHandler); // Listenerni o'chirish
+
+    } catch (err) {
+      console.error("Location handlerda xatolik:", err);
+      await bot.sendMessage(chatId, "❌ Ichki tizim xatosi yuz berdi. Iltimos, qayta urinib ko‘ring.");
     }
-
-    handledChatIds.add(chatId); // Faqat location yuborilganidan keyin belgilaymiz
-    bot.removeListener("message", locationHandler);
   };
+
+  // Listenerni qo'shish
 
   bot.on("message", locationHandler);
 };
+
+
 
 
 // 📦 Callback query handler

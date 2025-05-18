@@ -5,8 +5,9 @@ const DriverController = require("./controller/driver/driver.controller");
 function setupSocket(server) {
     const io = new Server(server, {
         cors: {
-            origin: "https://ecowater.company-erp.uz", // Frontend domeningiz
-            credentials: true, // Cookie va headerlar uchun
+            origin: '*'
+            // origin: "https://ecowater.company-erp.uz", // Frontend domeningiz
+            // credentials: true, // Cookie va headerlar uchun
         },
         pingInterval: 25000,
         pingTimeout: 300000,
