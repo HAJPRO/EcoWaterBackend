@@ -3,7 +3,7 @@ const { bot } = require("../bot");
 
 const formatNumber = (num) => Number(num).toLocaleString("uz-UZ");
 
-let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi uchun
+// let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi uchun
 
 const SentOrder = async (order, msg) => {
   const chatId = order.driverId.chatId;
@@ -16,7 +16,7 @@ const SentOrder = async (order, msg) => {
   }).populate("customerId");
 
   if (!pendingOrders.length) return;
-  if (handledChatIds.has(chatId)) return;
+  // if (handledChatIds.has(chatId)) return;
 
   await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
@@ -85,7 +85,7 @@ ${productLines}
         });
       }
       await bot.deleteMessage(chatId, msg.message_id);
-      handledChatIds.add(chatId);  // Faqat location qabul qilingandan keyin
+      // handledChatIds.add(chatId);  // Faqat location qabul qilingandan keyin
       bot.removeListener("message", locationHandler); // Listenerni o'chirish
 
     } catch (err) {
