@@ -126,14 +126,19 @@ class OrderManagmentService {
   // 📌 **Barcha haydovchilar olish**
   async GetAllDrivers(data) {
     try {
-      const drivers = await UserModel.find({
-        "roles.name": "driver"
-      });
-      return { drivers }
+      const users = await UserModel.find().populate('roles');
+
+      // roles ichida name = 'driver' bo‘lganlarni filter qilish
+      const drivers = users.filter(user =>
+        user.roles.some(role => role.name === 'driver')
+      );
+
+      return { drivers };
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}` };
     }
   }
+
 
 
 }
