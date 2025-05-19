@@ -68,7 +68,6 @@ const userSchema = new Schema(
     username: {
       type: String,
 
-      unique: true,
     },
     password: {
       type: String,
@@ -79,7 +78,6 @@ const userSchema = new Schema(
     },
     passportNumber: {
       type: String,
-      unique: true,
     },
 
     address: {
@@ -115,7 +113,6 @@ const userSchema = new Schema(
     // Qo'shilgan maydonlar
     driverLicenseNumber: {
       type: String,
-      unique: true,
     },
     driverLicenseDate: {
       type: Date,
