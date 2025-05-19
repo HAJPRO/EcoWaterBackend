@@ -31,6 +31,7 @@ const SentOrder = async (order, msg) => {
 
     try {
       // if (msg.chat.id !== chatId) return; // Boshqa chatlardan kelgan xabarlarni o'tkazib yuborish
+      console.log("Location handler chaqirildi:", msg);
 
       if (!msg.location) {
         await bot.sendMessage(chatId, "❗ Iltimos, faqatgina joylashuv yuboring.");
@@ -85,7 +86,7 @@ ${productLines}
         });
       }
       await bot.deleteMessage(chatId, msg.message_id);
-      // handledChatIds.add(chatId);  // Faqat location qabul qilingandan keyin
+      handledChatIds.add(chatId);  // Faqat location qabul qilingandan keyin
       bot.removeListener("message", locationHandler); // Listenerni o'chirish
 
     } catch (err) {
