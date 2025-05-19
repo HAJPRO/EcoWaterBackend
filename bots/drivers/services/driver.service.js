@@ -3,13 +3,13 @@ const { bot } = require("../bot");
 
 const formatNumber = (num) => Number(num).toLocaleString("uz-UZ");
 
-const handledChatIds = new Set(); // Har bir haydovchi uchun location faqat 1 marta qabul qilinsin
+const handledOrders = new Set(); // orderId uchun
 
 const SentOrder = async (order, msg) => {
   const chatId = order.driverId.chatId;
   const driverId = order.driverId._id;
 
-  // Faqat hali yuborilmagan va statusi "Haydovchiga yuborilmoqda" bo‘lgan buyurtmalarni olish
+  // Yangi buyurtmalarni olamiz
   const pendingOrders = await Order.find({
     driverId,
     status: "Haydovchiga yuborilmoqda",
@@ -18,7 +18,7 @@ const SentOrder = async (order, msg) => {
 
   if (!pendingOrders.length) return;
 
-  await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
+  await bot.sendMessage(chatId, `🚨 Sizda ${pendingOrders.length} ta yangi buyurtma bor!\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
     reply_markup: {
       keyboard: [[{ text: "📍 Joylashuvni yuborish", request_location: true }]],
@@ -28,32 +28,32 @@ const SentOrder = async (order, msg) => {
   });
 
   const locationHandler = async (msg) => {
-    try {
-      // Agar chat uchun location allaqachon qabul qilingan bo‘lsa, yana ishlatmaymiz
-      if (handledChatIds.has(chatId)) return;
-      handledChatIds.add(chatId);
+    if (!msg.location) {
+      await bot.sendMessage(chatId, "❗ Iltimos, faqatgina joylashuv yuboring.");
+      return;
+    }
 
-      if (!msg.location) {
-        await bot.sendMessage(chatId, "❗ Iltimos, faqatgina joylashuv yuboring.");
-        return;
+    const { latitude, longitude } = msg.location;
+
+    for (let order of pendingOrders) {
+      if (handledOrders.has(order._id.toString())) {
+        // Bu buyurtma uchun xabar oldin yuborilgan, o‘tib ketamiz
+        continue;
       }
 
-      const { latitude, longitude } = msg.location;
+      const customer = order.customerId;
+      if (!customer?.location?.lat || !customer?.location?.long) {
+        console.log("Mijozning joylashuvi yetarli emas", order._id);
+        continue;
+      }
 
-      for (let order of pendingOrders) {
-        const customer = order.customerId;
-        if (!customer?.location?.lat || !customer?.location?.long) {
-          console.log("Mijozning joylashuvi yetarli emas", order._id);
-          continue;
-        }
+      const productLines = order.products
+        .map(p =>
+          `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
+        )
+        .join("\n");
 
-        const productLines = order.products
-          .map(p =>
-            `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
-          )
-          .join("\n");
-
-        const text = `📦 Buyurtma nomeri: ${order.orderNumber}
+      const text = `📦 Buyurtma nomeri: ${order.orderNumber}
 📍 Manzil: ${customer.address.region}
 🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })}
 👤 Mijoz: ${customer.fullname}
@@ -63,43 +63,41 @@ const SentOrder = async (order, msg) => {
 ${productLines}
 💰🟢 Jami: ${formatNumber(order.totalAmount)} so'm`;
 
-        const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${customer.location.lat},${customer.location.long}&rtt=auto`;
+      const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${customer.location.lat},${customer.location.long}&rtt=auto`;
 
-        await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
-          caption: text,
-          parse_mode: "HTML",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
-                { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
-              ],
-              [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
+      await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
+        caption: text,
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Qabul qilish", callback_data: `accept_${order._id}` },
+              { text: "❌ Bekor qilish", callback_data: `cancel_${order._id}` },
             ],
-          },
-        });
+            [{ text: "🚗 Yandex Navigatsiya", url: yandexUrl }],
+          ],
+        },
+      });
 
-        // Buyurtmani yangilash
-        await Order.findByIdAndUpdate(order._id, {
-          driverLocation: { lat: latitude, long: longitude },
-          isSent: true,
-          status: "Haydovchiga yuborildi",
-        });
-      }
+      await Order.findByIdAndUpdate(order._id, {
+        driverLocation: {
+          lat: latitude,
+          long: longitude,
+        },
+        isSent: true,
+        status: "Haydovchiga yuborildi",
+      });
 
-      await bot.deleteMessage(chatId, msg.message_id);
-
-    } catch (err) {
-      console.error("Location handlerda xatolik:", err);
-      await bot.sendMessage(chatId, "❌ Ichki tizim xatosi yuz berdi. Iltimos, qayta urinib ko‘ring.");
-    } finally {
-      bot.removeListener("message", locationHandler);
+      handledOrders.add(order._id.toString());
     }
+
+    bot.removeListener("message", locationHandler);
+    await bot.deleteMessage(chatId, msg.message_id);
   };
 
-  // Location event faqat bir marta tinglansin
-  bot.once("message", locationHandler);
+  bot.on("message", locationHandler);
 };
+
 
 
 // 📦 Callback query handler
