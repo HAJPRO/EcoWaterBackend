@@ -9,6 +9,7 @@ const SentOrder = async (order, msg) => {
   const chatId = order.driverId.chatId;
   const driverId = order.driverId._id;
 
+  // Faqat hali yuborilmagan buyurtmalarni olish
   const pendingOrders = await Order.find({
     driverId,
     status: "Haydovchiga yuborilmoqda",
@@ -16,7 +17,7 @@ const SentOrder = async (order, msg) => {
   }).populate("customerId");
 
   if (!pendingOrders.length) return;
-  // if (handledChatIds.has(chatId)) return;
+  if (handledChatIds.has(chatId)) return;
 
   await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
@@ -28,11 +29,7 @@ const SentOrder = async (order, msg) => {
   });
 
   const locationHandler = async (msg) => {
-
     try {
-      // if (msg.chat.id !== chatId) return; // Boshqa chatlardan kelgan xabarlarni o'tkazib yuborish
-      console.log("Location handler chaqirildi:", msg);
-
       if (!msg.location) {
         await bot.sendMessage(chatId, "❗ Iltimos, faqatgina joylashuv yuboring.");
         return;
@@ -42,7 +39,10 @@ const SentOrder = async (order, msg) => {
 
       for (let order of pendingOrders) {
         const customer = order.customerId;
-        const { lat, long } = customer.location;
+        if (!customer?.location?.lat || !customer?.location?.long) {
+          console.log("Mijozning joylashuvi yetarli emas", order._id);
+          continue;
+        }
 
         const productLines = order.products
           .map(p =>
@@ -60,7 +60,7 @@ const SentOrder = async (order, msg) => {
 ${productLines}
 💰🟢 Jami: ${formatNumber(order.totalAmount)} so'm`;
 
-        const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
+        const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${customer.location.lat},${customer.location.long}&rtt=auto`;
 
         await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
           caption: text,
@@ -76,18 +76,21 @@ ${productLines}
           },
         });
 
-        await Order.findByIdAndUpdate(order._id, {
+        const updatedOrder = await Order.findByIdAndUpdate(order._id, {
           driverLocation: {
             lat: latitude,
             long: longitude,
           },
           isSent: true,
           status: "Haydovchiga yuborildi",
-        });
+        }, { new: true });
+
+        console.log("Buyurtma yangilandi:", updatedOrder._id);
       }
+
       await bot.deleteMessage(chatId, msg.message_id);
-      handledChatIds.add(chatId);  // Faqat location qabul qilingandan keyin
-      bot.removeListener("message", locationHandler); // Listenerni o'chirish
+      handledChatIds.add(chatId);
+      bot.removeListener("message", locationHandler);
 
     } catch (err) {
       console.error("Location handlerda xatolik:", err);
@@ -95,10 +98,9 @@ ${productLines}
     }
   };
 
-  // Listenerni qo'shish
-
   bot.on("message", locationHandler);
 };
+
 
 
 
