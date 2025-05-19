@@ -3,13 +3,13 @@ const { bot } = require("../bot");
 
 const formatNumber = (num) => Number(num).toLocaleString("uz-UZ");
 
-// let handledChatIds = new Set(); // Har bir location event faqat 1 marta ishlashi uchun
+const handledChatIds = new Set(); // Har bir haydovchi uchun location faqat 1 marta qabul qilinsin
 
 const SentOrder = async (order, msg) => {
   const chatId = order.driverId.chatId;
   const driverId = order.driverId._id;
 
-  // Faqat hali yuborilmagan buyurtmalarni olish
+  // Faqat hali yuborilmagan va statusi "Haydovchiga yuborilmoqda" bo‘lgan buyurtmalarni olish
   const pendingOrders = await Order.find({
     driverId,
     status: "Haydovchiga yuborilmoqda",
@@ -17,7 +17,6 @@ const SentOrder = async (order, msg) => {
   }).populate("customerId");
 
   if (!pendingOrders.length) return;
-  if (handledChatIds.has(chatId)) return;
 
   await bot.sendMessage(chatId, `🚨 *Sizda ${pendingOrders.length} ta yangi buyurtma bor!*\n\n📍 Joylashuvingizni yuboring`, {
     parse_mode: "Markdown",
@@ -30,6 +29,10 @@ const SentOrder = async (order, msg) => {
 
   const locationHandler = async (msg) => {
     try {
+      // Agar chat uchun location allaqachon qabul qilingan bo‘lsa, yana ishlatmaymiz
+      if (handledChatIds.has(chatId)) return;
+      handledChatIds.add(chatId);
+
       if (!msg.location) {
         await bot.sendMessage(chatId, "❗ Iltimos, faqatgina joylashuv yuboring.");
         return;
@@ -76,33 +79,27 @@ ${productLines}
           },
         });
 
-        const updatedOrder = await Order.findByIdAndUpdate(order._id, {
-          driverLocation: {
-            lat: latitude,
-            long: longitude,
-          },
+        // Buyurtmani yangilash
+        await Order.findByIdAndUpdate(order._id, {
+          driverLocation: { lat: latitude, long: longitude },
           isSent: true,
           status: "Haydovchiga yuborildi",
-        }, { new: true });
-
-        console.log("Buyurtma yangilandi:", updatedOrder._id);
+        });
       }
 
       await bot.deleteMessage(chatId, msg.message_id);
-      handledChatIds.add(chatId);
-      bot.removeListener("message", locationHandler);
 
     } catch (err) {
       console.error("Location handlerda xatolik:", err);
       await bot.sendMessage(chatId, "❌ Ichki tizim xatosi yuz berdi. Iltimos, qayta urinib ko‘ring.");
+    } finally {
+      bot.removeListener("message", locationHandler);
     }
   };
 
-  bot.on("message", locationHandler);
+  // Location event faqat bir marta tinglansin
+  bot.once("message", locationHandler);
 };
-
-
-
 
 
 // 📦 Callback query handler
@@ -121,8 +118,8 @@ bot.on("callback_query", async (query) => {
         { new: true }
       );
 
-      const { lat: latitude, long: longitude } = updated.driverLocation;
-      const { lat, long } = order.customerId.location;
+      const { lat: latitude, long: longitude } = updated.driverLocation || {};
+      const { lat, long } = order.customerId.location || {};
       const yandexUrl = `https://yandex.com/maps/?rtext=~${latitude},${longitude}~${lat},${long}&rtt=auto`;
 
       await bot.editMessageReplyMarkup({
@@ -172,7 +169,7 @@ bot.on("callback_query", async (query) => {
       });
 
       await bot.editMessageReplyMarkup({
-        inline_keyboard: [[{ text: "✅ Buyurtma muvaffaqiyatli yetkazildi", callback_data: `Delivered_${orderId}` }]],
+        inline_keyboard: [[{ text: "✅ Buyurtma muvaffaqiyatli yetkazildi", callback_data: `delivered_confirmed_${orderId}` }]],
       }, {
         chat_id: chatId,
         message_id: query.message.message_id,
@@ -184,6 +181,10 @@ bot.on("callback_query", async (query) => {
     } else {
       await bot.sendMessage(chatId, `❌ Buyurtma topilmadi!`);
     }
+  }
+
+  if (callbackData.startsWith("delivered_confirmed_")) {
+    // Qo‘shimcha tasdiqlash bo‘lsa ishlatiladi, hozircha bo‘sh qoladi yoki boshqa funksiyalar qo‘shishingiz mumkin
   }
 });
 
