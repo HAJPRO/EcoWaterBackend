@@ -10,17 +10,21 @@ router.post(
   authMiddleware, OrderManagmentController.Create
 );
 router.post(
-    "/managment/getone",
-    authMiddleware, OrderManagmentController.OrderGetById
-  );
-  router.post(
-    "/managment/all",
-    authMiddleware, OrderManagmentController.GetAll
-  );
-  router.post(
-    "/managment/update",
-    authMiddleware, OrderManagmentController.UpdateById
-  );
+  "/managment/getone",
+  authMiddleware, OrderManagmentController.OrderGetById
+);
+router.post(
+  "/managment/all",
+  authMiddleware, OrderManagmentController.GetAll
+);
+router.post(
+  "/managment/update",
+  authMiddleware, OrderManagmentController.UpdateById
+);
+router.post(
+  "/managment/drivers",
+  authMiddleware, OrderManagmentController.GetAllDrivers
+);
 //   router.post(
 //     "/managment/getone",
 //     authMiddleware, CustomerManagmentController.GetById

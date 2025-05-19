@@ -2,7 +2,7 @@ const OrderManagmentService = require("../../../services/sale/orders/order.servi
 class OrderManagmentController {
   async Create(req, res, next) {
     try {
-      const data = await OrderManagmentService.Create({author:req.user.id, ...req.body});
+      const data = await OrderManagmentService.Create({ author: req.user.id, ...req.body });
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -10,7 +10,7 @@ class OrderManagmentController {
   }
   async OrderGetById(req, res, next) {
     try {
-      const data = await OrderManagmentService.OrderGetById({author:req.user.id, ...req.body});
+      const data = await OrderManagmentService.OrderGetById({ author: req.user.id, ...req.body });
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -18,7 +18,7 @@ class OrderManagmentController {
   }
   async UpdateById(req, res, next) {
     try {
-      const data = await OrderManagmentService.UpdateById({author:req.user.id, ...req.body});
+      const data = await OrderManagmentService.UpdateById({ author: req.user.id, ...req.body });
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -32,6 +32,14 @@ class OrderManagmentController {
       next(error);
     }
   }
+  async GetAllDrivers(req, res, next) {
+    try {
+      const data = await OrderManagmentService.GetAllDrivers(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
   // async DeleteById(req, res, next) {
   //   try {
   //     const data = await CustomerManagmentService.DeleteById(req.body);
@@ -39,7 +47,7 @@ class OrderManagmentController {
   //   } catch (error) {
   //     next(error);
   //   }
-   
+
   // }
   // async GetById(req, res, next) {
   //   try {
@@ -48,11 +56,11 @@ class OrderManagmentController {
   //   } catch (error) {
   //     next(error);
   //   }
-   
+
   // }
 
- 
- 
+
+
 }
 
 module.exports = new OrderManagmentController();

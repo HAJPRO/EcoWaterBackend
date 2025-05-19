@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Order = require("../../../models/Sale/orders/order.model");
+const UserModel = require("../../../models/user.model");
+
 const BotDriverService = require("../../../bots/drivers/services/driver.service");
 const { generateUniqueOrderNumber } = require("../../../utils/generateUniqueNumber");
 
@@ -116,6 +118,18 @@ class OrderManagmentService {
         .lean();
 
       return orders.length ? orders : [];
+    } catch (error) {
+      return { msg: `Server xatosi: ${error.message}` };
+    }
+  }
+
+  // 📌 **Barcha haydovchilar olish**
+  async GetAllDrivers(data) {
+    try {
+      const drivers = await UserModel.find({
+        "roles.name": "driver"
+      });
+      return { drivers }
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}` };
     }
