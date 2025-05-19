@@ -7,7 +7,6 @@ const userSchema = new Schema(
     isActivated: { type: Boolean, default: false },
     chatId: {
       type: String,
-      // unique: true,  // Har bir foydalanuvchining yoki haydovchining chat ID si unikaldir
     },
     action: {
       type: String,

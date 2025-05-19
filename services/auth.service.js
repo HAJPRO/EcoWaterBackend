@@ -25,26 +25,6 @@ class AuthService {
     // Endi data to‘liq, shu jumladan password ham yangilangan holatda
     const user = await userModel.create(data);
     const userDto = new UserDto(user);
-    // ASSIGN DEFAULT PERMISSIONS
-    const defaultPermissions = await PermissionModel.find({ is_default: 1 });
-    if (defaultPermissions.length > 0) {
-      const permissionArray = [];
-      defaultPermissions.forEach((permission) => {
-        permissionArray.push({
-          permission_name: permission.permission_name,
-          permission_value: [0, 1, 2, 3],
-        });
-      });
-      // const userPermission = new userPermission({
-      //   user_is: userDto.id,
-      //   permissions: permissionArray,
-      // });
-      await UserPermissionModel.create({
-        user_id: userDto.id,
-        permissions: permissionArray,
-      });
-    }
-    //
 
     const tokens = tokenService.generateToken({ ...userDto });
 
