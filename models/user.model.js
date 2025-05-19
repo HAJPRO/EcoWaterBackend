@@ -80,11 +80,11 @@ const userSchema = new Schema(
     },
 
     address: {
-      region: { type: String },
-      district: { type: String },
-      neighborhood: { type: String },
-      street: { type: String },
-      house: { type: String },
+      region: { type: String, default: 0 },
+      district: { type: String, default: 0 },
+      neighborhood: { type: String, default: 0 },
+      street: { type: String, default: 0 },
+      house: { type: String, default: 0 },
     },
     roles: [{
       type: Schema.Types.ObjectId, ref: "Role"
@@ -141,6 +141,13 @@ const userSchema = new Schema(
         longitude: { type: Number },
       },
       default: { latitude: 0, longitude: 0 },
+    },
+    location: {
+      type: {
+        lat: { type: Number },
+        long: { type: Number },
+      },
+      default: { lat: 0, long: 0 },
     },
     workingHours: {
       type: {

@@ -5,11 +5,12 @@ const authMiddleware = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
-router.post("/register", authController.register);
-router.get("/activation/:id", authController.activation);
-router.post("/login", authController.login);
-router.post("/logout", authController.logout);
-router.get("/refresh", authController.refresh);
+router.post("/register", authMiddleware, authController.register);
+router.get("/activation/:id", authMiddleware, authController.activation);
+router.post("/login", authMiddleware, authController.login);
+router.post("/update", authMiddleware, authController.update);
+router.post("/logout", authMiddleware, authController.logout);
+router.get("/refresh", authMiddleware, authController.refresh);
 router.get("/get-users", authMiddleware, authController.getUser);
 
 module.exports = router;

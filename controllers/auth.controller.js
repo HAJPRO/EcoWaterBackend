@@ -29,7 +29,14 @@ class AuthController {
       next(error);
     }
   }
-
+  async update(req, res, next) {
+    try {
+      const data = await authService.update(req.body);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
   async activation(req, res, next) {
     try {
       const userId = req.params.id;
