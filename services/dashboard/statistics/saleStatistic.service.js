@@ -11,9 +11,9 @@ class SaleStatisticService {
             const MonthlyTotalAmount = await this.GetMonthlyTotalAmount();
             const WaterUsageByDay = await this.GetWaterUsageByDay();
             const MonthlySparklingWaterTotalPriceByMonth = await this.GetMonthlySparklingWaterTotalPriceByMonth();
-            const statistics = [await NewCustomers, await MonthlyTotalAmount]
-            const chartOptions = [await MonthlySparklingWaterTotalPriceByMonth]
-            return { statistics, chartOptions };
+            const metrics = [await NewCustomers, await MonthlyTotalAmount]
+            const charBartOptions = [await MonthlySparklingWaterTotalPriceByMonth]
+            return { metrics, charBartOptions };
 
         } catch (error) {
             return { msg: `Server xatosi: ${error.message} `, customers: [], all_length: {} };
