@@ -96,15 +96,19 @@ class SaleStatisticService {
 
     async GetMonthlySparklingWaterTotalPriceByMonth() {
         try {
+            const currentYear = new Date().getFullYear();
+
             const result = await Order.aggregate([
                 {
                     $match: {
-                        status: "Yetkazib berildi"
+                        status: "Yetkazib berildi",
+                        createdAt: {
+                            $gte: new Date(`${currentYear}-01-01T00:00:00Z`),
+                            $lte: new Date(`${currentYear}-12-31T23:59:59Z`)
+                        }
                     }
                 },
-                {
-                    $unwind: "$products"
-                },
+                { $unwind: "$products" },
                 {
                     $match: {
                         "products.pro_type": "Gazli"
@@ -112,17 +116,8 @@ class SaleStatisticService {
                 },
                 {
                     $group: {
-                        _id: {
-                            year: { $year: "$createdAt" },
-                            month: { $month: "$createdAt" }
-                        },
+                        _id: { month: { $month: "$createdAt" } },
                         totalSparklingWaterPrice: { $sum: "$products.pro_total_price" }
-                    }
-                },
-                {
-                    $sort: {
-                        "_id.year": 1,
-                        "_id.month": 1
                     }
                 }
             ]);
@@ -132,27 +127,32 @@ class SaleStatisticService {
                 "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
             ];
 
-            // Labels va data massivlarini yaratish
+            // Resultni map qilib olish
+            const monthMap = new Map();
+            result.forEach(item => {
+                monthMap.set(item._id.month, item.totalSparklingWaterPrice);
+            });
+
             const labels = [];
             const data = [];
 
-            result.forEach(item => {
-                const label = `${months[item._id.month - 1]} ${item._id.year}`;
-                labels.push(label);
-                data.push(item.totalSparklingWaterPrice);
-            });
+            for (let i = 1; i <= 12; i++) {
+                labels.push(`${months[i - 1]} ${currentYear}`);
+                data.push(monthMap.get(i) || 0);
+            }
 
             return {
                 name: "Gazli",
                 type: "bar",
-                labels, // ["Mart 2025", "Aprel 2025", ...]
-                data    // [1234000, 984000, ...]
+                labels,
+                data
             };
 
         } catch (error) {
             return { msg: `Server xatosi: ${error.message}` };
         }
     }
+
 
 
 
