@@ -116,7 +116,7 @@ class SaleStatisticService {
                             year: { $year: "$createdAt" },
                             month: { $month: "$createdAt" }
                         },
-                        totalGazliPrice: { $sum: "$products.pro_price" }
+                        totalSparklingWaterPrice: { $sum: "$products.pro_total_price" }
                     }
                 },
                 {
@@ -127,24 +127,33 @@ class SaleStatisticService {
                 }
             ]);
 
-            // Optional: Oyni matn shaklida chiqarish
             const months = [
                 "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
                 "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
             ];
 
-            const formatted = result.map(item => ({
-                month: `${months[item._id.month - 1]} ${item._id.year}`,
-                totalGazliPrice: item.totalGazliPrice
-            }));
-            console.log(formatted);
+            // Labels va data massivlarini yaratish
+            const labels = [];
+            const data = [];
 
-            return formatted;
+            result.forEach(item => {
+                const label = `${months[item._id.month - 1]} ${item._id.year}`;
+                labels.push(label);
+                data.push(item.totalSparklingWaterPrice);
+            });
+
+            return {
+                name: "Gazli",
+                type: "bar",
+                labels, // ["Mart 2025", "Aprel 2025", ...]
+                data    // [1234000, 984000, ...]
+            };
 
         } catch (error) {
             return { msg: `Server xatosi: ${error.message}` };
         }
     }
+
 
 
 }
