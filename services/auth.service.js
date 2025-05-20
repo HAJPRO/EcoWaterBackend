@@ -40,6 +40,7 @@ class AuthService {
   }
 
   async login(username, password) {
+
     const user = await userModel.findOne({ username });
 
     if (!user) {
@@ -53,7 +54,6 @@ class AuthService {
       }
       if (isPassword && user.username === username) {
         const userDto = new UserDto(user);
-        console.log(userDto);
 
 
         const tokens = tokenService.generateToken({ ...userDto });
