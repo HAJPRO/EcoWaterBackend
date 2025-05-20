@@ -32,6 +32,9 @@ const PORT = process.env.PORT || 5000;
 require("./bots/drivers/bot.js");
 
 app.use("/api/v1/helpers", require("./routes/helpers/address/address.route.js"));
+//Dashboard
+app.use("/api/v1/dashboard/statistics/sale", require("./routes/dashboard/statistics/saleStatistic.route.js"));
+
 // Admin
 app.use("/api/v1/admin/permission", require("./routes/admin/permission.route.js"));
 app.use("/api/v1/admin/role", require("./routes/admin/role.route.js"));

@@ -78,6 +78,16 @@ const userSchema = new Schema(
     passportNumber: {
       type: String,
     },
+    inn: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+    telegram: {
+      type: String,
+    },
+
 
     address: {
       region: { type: String, default: 0 },

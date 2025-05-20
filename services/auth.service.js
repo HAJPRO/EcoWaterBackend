@@ -33,6 +33,8 @@ class AuthService {
     return { msg: "Muvaffaqiyatli qo'shildi", user: userDto, ...tokens };
   }
   async update(data) {
+    console.log(data);
+
     const updateUser = await userModel.findByIdAndUpdate(data.id, data.model, { new: true })
     return {
       msg: "Muvaffaqiyatli o'zgartirildi"

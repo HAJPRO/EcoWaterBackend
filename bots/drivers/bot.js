@@ -9,7 +9,7 @@ if (!TG_TOKEN_ORDER) {
     process.exit(1);
 }
 
-const bot = new TG_BOT(TG_TOKEN_ORDER, { polling: false });
+const bot = new TG_BOT(TG_TOKEN_ORDER, { polling: true });
 
 // Polling error handler
 bot.on("polling_error", (error) => {
