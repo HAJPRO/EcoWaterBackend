@@ -23,7 +23,7 @@ class CustomerManagmentController {
     } catch (error) {
       next(error);
     }
-   
+
   }
   async GetById(req, res, next) {
     try {
@@ -32,11 +32,20 @@ class CustomerManagmentController {
     } catch (error) {
       next(error);
     }
-   
+
+  }
+  async GetOrdersByCustomerId(req, res, next) {
+    try {
+      const data = await CustomerManagmentService.GetOrdersByCustomerId(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+
   }
 
- 
- 
+
+
 }
 
 module.exports = new CustomerManagmentController();

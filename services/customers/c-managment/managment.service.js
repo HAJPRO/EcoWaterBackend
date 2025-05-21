@@ -1,4 +1,6 @@
 const Customer = require("../../../models/Customers/customer.model");
+const Order = require("../../../models/Sale/orders/order.model");
+
 class CustomerManagmentService {
   async Create(data) {
     try {
@@ -97,6 +99,20 @@ class CustomerManagmentService {
     }
 
   }
+  async GetOrdersByCustomerId(data) {
+    const id = data.id;
+    try {
+      const orders = await Order.find({ customerId: id })
+        .populate('driverId')    // haydovchi haqida ma'lumotni olish
+        .populate('author')     // author (buyurtmani kim yaratgan) haqida ma'lumot
+        .populate('customerId')
+
+      return { msg: "ok", status: 200, orders };
+    } catch (error) {
+      return { msg: `Server xatosi: ${error.message}` };
+    }
+  }
+
 
 }
 

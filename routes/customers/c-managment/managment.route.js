@@ -21,6 +21,10 @@ router.post(
   "/managment/getone",
   authMiddleware, CustomerManagmentController.GetById
 );
+router.post(
+  "/managment/customerId/orders",
+  authMiddleware, CustomerManagmentController.GetOrdersByCustomerId
+);
 
 
 
