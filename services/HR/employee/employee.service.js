@@ -1,4 +1,6 @@
 const User = require("../../../models/user.model");
+const Order = require("../../../models/Sale/orders/order.model");
+
 class EmployeeManagmentService {
     async Create(data) {
         try {
@@ -41,9 +43,15 @@ class EmployeeManagmentService {
             }
             if (data.status === 1) {
                 const all_length = await this.getAllLength(data);
-                const employees = await this.GetAllEmloyess(data);
+                const employees = await this.GetAllEmloyees(data);
                 return { employees, all_length };
-            } else {
+            }
+            if (data.status === 3) {
+                const all_length = await this.getAllLength(data);
+                const employees = await this.GetAllDrivers(data);
+                return { employees, all_length };
+            }
+            else {
                 return { msg: `Server xatosi: ${error.message} `, customers: [] };
             }
         } catch (error) {
@@ -51,7 +59,7 @@ class EmployeeManagmentService {
         }
     }
     // 📌 **Barcha mijozlar olish**
-    async GetAllEmloyess(data) {
+    async GetAllEmloyees(data) {
         const page = Number(data.page);
         const limit = Number(data.limit)
         const skip = (page - 1) * limit;
@@ -62,6 +70,23 @@ class EmployeeManagmentService {
                 .lean();
 
             return customers.length ? customers : [];
+        } catch (error) {
+            return { msg: `Server xatosi: ${error.message}` };
+        }
+    }
+    async GetAllDrivers(data) {
+
+        const page = Number(data.page);
+        const limit = Number(data.limit)
+        const skip = (page - 1) * limit;
+        try {
+            const drivers = await User.find({ position: "Haydovchi" }).populate("roles", "name permissions")
+                .skip(skip)
+                .limit(limit)
+                .lean();
+            console.log(drivers);
+
+            return drivers.length ? drivers : [];
         } catch (error) {
             return { msg: `Server xatosi: ${error.message}` };
         }
@@ -96,6 +121,20 @@ class EmployeeManagmentService {
             return { msg: `Server xatosi: ${error.message}` };
         }
 
+    }
+
+    async GetOrdersByDriverId(data) {
+        const id = data.id;
+        try {
+            const orders = await Order.find({ driverId: id })
+                .populate('driverId')    // haydovchi haqida ma'lumotni olish
+                .populate('author')     // author (buyurtmani kim yaratgan) haqida ma'lumot
+                .populate('customerId')
+
+            return { msg: "ok", status: 200, orders };
+        } catch (error) {
+            return { msg: `Server xatosi: ${error.message}` };
+        }
     }
 
 }

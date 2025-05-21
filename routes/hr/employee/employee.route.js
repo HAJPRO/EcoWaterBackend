@@ -21,6 +21,10 @@ router.post(
     "/managment/getone",
     authMiddleware, EmployeeManagmentController.GetById
 );
+router.post(
+    "/managment/driverId/orders",
+    authMiddleware, EmployeeManagmentController.GetOrdersByDriverId
+);
 
 
 

@@ -34,6 +34,16 @@ class EmployeeManagmentController {
         }
 
     }
+    async GetOrdersByDriverId(req, res, next) {
+        try {
+            const data = await EmployeeManagmentService.GetOrdersByDriverId(req.body);
+            res.status(200).json(data);
+        } catch (error) {
+            next(error);
+        }
+
+    }
+
 
 
 
