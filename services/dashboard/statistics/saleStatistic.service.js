@@ -21,12 +21,16 @@ class SaleStatisticService {
             const MonthlyEcoWaterTotalPriceBy = await this.GetMonthlyEcoWaterTotalPriceBy();
             ///
             const TopDriversWithFullInfo = await this.GetTopDriversWithFullInfo(3);
+            const TopCustomersWithFullInfo = await this.GetTopCustomersWithFullInfo(3);
+
+
+
 
             const metrics = [await NewCustomers, await TodayTotalAmount, await WaterUsageByDay]
             const charBarOptions = [await MonthlySparklingWaterTotalPriceByMonth, await MonthlyStillWaterTotalPriceByMonth, await MonthlyJuiceTotalPriceByMonth]
             const charLineOptions = [await MonthlyKolaTotalPriceBy, MonthlyFantaTotalPriceBy, MonthlyChortoqTotalPriceBy, MonthlyEcoWaterTotalPriceBy]
             ///
-            return { metrics, charBarOptions, charLineOptions, TopDriversWithFullInfo };
+            return { metrics, charBarOptions, charLineOptions, TopDriversWithFullInfo, TopCustomersWithFullInfo };
 
         } catch (error) {
             return { msg: `Server xatosi: ${error.message} `, customers: [], all_length: {} };
@@ -589,6 +593,52 @@ class SaleStatisticService {
                         driver: {
                             $mergeObjects: [
                                 "$driver",
+                                { totalSales: "$totalSales" }
+                            ]
+                        }
+                    }
+                },
+                { $sort: { totalSales: -1 } },
+                { $limit: limit }
+            ]);
+
+            return result;
+        } catch (error) {
+            return { msg: `Server xatosi: ${error.message}` };
+        }
+    }
+    async GetTopCustomersWithFullInfo(limit) {
+        try {
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+            const result = await Order.aggregate([
+                {
+                    $match: {
+                        status: "Yetkazib berildi",
+                        driverArrivedTime: { $gte: oneMonthAgo }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$customerId", // To‘g‘ri maydon
+                        totalSales: { $sum: "$totalAmount" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "customers", // <-- MongoDB'dagi Customer collection nomi
+                        localField: "_id", // driverId
+                        foreignField: "_id",
+                        as: "customer"
+                    }
+                },
+                { $unwind: "$customer" },
+                {
+                    $project: {
+                        customer: {
+                            $mergeObjects: [
+                                "$customer",
                                 { totalSales: "$totalSales" }
                             ]
                         }
