@@ -32,6 +32,14 @@ class ReadyWarehouseController {
       next(error);
     }
   }
+  async OutputProduct(req, res, next) {
+    try {
+      const data = await ReadyWarehouseService.OutputProduct(req.body);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 
 
 

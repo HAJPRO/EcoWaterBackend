@@ -11,6 +11,8 @@ const ReadyWarehouseSchema = new Schema({
   author: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Ushbu partiyani tizimga qo‘shgan foydalanuvchi
   notes: { type: String },                                            // Izohlar (ixtiyoriy maydon)
   totalAmount: { type: Number },
+  totalOutputPrice: { type: Number },                                       // Jami narx = quantity * costPrice
+  totalRemainderPrice: { type: Number },
   products: [                                                            // Partiyadagi mahsulotlar ro‘yxati
     {
       id: { type: String },
@@ -18,15 +20,32 @@ const ReadyWarehouseSchema = new Schema({
       category: { type: String },                                     // Mahsulot kategoriyasi (masalan: ichimlik, un, kiyim)
       quantity: { type: Number, required: true },                     // Mahsulot miqdori
       packagingType: { type: String },                                // Qadoqlash turi (masalan: quti, butilka, xalta)
-
+      unit: { type: String },
       costPrice: { type: Number },                                    // Asl tan narxi (real xarajat)
+      blockCostPrice: { type: Number },                                    // Asl tan narxi (real xarajat)
       salePrice: { type: Number },                                    // Rejalashtirilgan sotiladigan narx
       totalPrice: { type: Number },                                   // Jami narx = quantity * costPrice
-
       manufactureDate: { type: Date },                                // Ishlab chiqarilgan sana
       expireDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
     }
   ],
+  output: [{
+    id: { type: String },
+    product: { type: String },  // Mahsulot ID (Product modeliga havola)
+    category: { type: String },                                     // Mahsulot kategoriyasi (masalan: ichimlik, un, kiyim)
+    quantity: { type: Number, required: true },                     // Mahsulot miqdori
+    packagingType: { type: String },                                // Qadoqlash turi (masalan: quti, butilka, xalta)
+    unit: { type: String },
+    costPrice: { type: Number },
+    blockCostPrice: { type: Number },                                     // Asl tan narxi (real xarajat)
+    salePrice: { type: Number },                                    // Rejalashtirilgan sotiladigan narx
+    totalPrice: { type: Number },
+    // Jami narx = quantity * costPrice
+
+    manufactureDate: { type: Date },                                // Ishlab chiqarilgan sana
+    expireDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
+    outputDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
+  }],
   status: { type: String, default: "Tasdiqlangan" },                       // Partiya holati (masalan: active, inactive)
   state: { type: Boolean, default: true },                                   // Partiya holati (masalan: active, inactive)
 

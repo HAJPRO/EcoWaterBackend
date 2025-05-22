@@ -20,6 +20,10 @@ router.post(
   "/r-warehouse/getone",
   authMiddleware, ReadyWarehouseController.GetOne
 );
+router.post(
+  "/r-warehouse/output",
+  authMiddleware, ReadyWarehouseController.OutputProduct
+);
 
 
 module.exports = router;
