@@ -54,11 +54,11 @@ const SentOrder = async (order, msg) => {
         .join("\n");
 
       const text = `📦 Buyurtma nomeri: ${order.orderNumber}
-📍 Manzil: ${customer.address.region}
+📍 <b>Manzil</b>: ${customer.address.region},${customer.address.district},${customer.address.neighborhood},${customer.address.street}, ${customer.address.house}-uy,
 🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })}
-👤 Mijoz: ${customer.fullname}
-📞 Tel: ${customer.phoneNumber}
-🏢 Status: ${customer.category}
+👤 <b>Mijoz</b>: ${customer.fullname}
+📞 <b>Tel</b>: ${customer.phoneNumber}
+🏢 <b>Status</b>: ${customer.category}
 
 ${productLines}
 💰🟢 Jami: ${formatNumber(order.totalAmount)} so'm`;
