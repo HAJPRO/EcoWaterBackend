@@ -8,6 +8,7 @@ const OrderSchema = new Schema(
         pro_type: { type: String, required: true },
         pro_quantity: { type: Number, required: true },
         pro_unit: { type: String, required: true },
+        packingType: { type: String, required: true },
         pro_price: { type: Number, required: true },
         pro_total_price: { type: Number, required: true },
       },

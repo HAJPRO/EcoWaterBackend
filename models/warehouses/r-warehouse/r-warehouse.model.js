@@ -26,7 +26,8 @@ const ReadyWarehouseSchema = new Schema({
       salePrice: { type: Number },                                    // Rejalashtirilgan sotiladigan narx
       totalPrice: { type: Number },                                   // Jami narx = quantity * costPrice
       manufactureDate: { type: Date },                                // Ishlab chiqarilgan sana
-      expireDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
+      expireDate: { type: Date },
+      status: { type: String },                                   // Amal qilish muddati (yaroqlilik)
     }
   ],
   output: [{
@@ -40,13 +41,15 @@ const ReadyWarehouseSchema = new Schema({
     blockCostPrice: { type: Number },                                     // Asl tan narxi (real xarajat)
     salePrice: { type: Number },                                    // Rejalashtirilgan sotiladigan narx
     totalPrice: { type: Number },
-    // Jami narx = quantity * costPrice
-
+    outputRecipient: { type: String },
+    outputResponsible: { type: String },
     manufactureDate: { type: Date },                                // Ishlab chiqarilgan sana
     expireDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
-    outputDate: { type: Date },                                     // Amal qilish muddati (yaroqlilik)
+    outputDate: { type: Date },
+    status: { type: String },                                   // Amal qilish muddati (yaroqlilik)
+    // Amal qilish muddati (yaroqlilik)
   }],
-  status: { type: String, default: "Tasdiqlangan" },                       // Partiya holati (masalan: active, inactive)
+  status: { type: String, default: "Skladda mavjud" },                       // Partiya holati (masalan: active, inactive)
   state: { type: Boolean, default: true },                                   // Partiya holati (masalan: active, inactive)
 
 }, { timestamps: true });                                             // createdAt va updatedAt maydonlarini avtomatik qo‘shadi

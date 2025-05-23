@@ -10,7 +10,7 @@ class ReadyWarehouseController {
   }
   async Create(req, res, next) {
     try {
-      const data = await ReadyWarehouseService.Create({ ...req.body, author: req.user.id });
+      const data = await ReadyWarehouseService.Create({ ...req.body.model, author: req.user.id }, req.body.action);
       res.status(200).json(data);
     } catch (error) {
       next(error);

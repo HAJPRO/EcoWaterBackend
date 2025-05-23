@@ -49,7 +49,7 @@ const SentOrder = async (order, msg) => {
 
       const productLines = order.products
         .map(p =>
-          `🛒 ${p.pro_name} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
+          `🛒 ${p.pro_name}${p.packingType} - ${formatNumber(p.pro_quantity)} ${p.pro_unit} x ${formatNumber(p.pro_price)} so'm = ${formatNumber(p.pro_total_price)} so'm`
         )
         .join("\n");
 
