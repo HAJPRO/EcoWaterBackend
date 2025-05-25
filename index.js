@@ -73,39 +73,39 @@ START();
 
 
 
-const { SerialPort } = require('serialport');
-const { ReadlineParser } = require('@serialport/parser-readline');
+// const { SerialPort } = require('serialport');
+// const { ReadlineParser } = require('@serialport/parser-readline');
 
-const port = new SerialPort({
-  path: 'COM1',           // Tarozi ulangan port
-  baudRate: 9600,         // Tarozi sozlamasi bilan bir xil bo‘lishi kerak
-  dataBits: 8,
-  stopBits: 1,
-  parity: 'none'
-});
+// const port = new SerialPort({
+//   path: 'COM1',           // Tarozi ulangan port
+//   baudRate: 9600,         // Tarozi sozlamasi bilan bir xil bo‘lishi kerak
+//   dataBits: 8,
+//   stopBits: 1,
+//   parity: 'none'
+// });
 
-const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+// const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
-port.on('open', () => {
-  console.log('Port ochildi: COM1');
-});
+// port.on('open', () => {
+//   console.log('Port ochildi: COM1');
+// });
 
-parser.on('data', (data) => {
-  console.log('Tarozi ma\'lumoti:', data);
-});
+// parser.on('data', (data) => {
+//   console.log('Tarozi ma\'lumoti:', data);
+// });
 
-port.on('error', (err) => {
-  console.error('Xatolik:', err.message);
-});
-SerialPort.list().then(ports => {
-  ports.forEach(port => {
-    console.log(`Topilgan port: ${port.path} - ${port.manufacturer || 'Nomaʼlum qurilma'}`);
-  });
+// port.on('error', (err) => {
+//   console.error('Xatolik:', err.message);
+// });
+// SerialPort.list().then(ports => {
+//   ports.forEach(port => {
+//     console.log(`Topilgan port: ${port.path} - ${port.manufacturer || 'Nomaʼlum qurilma'}`);
+//   });
 
-  if (ports.length === 0) {
-    console.log('Hech qanday COM port topilmadi.');
-  }
-});
+//   if (ports.length === 0) {
+//     console.log('Hech qanday COM port topilmadi.');
+//   }
+// });
 
 
 
