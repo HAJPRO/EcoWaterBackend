@@ -5,39 +5,18 @@ const CustomerSchema = new Schema({
     required: true,
     trim: true,
   },
-  category: { type: String, required: true },
-  artikul: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-  position: {
-    type: String,
-    enum: ["Tilla", "Kumush", "Bronza"],
-    trim: true,
-  },
-  registeredAt: { type: Date, default: new Date(), required: true },
-  imageUrl: { type: String },
   discription: { type: String },
-  inn: { type: String },
-
-  passportNumber: {
-    type: String,
-    unique: true,
-  },
   phoneNumber: {
     type: String,
-
     trim: true,
+    required: true
   },
-  email: { type: String },
-  telegram: { type: String },
   address: {
     region: { type: String, required: true },
     district: { type: String, required: true },
     neighborhood: { type: String, required: true },
     street: { type: String, required: true },
-    house: { type: String, required: true },
+    house: { type: String },
   },
   location: {
     lat: { type: Number, required: true },
@@ -70,6 +49,33 @@ const CustomerSchema = new Schema({
     type: Date,
     default: null,
   },
+
+  // category: { type: String, required: true },
+  // artikul: {
+  //   type: String,
+  //   trim: true,
+  //   required: true,
+  // },
+  // position: {
+  //   type: String,
+  //   enum: ["Tilla", "Kumush", "Bronza"],
+  //   trim: true,
+  // },
+  // registeredAt: { type: Date, default: new Date(), required: true },
+  // imageUrl: { type: String },
+
+  // inn: { type: String },
+
+  // passportNumber: {
+  //   type: String,
+  //   unique: true,
+  // },
+
+  // email: { type: String },
+  // telegram: { type: String },
+
+
+
 }, { timestamps: true });
 
 module.exports = model("Customer", CustomerSchema);

@@ -10,7 +10,6 @@ class EmployeeManagmentService {
                     { artikul: data.artikul },
                 ],
             });
-            console.log(customerExists);
 
             if (customerExists) {
                 return { msg: "Bunday mijoz bazada mavjud !" };
@@ -108,8 +107,20 @@ class EmployeeManagmentService {
     async GetById(data) {
         const id = data.id;
         try {
-            const customer = await User.findById(id);
-            if (!customer) {
+            const user = await User.findById(data.id)
+                .populate({
+                    path: "roles",
+                    select: "name -_id" // faqat name ni oladi, _id ni olmaslik uchun
+                });
+
+            const roleNames = user.roles.map(role => role.name); // name larni arrayga olish
+
+            const customer = {
+                ...user.toObject(),
+                roles: roleNames
+            };
+
+            if (!user) {
                 return { msg: "Bunday mijoz topilmadi!" };
             } else {
 

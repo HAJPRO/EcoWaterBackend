@@ -3,7 +3,7 @@ const UserService = require("../../../socket/service/user/user.service");
 class UserController {
     // 🔹 Foydalanuvchini ro'yxatdan o'tkazish
     static RegisterUser(data, socket, io) {
-        console.log("📥 Foydalanuvchi ma'lumoti keldi:", data);
+        console.log("📥 Foydalanuvchi ma'lumoti keldi:");
 
         // 🔍 Ma’lumot to‘g‘riligini tekshirish
         if (!data || !data.id) {

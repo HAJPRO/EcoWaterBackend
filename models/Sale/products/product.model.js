@@ -6,7 +6,6 @@ const ProductSchema = new Schema(
     author: { type: Schema.Types.ObjectId, ref: "User" }, // Mahsulotni kim yaratganini ko‘rsatadi
     code: {
       type: String,
-      required: true,
       trim: true,
     },
     pro_name: {
@@ -20,23 +19,15 @@ const ProductSchema = new Schema(
       trim: true,
     },
 
-    pro_quality: {
-      type: String, // Sifat darajasi
-      trim: true,
-    },
+    // pro_quality: {
+    //   type: String, // Sifat darajasi
+    //   trim: true,
+    // },
     products: [
       {
         id: { type: String },
-        cost_price: {
-          type: Number, // Tannarxi (so'mda)
-          min: 0,
-        },
         buying_price: {
           type: Number, // Sotuv narxi (so'mda)
-          min: 0,
-        },
-        block_cost_price: {
-          type: Number, // Tannarxi (so'mda)
           min: 0,
         },
         block_buying_price: {
@@ -54,14 +45,14 @@ const ProductSchema = new Schema(
       type: String, // Sotuv turi
       trim: true,
     },
-    pro_image_url: {
-      type: String, // Rasm URL (yoki bir nechta URL bo‘lsa, massiv qilish mumkin)
-      default: "",
-    },
-    productionStarteddAt: {
-      type: Date, // Ishlab chiqarish sanasi
-      required: true,
-    },
+    // pro_image_url: {
+    //   type: String, // Rasm URL (yoki bir nechta URL bo‘lsa, massiv qilish mumkin)
+    //   default: "",
+    // },
+    // productionStarteddAt: {
+    //   type: Date, // Ishlab chiqarish sanasi
+    //   required: true,
+    // },
     status: {
       type: String,
       enum: ["Active", "Inactive"], // Mahsulot holati

@@ -83,12 +83,13 @@ class UserService {
   }
   async GetOneUser(data) {
     try {
-      const user = await UserModel.findOne({ _id: data.id });
+      const user = await UserModel.findOne({ _id: data.id }).populate('roles');
       return user;
     } catch (error) {
-      return error.messages;
+      return { error: true, msg: error.message };
     }
   }
+
   async GetRoles() {
     try {
       const roles = await RoleModel.find();

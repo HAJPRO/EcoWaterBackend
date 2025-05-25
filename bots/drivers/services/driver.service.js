@@ -58,7 +58,8 @@ const SentOrder = async (order, msg) => {
 🕒 <b>Yetkazib berish muddati</b>: ${order.deliveryTime.toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })}
 👤 <b>Mijoz</b>: ${customer.fullname}
 📞 <b>Tel</b>: ${customer.phoneNumber}
-🏢 <b>Status</b>: ${customer.category}
+
+🎯 <b>Mo'ljal</b>: ${customer.discription}
 
 ${productLines}
 💰🟢 Jami: ${formatNumber(order.totalAmount)} so'm`;

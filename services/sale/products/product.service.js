@@ -4,17 +4,24 @@ const Product = require("../../../models/Sale/products/product.model");
 class ProductManagmentService {
   // Mahsulot qo'shish
   async Create(data) {
-
+    const { action, model, author } = data
     try {
-      // Mahsulotni topish
-      const existingProduct = await Product.findOne({ code: data.code, pro_name: data.pro_name });
-      if (existingProduct) {
-        return { msg: "Bunday mahsulot mavjud !" }; // Agar mahsulot mavjud bo'lsa
-      }
 
-      // Yangi mahsulotni yaratish
-      const product = await Product.create(data);
-      return { msg: "Mahsulot muvaffaqiyatli qo'shildi !" }; // Yangi mahsulot yaratildi
+
+      if (action === 'create') {
+        const existingProduct = await Product.findOne({ code: model.code, pro_name: model.pro_name });
+        if (existingProduct) {
+          return { msg: "Bunday mahsulot mavjud !" }; // Agar mahsulot mavjud bo'lsa
+        }
+        const product = await Product.create(data);
+        return { msg: "Mahsulot muvaffaqiyatli qo'shildi !" }; // Yangi mahsulot yaratildi
+      }
+      if (action === 'update') {
+        const { _id, ...updateData } = model
+        const update = await Product.findByIdAndUpdate(_id, updateData, { new: true, runValidators: true })
+        return { msg: "Mahsulot muvaffaqiyatli o'zgartirildi !" }; // Yangi mahsulot yaratildi
+      }
+      return { msg: "Noto'g'ri harakat !" };
     } catch (error) {
       // Xatolikni qaytarish
       console.error("Mahsulotni yaratishda xatolik:", error);

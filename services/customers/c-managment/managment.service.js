@@ -2,23 +2,43 @@ const Customer = require("../../../models/Customers/customer.model");
 const Order = require("../../../models/Sale/orders/order.model");
 
 class CustomerManagmentService {
-  async Create(data) {
-    try {
-      const customerExists = await Customer.exists({
-        $or: [
-          { passportNumber: data.passportNumber },
-          { artikul: data.artikul },
-        ],
-      });
-      console.log(customerExists);
 
-      if (customerExists) {
-        return { msg: "Bunday mijoz bazada mavjud !" };
-      } else {
-        const customer = new Customer(data);
-        const savedCustomer = await customer.save();
-        return { status: "200", msg: "Mijoz muvaffaqiyatli qo'shildi!" };
+  async Create(data) {
+    const action = data.action
+    const model = data.model
+    try {
+      if (action === "create") {
+        const customerExists = await Customer.exists({
+          $or: [
+            { fullname: model.fullname },
+          ],
+        });
+
+        if (customerExists) {
+          return { msg: "Bunday mijoz bazada mavjud !" };
+        } else {
+          const customer = new Customer(model);
+          const savedCustomer = await customer.save();
+          return { status: "200", msg: "Mijoz muvaffaqiyatli qo'shildi!" };
+        }
       }
+      if (action === 'update') {
+        const { _id, ...updateData } = model
+        const updated = await Customer.findByIdAndUpdate(
+          _id,
+          updateData,
+          { new: true, runValidators: true }
+        );
+
+        if (!updated) {
+          return { msg: "O'zgartirish uchun orderId topilmadi!" };
+        }
+
+        return { msg: "Mijoz muvaffaqiyatli o'zgartirildi!", data: updated };
+      }
+
+      return { msg: "Noto'g'ri amal turi" };
+
     } catch (error) {
       throw new Error("Error creating customer: " + error.message);
     }

@@ -56,11 +56,11 @@ const userSchema = new Schema(
 
       trim: true,
     },
-    gender: {
-      type: String,
-      enum: ["Erkak", "Ayol"],
+    // gender: {
+    //   type: String,
+    //   enum: ["Erkak", "Ayol"],
 
-    },
+    // },
     age: {
       type: String,
     },
@@ -75,18 +75,18 @@ const userSchema = new Schema(
       type: String,
       trim: true
     },
-    passportNumber: {
-      type: String,
-    },
-    inn: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
-    telegram: {
-      type: String,
-    },
+    // passportNumber: {
+    //   type: String,
+    // },
+    // inn: {
+    //   type: String,
+    // },
+    // email: {
+    //   type: String,
+    // },
+    // telegram: {
+    //   type: String,
+    // },
 
 
     address: {
@@ -120,12 +120,12 @@ const userSchema = new Schema(
     },
 
     // Qo'shilgan maydonlar
-    driverLicenseNumber: {
-      type: String,
-    },
-    driverLicenseDate: {
-      type: Date,
-    },
+    // driverLicenseNumber: {
+    //   type: String,
+    // },
+    // driverLicenseDate: {
+    //   type: Date,
+    // },
     carNumber: {
       type: String,
     },
