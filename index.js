@@ -14,14 +14,14 @@ const { setupSocket } = require("./socket/socket.js");
 //   origin: "*",
 const isProd = process.env.NODE_ENV === "production"; // yoki boshqa flag
 // }));
-// app.use(
-//   cors({
-//     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-//     credentials: isProd ? true : false,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
+app.use(
+  cors({
+    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+    credentials: isProd ? true : false,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 // app.use(express.static(path.join(__dirname, "./public"))); /////
 app.use(express.static("./public"));
 app.use(fileUpload({}));
@@ -33,11 +33,11 @@ const server = http.createServer(app);
 // const io = setupSocket(server);
 
 const io = new setupSocket(server, {
-  cors: {
-    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-    methods: ["GET", "POST"],
-    credentials: isProd ? true : false,
-  },
+  // cors: {
+  //   origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+  //   methods: ["GET", "POST"],
+  //   credentials: isProd ? true : false,
+  // },
 });
 // Global o‘rniga app ichida saqlash
 app.set("io", io);

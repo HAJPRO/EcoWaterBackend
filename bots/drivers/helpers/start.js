@@ -135,7 +135,7 @@ const CreateFullname = async (msg) => {
     driver = await UserModel.create({
       chatId,
       fullname,
-      action: "register_gender", // keyingi bosqich
+      action: "register_next", // keyingi bosqich
       position: "Haydovchi", // Foydalanuvchi roli
       // registerData: [fullname], // inputlarni yigish
     });
@@ -147,13 +147,13 @@ const CreateFullname = async (msg) => {
   } else if (!driver.fullname) {
     // Foydalanuvchi bor, lekin fullname yo‘q — yangilaymiz
     driver.fullname = fullname;
-    driver.action = "register_gender";
+    driver.action = "register_next";
     // driver.registerData = [fullname];
     await driver.save();
 
     await bot.sendMessage(
       chatId,
-      `✅ Ismingiz qabul qilindi!\n\n👫 Endi jinsingizni kiriting (Erkak yoki Ayol):`
+      `✅ Ismingiz qabul qilindi!\n\n Endi operatorga murojaat qiling va ishni boshlash uchun ruxsatlarni qo'shtiring`
     );
   } else if (driver.role === "driver") {
     // Allaqachon ro‘yxatdan o‘tgan bo‘lsa
@@ -178,7 +178,7 @@ const CreateFullname = async (msg) => {
 };
 const CreateGender = async (msg) => {
   const chatId = msg.from.id;
-  const gender = msg.text.trim();
+  const gender = msg.text?.trim();
 
   // Faqat "Erkak" yoki "Ayol" bo‘lishi kerak
   if (!["Erkak", "Ayol"].includes(gender)) {
