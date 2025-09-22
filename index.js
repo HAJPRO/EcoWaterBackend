@@ -18,19 +18,35 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS
 const isProd = process.env.NODE_ENV === "production";
+// app.use(
+//   cors({
+//     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+//     credentials: isProd, // prod -> true, dev -> false
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+// ✅ CORS sozlamalari
+// ✅ Ruxsat berilgan domenlar ro‘yxati
+const allowedOrigins = [
+  "https://ecowater.company-erp.uz"
+  // "https://dev.company-erp.uz"
+];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || !isProd || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS: Ruxsat etilmagan domen"));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization']
+};
 
-
-app.use(
-  cors({
-    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-    credentials: isProd, // prod -> true, dev -> false
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-
-
+// ✅ CORS middleware - har doim tepada
+app.use(cors(corsOptions));
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
 
