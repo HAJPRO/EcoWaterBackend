@@ -11,21 +11,23 @@ const errorMiddleware = require("./middlewares/error.middleware.js");
 const app = express();
 
 // env flag
-const isProd = process.env.NODE_ENV === "production";
 
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS
+const isProd = process.env.NODE_ENV === "production";
+
 app.use(
   cors({
     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-    credentials: isProd ? true : false,
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
@@ -44,11 +46,11 @@ const setupSocket = socketModule.setupSocket || socketModule;
 
 // Create socket (passthrough options if your socket module supports them)
 const io = setupSocket(server, {
-  cors: {
-    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-    methods: ["GET", "POST"],
-    credentials: isProd ? true : false,
-  },
+  // cors: {
+  //   origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+  //   methods: ["GET", "POST"],
+  //   credentials: isProd ? true : false,
+  // },
 });
 
 // make io available inside express handlers
