@@ -1,56 +1,70 @@
-const express = require("express");
+// server.js (yoki index.js)
 require("dotenv").config();
+const express = require("express");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
-const cookie = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const mongoose = require("mongoose");
 const errorMiddleware = require("./middlewares/error.middleware.js");
+
 const app = express();
+
+// env flag
+const isProd = process.env.NODE_ENV === "production";
+
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const { setupSocket } = require("./socket/socket.js");
-// app.use(cors({
-//   origin: "*",
-// const isProd = process.env.NODE_ENV === "production"; // yoki boshqa flag
-// }));
-// app.use(
-//   cors({
-//     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-//     credentials: isProd ? true : false,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-// app.use(express.static(path.join(__dirname, "./public"))); /////
-app.use(express.static("./public"));
-app.use(fileUpload({}));
-app.use(cookie({}));
-app.use(errorMiddleware);
 
+// CORS
+app.use(
+  cors({
+    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+    credentials: isProd ? true : false,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Static files
+app.use(express.static(path.join(__dirname, "public")));
+
+// File upload & cookies
+app.use(fileUpload());
+app.use(cookieParser());
+
+// HTTP server + socket setup
 const http = require("http");
 const server = http.createServer(app);
-// const io = setupSocket(server);
 
-const io = new setupSocket(server, {
+// Require socket module robustly (handles both module.exports = fn and exports.setupSocket = fn)
+const socketModule = require("./socket/socket.js");
+const setupSocket = socketModule.setupSocket || socketModule;
+
+// Create socket (passthrough options if your socket module supports them)
+const io = setupSocket(server, {
   cors: {
     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
     methods: ["GET", "POST"],
     credentials: isProd ? true : false,
   },
 });
-// Global o‘rniga app ichida saqlash
+
+// make io available inside express handlers
 app.set("io", io);
-const PORT = process.env.PORT || 5000;
-// Routes
-// 📌 BOTLAR
+
+// ------------------ ROUTES ------------------
+// Bots (side-effect require)
 require("./bots/drivers/bot.js");
 
+// Helpers
 app.use(
   "/api/v1/helpers",
   require("./routes/helpers/address/address.route.js")
 );
-//Dashboard
+
+// Dashboard
 app.use(
   "/api/v1/dashboard/statistics/sale",
   require("./routes/dashboard/statistics/saleStatistic.route.js")
@@ -63,18 +77,22 @@ app.use(
 );
 app.use("/api/v1/admin/role", require("./routes/admin/role.route.js"));
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
+
 // HR
 app.use(
   "/api/v1/hr/employees",
   require("./routes/hr/employee/employee.route.js")
 );
+
 // Drivers
 app.use("/api/v1/drivers", require("./routes/drivers/driver.route.js"));
+
 // Customers
 app.use(
   "/api/v1/customers",
   require("./routes/customers/c-managment/managment.route.js")
 );
+
 // Sale
 app.use("/api/v1/sale", require("./routes/sale/orders/order.route.js"));
 app.use(
@@ -88,6 +106,12 @@ app.use(
   require("./routes/warehouses/r-warehouse/warehouse.route.js")
 );
 
+// Error middleware SHOULD be after all routes
+app.use(errorMiddleware);
+
+// ------------------ START ------------------
+const PORT = process.env.PORT || 5000;
+
 const START = async () => {
   try {
     await mongoose.connect(process.env.DB_URL, {
@@ -100,7 +124,9 @@ const START = async () => {
       console.log(`Server ${PORT} portda ishga tushdi`);
     });
   } catch (err) {
-    console.log(`DB ga ulanishda xatolik: ${err}`);
+    console.error(`DB ga ulanishda xatolik: ${err}`);
+    process.exit(1); // agar xato bo'lsa processni tugatish mumkin
   }
 };
+
 START();
