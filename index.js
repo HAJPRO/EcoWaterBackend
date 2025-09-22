@@ -19,14 +19,16 @@ app.use(express.urlencoded({ extended: true }));
 // CORS
 const isProd = process.env.NODE_ENV === "production";
 
+
 app.use(
   cors({
     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-    credentials: true,
+    credentials: isProd, // prod -> true, dev -> false
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 
 // Static files
@@ -46,11 +48,7 @@ const setupSocket = socketModule.setupSocket || socketModule;
 
 // Create socket (passthrough options if your socket module supports them)
 const io = setupSocket(server, {
-  // cors: {
-  //   origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-  //   methods: ["GET", "POST"],
-  //   credentials: isProd ? true : false,
-  // },
+  
 });
 
 // make io available inside express handlers
