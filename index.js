@@ -10,10 +10,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const { setupSocket } = require("./socket/socket.js");
-app.use(cors({
-  origin: "*",
+// app.use(cors({
+//   origin: "*",
 // const isProd = process.env.NODE_ENV === "production"; // yoki boshqa flag
-}));
+// }));
 // app.use(
 //   cors({
 //     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
@@ -33,11 +33,11 @@ const server = http.createServer(app);
 // const io = setupSocket(server);
 
 const io = new setupSocket(server, {
-  // cors: {
-  //   origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-  //   methods: ["GET", "POST"],
-  //   credentials: isProd ? true : false,
-  // },
+  cors: {
+    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+    methods: ["GET", "POST"],
+    credentials: isProd ? true : false,
+  },
 });
 // Global o‘rniga app ichida saqlash
 app.set("io", io);
