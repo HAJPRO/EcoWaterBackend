@@ -40,9 +40,7 @@ class OrderManagmentService {
         .populate("driverId", "chatId") // agar boshqa bog‘langan maydonlar bo‘lsa, qo‘shing
         .populate("customerId") // misol uchun
         .populate("author", "username fullname position"); // misol uchun
-      if (updateData.status === "Haydovchiga yuborilmoqda") {
-        BotDriverService.SentOrder(updateData);
-      }
+      await BotDriverService.SentOrder(updateData);
       return { status: 200, msg: "Haydovchiga muvaffaqiyatli yuborildi" };
     } catch (error) {
       console.error("Buyurtmani olishda xatolik: ", error);
