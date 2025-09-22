@@ -10,18 +10,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const { setupSocket } = require("./socket/socket.js");
-// app.use(cors({
-//   origin: "*",
-const isProd = process.env.NODE_ENV === "production"; // yoki boshqa flag
-// }));
-app.use(
-  cors({
-    origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-    credentials: isProd ? true : false,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({
+  origin: "*",
+// const isProd = process.env.NODE_ENV === "production"; // yoki boshqa flag
+}));
+// app.use(
+//   cors({
+//     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
+//     credentials: isProd ? true : false,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 // app.use(express.static(path.join(__dirname, "./public"))); /////
 app.use(express.static("./public"));
 app.use(fileUpload({}));
