@@ -18,14 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS
 const isProd = process.env.NODE_ENV === "production";
-// app.use(
-//   cors({
-//     origin: isProd ? "https://ecowater.company-erp.uz" : "*",
-//     credentials: isProd, // prod -> true, dev -> false
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
+
 // ✅ CORS sozlamalari
 // ✅ Ruxsat berilgan domenlar ro‘yxati
 const allowedOrigins = [
