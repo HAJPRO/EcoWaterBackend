@@ -207,7 +207,7 @@ function applyStatusColor(cell, status) {
   let color = 'FF34495E'; // Default
   const s = status.toLowerCase();
   
-  if (s.includes('yetkaz') || s.includes('delivered')) color = 'FF27AE60'; // Yashil
+  if (s.includes('yetkaz') || s.includes('delivered')) color = 'FF27AE60'; // Yashil...
   else if (s.includes('bekor') || s.includes('cancel')) color = 'FFC0392B'; // Qizil
   else if (s.includes('yangi') || s.includes('new')) color = 'FF2980B9'; // Ko'k
   else if (s.includes('jarayon') || s.includes('pending')) color = 'FFF39C12'; // Sariq
