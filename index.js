@@ -1,4 +1,4 @@
-// server.js (yoki index.js)
+// index.js - To'liq yangilangan versiya
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -10,8 +10,6 @@ const errorMiddleware = require("./middlewares/error.middleware.js");
 
 const app = express();
 
-// env flag
-
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,7 +18,6 @@ app.use(express.urlencoded({ extended: true }));
 const isProd = process.env.NODE_ENV === "production";
 
 // ✅ CORS sozlamalari
-// ✅ Ruxsat berilgan domenlar ro‘yxati
 const allowedOrigins = [
   "https://ecowater.company-erp.uz"
   // "https://dev.company-erp.uz"
@@ -51,13 +48,13 @@ app.use(cookieParser());
 const http = require("http");
 const server = http.createServer(app);
 
-// Require socket module robustly (handles both module.exports = fn and exports.setupSocket = fn)
+// Require socket module robustly
 const socketModule = require("./socket/socket.js");
 const setupSocket = socketModule.setupSocket || socketModule;
 
-// Create socket (passthrough options if your socket module supports them)
+// Create socket
 const io = setupSocket(server, {
-  
+  // socket options if needed
 });
 
 // make io available inside express handlers
@@ -134,8 +131,14 @@ const START = async () => {
     });
   } catch (err) {
     console.error(`DB ga ulanishda xatolik: ${err}`);
-    process.exit(1); // agar xato bo'lsa processni tugatish mumkin
+    process.exit(1);
   }
 };
 
-START();
+// 🔥 O'ZGARGON JOY: START() faqat asosiy fayl bo'lsa ishlaydi
+if (require.main === module) {
+    START();
+}
+
+// Boshqa fayllar import qilishi uchun eksport qilamiz
+module.exports = server;
