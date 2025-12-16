@@ -101,6 +101,4 @@ const ReadyWarehouseSchema = new Schema(
 
 
 
-module.exports = mongoose.models.ReadyWarehouse 
-    ? mongoose.model('ReadyWarehouse') 
-    : model("ReadyWarehouse", ReadyWarehouseSchema);
+module.exports = model("ReadyWarehouse", ReadyWarehouseSchema);

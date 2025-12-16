@@ -1,11 +1,13 @@
 const e = require("express");
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/r-warehouse.model");
-const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
+const {
+  generateUniquePartyNumber,
+} = require("../../../utils/generateUniqueNumber");
 
 class ReadyWarehouseService {
   // Modelni yaratish
   async GetModel() {
-    const partyNumber = await generateUniquePartyNumber();  // Unikal partiya raqamini olish
+    const partyNumber = await generateUniquePartyNumber(); // Unikal partiya raqamini olish
     const model = {
       partyNumber: partyNumber, // Partiya raqami
       supplier: "", // Yetkazib beruvchi (firma yoki shaxs nomi)
@@ -20,7 +22,7 @@ class ReadyWarehouseService {
       costPrice: "",
       products: [],
       input: [],
-      output: []
+      output: [],
     };
 
     return { msg: "Model taqdim qilindi!", model };
@@ -28,18 +30,18 @@ class ReadyWarehouseService {
 
   // Yangi ReadyWarehouse yaratish
   async Create(model, action) {
-
-
     try {
       if (action === "create") {
-        const changeProduct = await ReadyWarehouse.findOne({ product: model.product })
+        const changeProduct = await ReadyWarehouse.findOne({
+          product: model.product,
+        });
         if (changeProduct) {
-          return { msg: "Bunday mahsulot sklada mavjud !", status: 404 }
+          return { msg: "Bunday mahsulot sklada mavjud !", status: 404 };
         }
-        await ReadyWarehouse.create({ ...model, input: model.products })
+        await ReadyWarehouse.create({ ...model, input: model.products });
         return { status: 200, msg: "Mahsulot muvaffaqiyatli qo'shildi!" };
       }
-      if (action === 'update') {
+      if (action === "update") {
         const { id, newDataArray } = model;
 
         const updated = await ReadyWarehouse.findByIdAndUpdate(
@@ -47,8 +49,8 @@ class ReadyWarehouseService {
           {
             $push: {
               input: newDataArray,
-              products: newDataArray
-            }
+              products: newDataArray,
+            },
           },
           { new: true, runValidators: true }
         );
@@ -56,11 +58,6 @@ class ReadyWarehouseService {
       } else {
         return { status: 404, msg: "Noto'g'ri amal turi" };
       }
-
-
-
-
-
     } catch (error) {
       return { status: 404, msg: `Xatolik yuz berdi: ${error.message}` };
     }
@@ -68,22 +65,23 @@ class ReadyWarehouseService {
 
   // Barcha ReadyWarehouse uzunligini olish
   async getAllLength(data) {
-    const all = await ReadyWarehouse.find({ author: data.author }).then((data) => {
-      if (data) {
-        return data.length;
-      } else {
-        return 0;
+    const all = await ReadyWarehouse.find({ author: data.author }).then(
+      (data) => {
+        if (data) {
+          return data.length;
+        } else {
+          return 0;
+        }
       }
-    });
+    );
     return { all };
   }
 
   // Barcha ReadyWarehouse olish
   async GetAll(data) {
-
     try {
       const all_length = await this.getAllLength(data);
-      const products = await this.GetAllParty(data)
+      const products = await this.GetAllParty(data);
       return { products, all_length };
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}`, warehouses: [] };
@@ -91,28 +89,28 @@ class ReadyWarehouseService {
   }
   // 📌 **Barcha partyalar**
   async GetAllParty(data) {
-// if(data.author)   {
-  
-//       const products = await ReadyWarehouse.find()
-//      return products.length ? products : [];
-// } 
-//     const page = Number(data.page);
-//     const limit = Number(data.limit)
-//     const skip = (page - 1) * limit;
-    try {
-      if(data.author) {
-        const products = await ReadyWarehouse.find().populate("product")
-        console.log(products);
-        
-        return products.length ? products : [];
-       }
-        else{ const products = await ReadyWarehouse.find({ author: data.author })
-        .skip(skip)
-        .limit(limit)
-        .lean();
+    // if(data.author)   {
 
-      return products.length ? products : [];}
-     
+    //       const products = await ReadyWarehouse.find()
+    //      return products.length ? products : [];
+    // }
+    //     const page = Number(data.page);
+    //     const limit = Number(data.limit)
+    //     const skip = (page - 1) * limit;
+    try {
+      if (data.author) {
+        const products = await ReadyWarehouse.find().populate("product");
+        console.log(products);
+
+        return products.length ? products : [];
+      } else {
+        const products = await ReadyWarehouse.find({ author: data.author })
+          .skip(skip)
+          .limit(limit)
+          .lean();
+
+        return products.length ? products : [];
+      }
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}` };
     }
@@ -140,20 +138,31 @@ class ReadyWarehouseService {
 
       // 2. Har bir chiqarilayotgan mahsulotni ko‘rib chiqamiz
       for (const outputItem of outputItems) {
-        const foundProduct = product.products.find(item => String(item._id) === String(outputItem._id));
+        const foundProduct = product.products.find(
+          (item) => String(item._id) === String(outputItem._id)
+        );
         if (!foundProduct) {
-          return { status: 404, msg: `Mahsulot topilmadi (ID: ${outputItem._id})`, warehouses: [] };
+          return {
+            status: 404,
+            msg: `Mahsulot topilmadi (ID: ${outputItem._id})`,
+            warehouses: [],
+          };
         }
 
         if (foundProduct.quantity < outputItem.outputQuantity) {
-          return { status: 400, msg: `Chiqarilayotgan miqdor mavjudidan oshib ketdi (ID: ${outputItem._id})`, warehouses: [] };
+          return {
+            status: 400,
+            msg: `Chiqarilayotgan miqdor mavjudidan oshib ketdi (ID: ${outputItem._id})`,
+            warehouses: [],
+          };
         }
 
         // Miqdorni kamaytirish
         foundProduct.quantity -= outputItem.outputQuantity;
-        foundProduct.totalPrice = foundProduct.unit === 'Blok'
-          ? foundProduct.quantity * foundProduct.blockCostPrice
-          : foundProduct.quantity * foundProduct.costPrice;
+        foundProduct.totalPrice =
+          foundProduct.unit === "Blok"
+            ? foundProduct.quantity * foundProduct.blockCostPrice
+            : foundProduct.quantity * foundProduct.costPrice;
 
         // Output massivga qo'shish
         if (!Array.isArray(product.output)) {
@@ -171,29 +180,43 @@ class ReadyWarehouseService {
           blockCostPrice: foundProduct.blockCostPrice,
           salePrice: foundProduct.salePrice,
           registeredAt: output.outputRegisteredAt,
-          totalPrice: foundProduct.unit === 'Blok'
-            ? outputItem.outputQuantity * foundProduct.blockCostPrice
-            : outputItem.outputQuantity * foundProduct.costPrice,
+          totalPrice:
+            foundProduct.unit === "Blok"
+              ? outputItem.outputQuantity * foundProduct.blockCostPrice
+              : outputItem.outputQuantity * foundProduct.costPrice,
           manufactureDate: foundProduct.manufactureDate,
           expireDate: foundProduct.expireDate,
           outputDate: new Date(),
-          outputResponsible: foundProduct.outputResponsible || outputItem.outputResponsible,
-          outputRecipient: foundProduct.outputRecipient || outputItem.outputRecipient,
+          outputResponsible:
+            foundProduct.outputResponsible || outputItem.outputResponsible,
+          outputRecipient:
+            foundProduct.outputRecipient || outputItem.outputRecipient,
         });
       }
 
       // 3. Umumiy summalarni hisoblash
-      product.totalOutputPrice = product.output.reduce((acc, item) => acc + item.totalPrice, 0);
-      product.totalRemainderPrice = product.totalAmount - product.totalOutputPrice;
+      product.totalOutputPrice = product.output.reduce(
+        (acc, item) => acc + item.totalPrice,
+        0
+      );
+      product.totalRemainderPrice =
+        product.totalAmount - product.totalOutputPrice;
 
       // 4. Saqlash
       await product.save();
 
       // 5. Javob
-      return { status: 200, msg: "Chiqarish muvaffaqiyatli", warehouses: product.products };
-
+      return {
+        status: 200,
+        msg: "Chiqarish muvaffaqiyatli",
+        warehouses: product.products,
+      };
     } catch (error) {
-      return { status: 500, msg: `Server xatosi: ${error.message}`, warehouses: [] };
+      return {
+        status: 500,
+        msg: `Server xatosi: ${error.message}`,
+        warehouses: [],
+      };
     }
   }
 
@@ -201,12 +224,11 @@ class ReadyWarehouseService {
     const { id, action } = data;
     console.log(data);
 
-
     const actionsMap = {
-      1: { key: 'input', successMsg: "Kirim muvaffaqiyatli o'chirildi!" },
-      2: { key: 'products', successMsg: "Qoldiq muvaffaqiyatli o'chirildi!" },
-      3: { key: 'output', successMsg: "Chiqim muvaffaqiyatli o'chirildi!" },
-      4: { key: 'main', successMsg: "Muvaffaqiyatli o'chirildi!" }
+      1: { key: "input", successMsg: "Kirim muvaffaqiyatli o'chirildi!" },
+      2: { key: "products", successMsg: "Qoldiq muvaffaqiyatli o'chirildi!" },
+      3: { key: "output", successMsg: "Chiqim muvaffaqiyatli o'chirildi!" },
+      4: { key: "main", successMsg: "Muvaffaqiyatli o'chirildi!" },
     };
 
     const actionInfo = actionsMap[action];
@@ -216,7 +238,7 @@ class ReadyWarehouseService {
     }
 
     try {
-      if (actionInfo.key === 'main') {
+      if (actionInfo.key === "main") {
         const deleted = await ReadyWarehouse.findByIdAndDelete(id);
         if (!deleted) {
           return { status: 404, msg: "Ma'lumot topilmadi." };
@@ -225,7 +247,7 @@ class ReadyWarehouseService {
       }
 
       const warehouse = await ReadyWarehouse.findOne({
-        [`${actionInfo.key}._id`]: id
+        [`${actionInfo.key}._id`]: id,
       });
 
       if (!warehouse) {
@@ -234,24 +256,16 @@ class ReadyWarehouseService {
 
       // Delete by filtering out matching item
       warehouse[actionInfo.key] = warehouse[actionInfo.key].filter(
-        item => item._id.toString() !== id
+        (item) => item._id.toString() !== id
       );
 
       await warehouse.save();
 
       return { status: 200, msg: actionInfo.successMsg };
-
     } catch (error) {
       return { status: 500, msg: `Server xatosi: ${error.message}` };
     }
   }
-
-
-
-
-
-
-
 }
 
 module.exports = new ReadyWarehouseService();
