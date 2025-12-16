@@ -1,100 +1,155 @@
-const mongoose = require('mongoose');
-const Product = require("../../../models/Sale/products/product.model");
+const Product = require("../../../models/Sale/products/product.model"); // Model manzili to'g'ri ekanligiga ishonch hosil qiling
 
-class ProductManagmentService {
-  // Mahsulot qo'shish
-  async Create(data) {
-    const { action, model, author } = data
+class ProductManagementService {
+
+  /**
+   * Yangi mahsulot yaratish
+   * @param {Object} data - Mahsulot ma'lumotlari
+   * @param {String} authorId - Yaratuvchi ID
+   */
+  async create(data, authorId) {
+    console.log(data, authorId);
     try {
+      // 1. Shtrix-kod (code) takrorlanmasligini tekshirish
+      const existingProduct = await Product.findOne({ code: data.code });
+      if (existingProduct) {
+        return { success: false, msg: `Diqqat: ${data.code} kodli mahsulot allaqachon mavjud!` };
+      }
 
+      // 2. Yangi obyektni tayyorlash (Yangi Schema bo'yicha)
+      const newProductPayload = {
+        ...data,
+        author: authorId,
+        // Frontenddan kelayotgan ma'lumotlarni yangi modelga moslash
+        // Agar front hali eski nomlarni ishlatsa, shu yerda mapping qilinadi:
+        name: data.name || data.pro_name, 
+        salePrice: data.salePrice || data.buying_price, 
+      };
 
-      if (action === 'create') {
-        const existingProduct = await Product.findOne({ code: model.code, pro_name: model.pro_name });
-        if (existingProduct) {
-          return { msg: "Bunday mahsulot mavjud !" }; // Agar mahsulot mavjud bo'lsa
+      const newProduct = await Product.create(newProductPayload);
+      
+      return { success: true, msg: "Mahsulot muvaffaqiyatli qo'shildi!", data: newProduct };
+    } catch (error) {
+      console.error("Product Create Error:", error);
+      return { success: false, msg: `Xatolik: ${error.message}` };
+    }
+  }
+
+  /**
+   * Mahsulotni tahrirlash
+   * @param {String} id - Mahsulot ID
+   * @param {Object} updateData - O'zgaradigan ma'lumotlar
+   */
+  async update(id, updateData) {
+    try {
+      // Agar code o'zgarayotgan bo'lsa, u boshqa mahsulotda yo'qligini tekshirish kerak
+      if (updateData.code) {
+        const duplicate = await Product.findOne({ code: updateData.code, _id: { $ne: id } });
+        if (duplicate) {
+          return { success: false, msg: "Bu shtrix-kod boshqa mahsulotda band!" };
         }
-        const product = await Product.create(data);
-        return { msg: "Mahsulot muvaffaqiyatli qo'shildi !" }; // Yangi mahsulot yaratildi
       }
-      if (action === 'update') {
-        const { _id, ...updateData } = model
-        const update = await Product.findByIdAndUpdate(_id, updateData, { new: true, runValidators: true })
-        return { msg: "Mahsulot muvaffaqiyatli o'zgartirildi !" }; // Yangi mahsulot yaratildi
+
+      const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { 
+        new: true, 
+        runValidators: true 
+      });
+
+      if (!updatedProduct) {
+        return { success: false, msg: "Mahsulot topilmadi" };
       }
-      return { msg: "Noto'g'ri harakat !" };
+
+      return { success: true, msg: "Mahsulot muvaffaqiyatli yangilandi!", data: updatedProduct };
     } catch (error) {
-      // Xatolikni qaytarish
-      console.error("Mahsulotni yaratishda xatolik:", error);
-      throw new Error("Mahsulotni yaratishda xatolik yuz berdi");
+      return { success: false, msg: `Xatolik: ${error.message}` };
     }
   }
 
-  async getAllLength(data) {
-    const all = await Product.find().then((data) => {
-      if (data) {
-        return data.length;
-      } else {
-        return 0;
-      }
-    });
-    return { all };
-  }
-  async GetAll(data) {
-
+  /**
+   * Barcha mahsulotlarni olish (Pagination + Search + Filter)
+   * @param {Object} query - { page, limit, search, category }
+   */
+  async getAll(query) {
     try {
-      if (data.status === 0) {
-        const products = await Product.find().lean()
-        return { products }
+      const page = parseInt(query.page) || 1;
+      const limit = parseInt(query.limit) || 20;
+      const skip = (page - 1) * limit;
+      
+      // Qidiruv shartlarini yig'ish
+      let filter = { status: "active" }; // Default faqat aktivlar
+
+      // Qidiruv (Nom yoki Kod bo'yicha)
+      if (query.search) {
+        filter.$or = [
+          { name: { $regex: query.search, $options: "i" } },
+          { code: { $regex: query.search, $options: "i" } }
+        ];
       }
-      if (data.status === 1) {
-        const all_length = await this.getAllLength(data);
-        const products = await this.GetAllProducts(data);
-        return { products, all_length };
-      } else {
-        return { msg: `Server xatosi: ${error.message} `, products: [] };
+
+      // Kategoriya bo'yicha
+      if (query.category && query.category !== "Barchasi") {
+        filter.category = query.category;
       }
+
+      // So'rovlarni parallel bajarish (tezlik uchun)
+      const [products, total] = await Promise.all([
+        Product.find(filter)
+          .sort({ createdAt: -1 }) // Eng yangilari tepada
+          .skip(skip)
+          .limit(limit)
+          .lean(), // Faqat JSON qaytaradi (tez)
+        Product.countDocuments(filter)
+      ]);
+
+      return {
+        success: true,
+        products,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     } catch (error) {
-      return { msg: `Server xatosi: ${error.message} `, products: [], all_length: {} };
+      return { success: false, msg: `Server xatosi: ${error.message}`, products: [] };
     }
   }
-  // 📌 **Barcha mijozlar olish**
-  async GetAllProducts(data) {
-    const page = Number(data.page);
-    const limit = Number(data.limit)
-    const skip = (page - 1) * limit;
-    try {
-      const products = await Product.find({})
-        .skip(skip)
-        .limit(limit)
-        .lean();
 
-      return products.length ? products : [];
+  /**
+   * Bitta mahsulotni ID bo'yicha olish
+   */
+  async getOne(id) {
+    try {
+      const product = await Product.findById(id).lean();
+      if (!product) {
+        return { success: false, msg: "Mahsulot topilmadi" };
+      }
+      return { success: true, data: product };
     } catch (error) {
-      return { msg: `Server xatosi: ${error.message}` };
+      return { success: false, msg: `Xatolik: ${error.message}` };
     }
   }
 
-  async GetOne(data) {
+  /**
+   * Mahsulotni o'chirish (yoki arxivlash)
+   */
+  async delete(id) {
+    try {
+      // 1-variant: Butunlay o'chirish (Physical Delete)
+      const deleted = await Product.findByIdAndDelete(id);
+      
+      // 2-variant: Arxivlash (Tavsiya etiladi, agar sotuv tarixi bo'lsa)
+      // const deleted = await Product.findByIdAndUpdate(id, { status: 'archived' });
 
-    try {
-      const product = await Product.findById(data.id).lean();
-      return { msg: "Mahsilotv topildi", product }
-    } catch (error) {
-      return { msg: `Server xatosi: ${error.message}` };
-    }
-  };
-  async DeleteById(data) {
-    try {
-      const deleted = await Product.findByIdAndDelete(data.id);
       if (!deleted) {
-        return { msg: "Mahsulot topilmadi yoki allaqachon o'chirilgan" };
+        return { success: false, msg: "Mahsulot topilmadi" };
       }
-      return { msg: "Mahsulot o'chirildi", success: true };
+      return { success: true, msg: "Mahsulot o'chirildi" };
     } catch (error) {
-      return { msg: `Server xatosi: ${error.message}` };
+      return { success: false, msg: `Xatolik: ${error.message}` };
     }
   }
-
 }
 
-module.exports = new ProductManagmentService();
+module.exports = new ProductManagementService();

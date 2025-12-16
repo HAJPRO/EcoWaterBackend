@@ -1,3 +1,4 @@
+const e = require("express");
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/r-warehouse.model");
 const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
 
@@ -27,7 +28,6 @@ class ReadyWarehouseService {
 
   // Yangi ReadyWarehouse yaratish
   async Create(model, action) {
-    console.log(model);
 
 
     try {
@@ -92,16 +92,26 @@ class ReadyWarehouseService {
   }
   // 📌 **Barcha partyalar**
   async GetAllParty(data) {
-    const page = Number(data.page);
-    const limit = Number(data.limit)
-    const skip = (page - 1) * limit;
+// if(data.author)   {
+  
+//       const products = await ReadyWarehouse.find()
+//      return products.length ? products : [];
+// } 
+//     const page = Number(data.page);
+//     const limit = Number(data.limit)
+//     const skip = (page - 1) * limit;
     try {
-      const products = await ReadyWarehouse.find({ author: data.author })
+      if(data.author) {
+        const products = await ReadyWarehouse.find()
+        return products.length ? products : [];
+       }
+        else{ const products = await ReadyWarehouse.find({ author: data.author })
         .skip(skip)
         .limit(limit)
         .lean();
 
-      return products.length ? products : [];
+      return products.length ? products : [];}
+     
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}` };
     }

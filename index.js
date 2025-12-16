@@ -111,6 +111,11 @@ app.use(
   "/api/v1/warehouses",
   require("./routes/warehouses/r-warehouse/warehouse.route.js")
 );
+app.use(
+  "/api/v1/warehouses/input",
+  require("./routes/warehouses/input/input.route.js")
+);
+
 
 // Error middleware SHOULD be after all routes
 app.use(errorMiddleware);
