@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { model, Schema } = mongoose;
+const mongoose = require("mongoose"); // <- BU QATORNI QO'SHING
+const { model, Schema } = mongoose; // Endi Mongoose obyekti mavjud
 
 const ReadyWarehouseSchema = new Schema(
   {
@@ -71,9 +71,10 @@ const ReadyWarehouseSchema = new Schema(
       default: "General",
       comment: "Ombor ichidagi joylashuv: A-Zona, 3-Polka"
     },
-    supplier: {
-      // type: Schema.Types.ObjectId,
-      // ref: "Supplier",
+    driver: {
+      type: Schema.Types.ObjectId, // Bog'lanish turini belgilash
+    ref: "Employee",             // 'Employee' nomli boshqa modelga bog'lash
+    comment: "Mahsulot qaysi yetkazib beruvchidan kelganligi"
     },
     expireDate: {
       type: Date,
@@ -101,6 +102,6 @@ const ReadyWarehouseSchema = new Schema(
 
 
 
-module.exports = mongoose.models.ReadyWarehouse 
-    ? mongoose.model('ReadyWarehouse') 
-    : model("ReadyWarehouse", ReadyWarehouseSchema);
+module.exports = mongoose.models.ReadyWarehouse
+    ? mongoose.model('ReadyWarehouse') // Agar model mavjud bo'lsa, uni qaytaradi
+    : model("ReadyWarehouse", ReadyWarehouseSchema); // Aks holda, uni yaratadi

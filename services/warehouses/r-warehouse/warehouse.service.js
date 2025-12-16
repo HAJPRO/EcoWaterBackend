@@ -1,4 +1,3 @@
-const e = require("express");
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/r-warehouse.model");
 const {
   generateUniquePartyNumber,
