@@ -1,4 +1,4 @@
-// index.js - To'liq yangilangan versiya
+// index.js - To'liq yangilangan, Socket.IO olib tashlangan versiya
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -9,6 +9,8 @@ const mongoose = require("mongoose");
 const errorMiddleware = require("./middlewares/error.middleware.js");
 
 const app = express();
+
+// ------------------ MIDDLWARES ------------------
 
 // Body parsers
 app.use(express.json());
@@ -24,6 +26,7 @@ const allowedOrigins = [
 ];
 const corsOptions = {
   origin: function (origin, callback) {
+    // Agar production emas bo'lsa yoki allowedOrigins ro'yxatida bo'lsa ruxsat berish
     if (!origin || !isProd || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -37,28 +40,14 @@ const corsOptions = {
 
 // ✅ CORS middleware - har doim tepada
 app.use(cors(corsOptions));
-// Static files
+
+// Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
 
 // File upload & cookies
 app.use(fileUpload());
 app.use(cookieParser());
 
-// HTTP server + socket setup
-const http = require("http");
-const server = http.createServer(app);
-
-// Require socket module robustly
-const socketModule = require("./socket/socket.js");
-const setupSocket = socketModule.setupSocket || socketModule;
-
-// Create socket
-const io = setupSocket(server, {
-  // socket options if needed
-});
-
-// make io available inside express handlers
-app.set("io", io);
 
 // ------------------ ROUTES ------------------
 // Bots (side-effect require)
@@ -129,13 +118,11 @@ const PORT = process.env.PORT || 5000;
 
 const START = async () => {
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.DB_URL); // mongoose.connect hozirgi versiyalarda options talab qilmaydi
     console.log("DB ga ulanish muvaffaqiyatli");
 
-    server.listen(PORT, () => {
+    // Express serverni to'g'ridan-to'g'ri app.listen() orqali ishga tushirish
+    app.listen(PORT, () => {
       console.log(`Server ${PORT} portda ishga tushdi`);
     });
   } catch (err) {
@@ -149,5 +136,5 @@ if (require.main === module) {
     START();
 }
 
-// Boshqa fayllar import qilishi uchun eksport qilamiz
-module.exports = server;
+// Boshqa fayllar import qilishi uchun Express app ob'ektini eksport qilamiz
+module.exports = app;
