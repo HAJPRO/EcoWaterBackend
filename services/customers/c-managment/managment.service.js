@@ -51,33 +51,33 @@ class CustomerManagmentService {
   }
   async GetAll(data) {
     try {
-      if (data.filter) {
-        const all_length = await this.getAllLength(data);
+      // if (data.filter) {
+      //   const all_length = await this.getAllLength(data);
 
-        const customers = await Customer.find({
-          $or: [
-            { fullname: { $regex: data.filter.fullname, $options: "i" } },
-            { phoneNumber: { $regex: data.filter.fullname, $options: "i" } }, // telefon raqam bo‘yicha izlash
-          ],
-        }).lean();
+      //   const customers = await Customer.find({
+      //     $or: [
+      //       { fullname: { $regex: data.filter.fullname, $options: "i" } },
+      //       { phoneNumber: { $regex: data.filter.fullname, $options: "i" } }, // telefon raqam bo‘yicha izlash
+      //     ],
+      //   }).lean();
 
-        if (customers.length > 0) {
-          return { customers, all_length };
-        } else {
-          return {
-            status: 404,
-            msg: "Bunday mijoz topilmadi",
-            all_length,
-            customers: [],
-          };
-        }
-      }
+      //   if (customers.length > 0) {
+      //     return { customers, all_length };
+      //   } else {
+      //     return {
+      //       status: 404,
+      //       msg: "Bunday mijoz topilmadi",
+      //       all_length,
+      //       customers: [],
+      //     };
+      //   }
+      // }
 
-      if (data.status === 0) {
-        const customers = await Customer.find().lean();
-        return { customers };
-      }
-      if (data.status === 1) {
+      // if (data.status === 0) {
+      //   const customers = await Customer.find().lean();
+      //   return { customers };
+      // }
+      if (data) {
         const all_length = await this.getAllLength(data);
         const customers = await this.GetAllCustomers(data);
         return { customers, all_length };
@@ -94,12 +94,12 @@ class CustomerManagmentService {
   }
   // 📌 **Barcha mijozlar olish**
   async GetAllCustomers(data) {
-    const page = Number(data.page);
-    const limit = Number(data.limit);
-    const skip = (page - 1) * limit;
+    // const page = Number(data.page);
+    // const limit = Number(data.limit);
+    // const skip = (page - 1) * limit;
     try {
-      const customers = await Customer.find({}).skip(skip).limit(limit).lean();
-
+      const customers = await Customer.find()
+console.log(data);
       return customers.length ? customers : [];
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}` };

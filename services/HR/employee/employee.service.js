@@ -36,6 +36,10 @@ class EmployeeManagmentService {
     async GetAll(data) {
 
         try {
+             if (!data.status) {
+                const employees = await User.find().lean()
+                return { employees }
+            }
             if (data.status === 0) {
                 const employees = await User.find().lean()
                 return { employees }

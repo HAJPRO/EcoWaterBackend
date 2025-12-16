@@ -84,7 +84,6 @@ class ReadyWarehouseService {
     try {
       const all_length = await this.getAllLength(data);
       const products = await this.GetAllParty(data)
-
       return { products, all_length };
     } catch (error) {
       return { msg: `Server xatosi: ${error.message}`, warehouses: [] };
@@ -102,7 +101,9 @@ class ReadyWarehouseService {
 //     const skip = (page - 1) * limit;
     try {
       if(data.author) {
-        const products = await ReadyWarehouse.find()
+        const products = await ReadyWarehouse.find().populate("product")
+        console.log(products);
+        
         return products.length ? products : [];
        }
         else{ const products = await ReadyWarehouse.find({ author: data.author })

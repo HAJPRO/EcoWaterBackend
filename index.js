@@ -105,6 +105,10 @@ app.use(
   "/api/v1/sale/products",
   require("./routes/sale/products/product.route.js")
 );
+app.use(
+  "/api/v1/sale/salepos",
+  require("./routes/sale/salepos/salepos.route.js")
+);
 
 // Warehouses
 app.use(

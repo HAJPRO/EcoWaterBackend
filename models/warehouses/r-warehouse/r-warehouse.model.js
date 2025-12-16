@@ -95,34 +95,12 @@ const ReadyWarehouseSchema = new Schema(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true }, // Frontendga json berganda virtual maydonlarni qo'shish
-    toObject: { virtuals: true }
+   
   }
 );
 
-// --- 💡 OPTIMIZATSIYA: Virtual Maydonlar ---
-// Bazada joy egallamaydi, lekin so'rovda hisoblab beriladi
 
-// 1. Jami Tan Narx Qiymati (Qoldiq * Tan narx)
-ReadyWarehouseSchema.virtual("totalCostValue").get(function () {
-  return this.currentQuantity * this.costPrice;
-});
 
-// 2. Jami Sotuv Qiymati (Qoldiq * Sotuv narx)
-ReadyWarehouseSchema.virtual("totalSaleValue").get(function () {
-  return this.currentQuantity * this.salePrice;
-});
-
-// 3. Kutilayotgan Foyda
-ReadyWarehouseSchema.virtual("expectedProfit").get(function () {
-  return (this.salePrice - this.costPrice) * this.currentQuantity;
-});
-
-// --- ⚡️ INDEXING (Tezlik uchun) ---
-// 1. "Shu filialdagi, shu mahsulotning, aktiv partiyalari" so'rovi uchun (Eng ko'p ishlatiladigan so'rov)
-ReadyWarehouseSchema.index({ branch: 1, product: 1, status: 1 });
-
-// 2. Yaroqlilik muddati bo'yicha ogohlantirish uchun
-ReadyWarehouseSchema.index({ expireDate: 1, status: 1 });
-
-module.exports = model("ReadyWarehouse", ReadyWarehouseSchema);
+module.exports = mongoose.models.ReadyWarehouse 
+    ? mongoose.model('ReadyWarehouse') 
+    : model("ReadyWarehouse", ReadyWarehouseSchema);
