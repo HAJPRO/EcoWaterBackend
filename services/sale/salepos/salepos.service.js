@@ -4,7 +4,7 @@ const SaleModel = require("../../../models/Sale/orders/sales.model");
 const ReadyWarehouse = require("../../../models/Warehouses/r-warehouse/r-warehouse.model");
 const UserModel = require("../../../models/user.model");
 
-const BotDriverService = require("../../../bots/drivers/services/driver.service");
+// const BotDriverService = require("../../../bots/drivers/services/driver.service");
 const {
   generateUniqueOrderNumber,
 } = require("../../../utils/generateUniqueNumber");
@@ -121,7 +121,7 @@ class OrderManagmentService {
                     .populate("driverId", "chatId") 
                     .populate("customerId");
 
-                BotDriverService.SentOrder(populatedOrder); 
+//                 BotDriverService.SentOrder(populatedOrder); 
             }
             
             return { 
