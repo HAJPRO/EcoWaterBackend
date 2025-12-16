@@ -1,4 +1,3 @@
-// index.js - To'liq yangilangan, Socket.IO olib tashlangan versiya
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
