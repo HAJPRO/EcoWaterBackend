@@ -10,7 +10,7 @@ class ReadyWarehouseService {
     const model = {
       partyNumber: partyNumber, // Partiya raqami
       supplier: "", // Yetkazib beruvchi (firma yoki shaxs nomi)
-      manufacturer: "", // Ishlab chiqaruvchi korxona yoki brend nomi
+      manufacturer: "", // Ishlab chiqaruvchi korxona yoki brend nomi..
       senderEmployee: "", // Mahsulotni jo‘natgan xodim (ism yoki ID)
       receivedBy: "", // Mahsulotni qabul qilgan xodim
       receivedDate: new Date(), // Qabul qilingan sana (hozirgi vaqt)
