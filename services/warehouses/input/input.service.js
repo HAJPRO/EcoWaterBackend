@@ -4,8 +4,9 @@ const InputHistory = require("../../../models/warehouses/input/input.model");
 const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
 
 class WarehouseInputService {
-
 async create(payload) {
+const newPartyNumber = await generateUniquePartyNumber();
+  
   try {
     // 1. Validatsiya
     if (!payload.items || payload.items.length === 0) {
@@ -33,7 +34,7 @@ async create(payload) {
         currentQuantity: qty,
         costPrice: cost,
         salePrice: sale,
-        partyNumber: payload.partyNumber,
+        partyNumber: newPartyNumber,
         status: 'active',
         createdAt: now
       });
