@@ -39,8 +39,7 @@ const newPartyNumber = await generateUniquePartyNumber();
         createdAt: now
       });
 
-      // B) Tarix (InputHistory) modeli uchun obyekt
-      // DIQQAT: Modelingizda 'qty' so'ralgan bo'lsa, aynan 'qty' deb yuboramiz
+      
       historyItems.push({
         product: item.product,
         qty: qty, // <--- Xatolik shu yerda edi, nomini mosladik
