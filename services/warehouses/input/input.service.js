@@ -1,4 +1,4 @@
-const ReadyWarehouse = require("../../../models/Warehouses/r-warehouse/Rwarehouse.model");
+const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/Rwarehouse.model.js");
 const Product = require("../../../models/Sale/products/product.model");
 const InputHistory = require("../../../models/warehouses/input/input.model");
 const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
