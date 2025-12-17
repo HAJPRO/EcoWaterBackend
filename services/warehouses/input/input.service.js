@@ -34,7 +34,7 @@ async create(payload) {
         currentQuantity: qty,
         costPrice: cost,
         salePrice: sale,
-        partyNumber: newPartyNumber,
+        partyNumber: payload.partyNumber,
         status: 'active',
         createdAt: now
       });
@@ -59,7 +59,7 @@ async create(payload) {
     // 3. Kirim tarixini saqlash
     // Payload'dan emas, biz tayyorlagan 'historyItems' dan foydalanamiz
     const history = await InputHistory.create({
-      partyNumber: newPartyNumber,
+      partyNumber: payload.partyNumber,
       supplierId: payload.supplierId,
       branchId: payload.branchId,
       items: historyItems, // <--- To'g'irlangan massiv
