@@ -77,16 +77,16 @@ const newPartyNumber = await generateUniquePartyNumber();
     };
 
   } catch (error) {
-    console.error("Inbound Error:", error);
+    console.log("Inbound Error:", error);
 
     // Duplicate key xatosi uchun chiroyli javob
-    if (error.code === 11000) {
-      return { 
-        success: false, 
-        status: 400, 
-        msg: `Xatolik: ${payload.partyNumber} raqamli faktura avval kiritilgan!` 
-      };
-    }
+    // if (error.code === 11000) {
+    //   return { 
+    //     success: false, 
+    //     status: 400, 
+    //     msg: `Xatolik: ${payload.partyNumber} raqamli faktura avval kiritilgan!` 
+    //   };
+    // }
 
     return { success: false, status: 500, msg: "Serverda xatolik yuz berdi" };
   }
