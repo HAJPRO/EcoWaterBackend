@@ -27,7 +27,7 @@ const ReadyWarehouseSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // FIFO operatsiyalari uchun eng muhim indeks
-ReadyWarehouseSchema.index({ product: 1, branch: 1, createdAt: 1 });
+// ReadyWarehouseSchema.index({ product: 1, branch: 1, createdAt: 1 });
 
 module.exports = mongoose.models.ReadyWarehouse
     ? mongoose.model('ReadyWarehouse') // Agar model mavjud bo'lsa, uni qaytaradi
