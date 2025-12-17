@@ -59,7 +59,7 @@ const newPartyNumber = await generateUniquePartyNumber();
     // 3. Kirim tarixini saqlash
     // Payload'dan emas, biz tayyorlagan 'historyItems' dan foydalanamiz
     const history = await InputHistory.create({
-      partyNumber: payload.partyNumber,
+      partyNumber: newPartyNumber,
       supplierId: payload.supplierId,
       branchId: payload.branchId,
       items: historyItems, // <--- To'g'irlangan massiv
