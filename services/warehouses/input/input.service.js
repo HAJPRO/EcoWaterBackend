@@ -1,11 +1,12 @@
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/Rwarehouse.model.js");
 const Product = require("../../../models/Sale/products/product.model");
 const InputHistory = require("../../../models/warehouses/input/input.model");
+const SaleModel = require("../../../models/Sale/orders/sales.model.js");
 const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
 
 class WarehouseInputService {
 async create(payload) {
-  const newPartyNumber = `S-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+  const newPartyNumber = payload.partyNumber || `FKT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   try {
     // 1. Validatsiya
     if (!payload.items || payload.items.length === 0) {
@@ -90,10 +91,7 @@ async create(payload) {
     return { success: false, status: 500, msg: "Serverda xatolik yuz berdi" };
   }
 }
-
-  /**
-   * Barcha partiyalarni olish (Pagination & Filter)
-   */
+ 
   async getAll(query) {
     try {
       const page = parseInt(query.page) || 1;
@@ -232,6 +230,19 @@ async create(payload) {
       return { success: false, status: 500, msg: `Server xatosi: ${error.message}` };
     }
   }
+
+async clearAllData() {
+  try {
+    // Barcha partiyalarni va kirim tarixini o'chirish
+    await ReadyWarehouse.deleteMany({});
+    await InputHistory.deleteMany({});
+    await SaleModel.deleteMany({});
+    await Product.updateMany({}, { totalStock: 0 });
+    return { success: true, msg: "Barcha ma'lumotlar o'chirildi!" };
+  } catch (error) {
+    return { error: true, msg: error.msg};
+  }
+}
 }
 
 module.exports = new WarehouseInputService();

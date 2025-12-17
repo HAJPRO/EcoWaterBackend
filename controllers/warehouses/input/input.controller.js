@@ -123,6 +123,14 @@ class WarehouseInputController {
       next(error);
     }
   }
+async clearAllData(req, res, next) {
+    try {
+      const result = await WarehouseInputService.clearAllData();
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+} 
 }
 
 module.exports = new WarehouseInputController();

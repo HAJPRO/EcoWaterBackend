@@ -68,4 +68,14 @@ router.delete(
   WarehouseInputController.deleteById
 );
 
+// --- 4. TOZALASH (FAKULTATIV) ---
+// Barcha ombor va savdo ma'lumotlarini tozalash (FAKULTATIV, ehtiyotkorlik bilan ishlating!)
+// POST /api/warehouses/input/clear-all 
+router.post(
+  "/clear-all",
+  authMiddleware,
+  // onlyAdminAccess, // Faqat Adminlar ruxsat etiladi
+  WarehouseInputController.clearAllData
+);
+
 module.exports = router;
