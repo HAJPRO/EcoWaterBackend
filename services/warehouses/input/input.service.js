@@ -6,7 +6,7 @@ const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumb
 
 class WarehouseInputService {
 async create(payload) {
-  const newPartyNumber = payload.partyNumber || `FKT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const newPartyNumber =`FKT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   try {
     // 1. Validatsiya
     if (!payload.items || payload.items.length === 0) {
