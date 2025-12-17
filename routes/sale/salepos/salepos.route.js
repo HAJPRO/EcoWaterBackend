@@ -4,12 +4,6 @@ const authMiddleware = require("../../../middlewares/auth.middleware.js");
 const authorMiddleware = require("../../../middlewares/author.middleware.js");
 const onlyAdminAccess = require("../../../middlewares/admin.middleware.js");
 const SaleposManagmentController = require("../../../controllers/sale/salepos/salepos.controller.js");
-
-// Barcha marshrutlarga /managment/ prefiksini o'rnating
-// Masalan, bu router /api/sale/salepos/ ga ulansa:
-// Yangi URL: /api/sale/salepos/
-// Yangi URL: /api/sale/salepos/drivers
-
 // --- 1. Sotuv Tranzaksiyasini Yaratish (Chekni Yakunlash) ---
 // Frontend (Pinia) dan keladigan asosiy POST so'rovi.
 router.post(

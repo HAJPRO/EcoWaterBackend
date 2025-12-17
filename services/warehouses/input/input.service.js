@@ -1,68 +1,96 @@
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/r-warehouse.model");
-const Product = require("../../../models/Sale/products/product.model"); // Product modelini yangilash uchun
+const Product = require("../../../models/Sale/products/product.model");
+const InputHistory = require("../../../models/warehouses/input/input.model");
 const { generateUniquePartyNumber } = require("../../../utils/generateUniqueNumber");
 
 class WarehouseInputService {
 
-  /**
-   * Bitta partiyani yaratish (Frontenddan kirim qilingan har bir mahsulot qatori uchun chaqiriladi)
-   * @param {Object} payload - ReadyWarehouse schema'siga mos ma'lumotlar
-   * @param {string} action - 'create' yoki 'update'
-   */
-  async create(payload, action = 'create') {
-    console.log("Payload received in service:", payload, "Action:", action);
-    
-    try {
-      // 1. Validatsiya: Boshlang'ich miqdor mavjudligini tekshirish
-      if (!payload.initialQuantity || payload.initialQuantity <= 0) {
-        return { success: false, status: 400, msg: "Kirim miqdori noto'g'ri (0 dan katta bo'lishi kerak)" };
-      }
-
-      // 2. YARATISH (Yangi Partiya)
-      if (action === "create") {
-        
-        // Mahsulot mavjudligini tekshirish (Opsional, ammo yaxshi)
-        const productExists = await Product.findById(payload.product);
-        if (!productExists) {
-             return { success: false, status: 404, msg: "Mahsulot katalogda topilmadi!" };
-        }
-        
-        // Agar partyNumber berilmasa, avtomatik generatsiya qilish (Frontend o'zida yuboryapti, lekin backend nazorat qiladi)
-        if (!payload.partyNumber) {
-            payload.partyNumber = await generateUniquePartyNumber();
-        }
-
-        const newParty = await ReadyWarehouse.create({
-          ...payload,
-          // Boshlang'ich va joriy qoldiqni o'rnatish
-          currentQuantity: payload.initialQuantity, 
-        });
-        
-        // 3. PRODUCT MODEL'dagi TOTALSTOCK ni yangilash
-        // Bu tranzaksiyaning eng muhim qismi!
-        await Product.findByIdAndUpdate(
-            payload.product,
-            { $inc: { totalStock: payload.initialQuantity } },
-            { new: true }
-        );
-
-        return { success: true, status: 201, msg: "Kirim partiyasi muvaffaqiyatli saqlandi!", data: newParty };
-      }
-
-      // 4. YANGILASH (Qo'shimcha kirim)
-      if (action === 'update') {
-          // Bu logika kirim qilish uchun kam ishlatiladi. Odatda yangi partiya ochiladi.
-          // Agar kerak bo'lsa, mavjud partiyaning `currentQuantity` va `initialQuantity` lari $inc bilan oshiriladi.
-          return { success: false, status: 405, msg: "Partiya yangilanishi notog'ri. Iltimos, yangi partiya yarating." };
-      }
-      
-      return { success: false, status: 400, msg: "Noto'g'ri amal turi" };
-
-    } catch (error) {
-      console.error("ReadyWarehouse Create Error:", error);
-      return { success: false, status: 500, msg: `Server xatosi: ${error.message}` };
+async create(payload) {
+  try {
+    // 1. Validatsiya
+    if (!payload.items || payload.items.length === 0) {
+      return { success: false, status: 400, msg: "Mahsulotlar tanlanmagan!" };
     }
+
+    const warehouseEntries = [];
+    const historyItems = []; // History uchun to'g'ri formatdagi itemlar
+    const now = new Date();
+    let totalInvoiceAmount = 0;
+
+    for (const item of payload.items) {
+      const qty = Number(item.initialQuantity);
+      const cost = Number(item.costPrice);
+      const sale = Number(item.salePrice);
+      
+      totalInvoiceAmount += qty * cost;
+
+      // A) Ombor (ReadyWarehouse) uchun obyekt
+      warehouseEntries.push({
+        product: item.product,
+        supplierId: payload.supplierId,
+        branchId: payload.branchId,
+        initialQuantity: qty,
+        currentQuantity: qty,
+        costPrice: cost,
+        salePrice: sale,
+        partyNumber: payload.partyNumber,
+        status: 'active',
+        createdAt: now
+      });
+
+      // B) Tarix (InputHistory) modeli uchun obyekt
+      // DIQQAT: Modelingizda 'qty' so'ralgan bo'lsa, aynan 'qty' deb yuboramiz
+      historyItems.push({
+        product: item.product,
+        qty: qty, // <--- Xatolik shu yerda edi, nomini mosladik
+        costPrice: cost,
+        salePrice: sale
+      });
+
+      // C) Product modelida umumiy qoldiqni yangilash
+      await Product.findByIdAndUpdate(item.product, { 
+        $inc: { totalStock: qty } 
+      });
+    }
+
+    // 2. Omborga partiyalarni ommaviy yozish
+    await ReadyWarehouse.insertMany(warehouseEntries);
+
+    // 3. Kirim tarixini saqlash
+    // Payload'dan emas, biz tayyorlagan 'historyItems' dan foydalanamiz
+    const history = await InputHistory.create({
+      partyNumber: payload.partyNumber,
+      supplierId: payload.supplierId,
+      branchId: payload.branchId,
+      items: historyItems, // <--- To'g'irlangan massiv
+      totalAmount: totalInvoiceAmount,
+      note: payload.note || "",
+      action: payload.action || 1,
+      createdAt: now
+    });
+
+    return { 
+      success: true, 
+      status: 201, 
+      msg: `Kirim muvaffaqiyatli! Faktura: ${payload.partyNumber}`,
+      data: history 
+    };
+
+  } catch (error) {
+    console.error("Inbound Error:", error);
+
+    // Duplicate key xatosi uchun chiroyli javob
+    if (error.code === 11000) {
+      return { 
+        success: false, 
+        status: 400, 
+        msg: `Xatolik: ${payload.partyNumber} raqamli faktura avval kiritilgan!` 
+      };
+    }
+
+    return { success: false, status: 500, msg: "Serverda xatolik yuz berdi" };
   }
+}
 
   /**
    * Barcha partiyalarni olish (Pagination & Filter)

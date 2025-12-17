@@ -60,9 +60,6 @@ const ProductSchema = new Schema(
       default: 0,
       min: 0
     },
-
-    // --- 4. Zaxira Ko'rsatkichlari (Cache) ---
-    // Bu raqam "ReadyWarehouse" kolleksiyasidagi yig'indidan kelib chiqadi
     totalStock: {
       type: Number,
       default: 0,
@@ -72,7 +69,12 @@ const ProductSchema = new Schema(
       type: Number,
       default: 10
     },
-
+margainPercent: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100
+    },
     // --- 5. Tizim Ma'lumotlari ---
     author: { 
       type: Schema.Types.ObjectId, 
@@ -80,19 +82,17 @@ const ProductSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["active", "archived"], 
+      enum: ["active", "inactive"], 
       default: "active",
       index: true
-    }
+    },
+    state : {type:Boolean, default:true}
   },
   {
     timestamps: true, // createdAt, updatedAt
-    versionKey: false // __v maydonini o'chirib tashlaydi (toza JSON uchun)
   }
 );
 
-// Qo'shimcha murakkab indekslar (Opsional)
-// Ism va Kod bo'yicha bir vaqtda qidirish uchun
-// ProductSchema.index({ name: 1, code: 1 });
+
 
 module.exports = model("Product", ProductSchema);

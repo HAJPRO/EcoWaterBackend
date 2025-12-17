@@ -2,13 +2,8 @@ const Product = require("../../../models/Sale/products/product.model"); // Model
 
 class ProductManagementService {
 
-  /**
-   * Yangi mahsulot yaratish
-   * @param {Object} data - Mahsulot ma'lumotlari
-   * @param {String} authorId - Yaratuvchi ID
-   */
+  
   async create(data, authorId) {
-    console.log(data, authorId);
     try {
       // 1. Shtrix-kod (code) takrorlanmasligini tekshirish
       const existingProduct = await Product.findOne({ code: data.code });
@@ -20,14 +15,8 @@ class ProductManagementService {
       const newProductPayload = {
         ...data,
         author: authorId,
-        // Frontenddan kelayotgan ma'lumotlarni yangi modelga moslash
-        // Agar front hali eski nomlarni ishlatsa, shu yerda mapping qilinadi:
-        name: data.name || data.pro_name, 
-        salePrice: data.salePrice || data.buying_price, 
       };
-
       const newProduct = await Product.create(newProductPayload);
-      
       return { success: true, msg: "Mahsulot muvaffaqiyatli qo'shildi!", data: newProduct };
     } catch (error) {
       console.error("Product Create Error:", error);
@@ -35,40 +24,43 @@ class ProductManagementService {
     }
   }
 
-  /**
-   * Mahsulotni tahrirlash
-   * @param {String} id - Mahsulot ID
-   * @param {Object} updateData - O'zgaradigan ma'lumotlar
-   */
-  async update(id, updateData) {
+  
+ // ... (avvalgi kod)
+
+async update(id, updateData) {
     try {
-      // Agar code o'zgarayotgan bo'lsa, u boshqa mahsulotda yo'qligini tekshirish kerak
-      if (updateData.code) {
-        const duplicate = await Product.findOne({ code: updateData.code, _id: { $ne: id } });
-        if (duplicate) {
-          return { success: false, msg: "Bu shtrix-kod boshqa mahsulotda band!" };
+        // 1. Yangilanishi MUMKIN BO'LMAGAN maydonlarni O'CHIRISH
+        // Bu joyga kiritilgan parametrlar updateData ichida bo'lsa ham, MongoDB ga jo'natilmaydi.
+        delete updateData.totalStock;
+        delete updateData.margainPercent;
+        delete updateData.packSalePrice;
+        delete updateData.salePrice;
+
+        // 2. Agar code o'zgarayotgan bo'lsa, u boshqa mahsulotda yo'qligini tekshirish
+        if (updateData.code) {
+            const duplicate = await Product.findOne({ code: updateData.code, _id: { $ne: id } });
+            if (duplicate) {
+                return { success: false, msg: "Bu shtrix-kod boshqa mahsulotda band!" };
+            }
         }
-      }
+        // 3. Mahsulotni yangilash
+        // updateData endi faqat ruxsat etilgan maydonlarni o'z ichiga oladi
+        const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { 
+            new: true, 
+            runValidators: true 
+        });
+        
+        if (!updatedProduct) {
+            return { success: false, msg: "Mahsulot topilmadi" };
+        }
 
-      const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { 
-        new: true, 
-        runValidators: true 
-      });
-
-      if (!updatedProduct) {
-        return { success: false, msg: "Mahsulot topilmadi" };
-      }
-
-      return { success: true, msg: "Mahsulot muvaffaqiyatli yangilandi!", data: updatedProduct };
+        return { success: true, msg: "Mahsulot muvaffaqiyatli yangilandi!", data: updatedProduct };
     } catch (error) {
-      return { success: false, msg: `Xatolik: ${error.message}` };
+        return { success: false, msg: `Xatolik: ${error.message}` };
     }
-  }
+}
 
-  /**
-   * Barcha mahsulotlarni olish (Pagination + Search + Filter)
-   * @param {Object} query - { page, limit, search, category }
-   */
+  
   async getAll(query) {
     try {
       const page = parseInt(query.page) || 1;
