@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const SaleModel = require("../../../models/Sale/orders/sales.model"); 
-const ReadyWarehouse = require("../../../models/Warehouses/r-warehouse/r-warehouse.model");
+const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/Rwarehouse.model");
 const Product = require("../../../models/Sale/products/product.model"); 
 const UserModel = require("../../../models/user.model"); 
 

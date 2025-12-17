@@ -1,4 +1,4 @@
-const ReadyWarehouse = require("../models/warehouses/r-warehouse/r-warehouse.model"); // modelga yo‘l to‘g‘rilang
+const ReadyWarehouse = require("../models/warehouses/r-warehouse/Rwarehouse.model"); // modelga yo‘l to‘g‘rilang
 const Order = require("../models/Sale/orders/order.model"); // modelga yo‘l to‘g‘rilang
 
 

@@ -1,4 +1,4 @@
-const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/r-warehouse.model");
+const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/Rwarehouse.model");
 const {
   generateUniquePartyNumber,
 } = require("../../../utils/generateUniqueNumber");
