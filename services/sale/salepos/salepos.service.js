@@ -21,7 +21,7 @@ async Create(payload) {
       // 1. Shu mahsulotning barcha faol partiyalarini eskidan yangiga qarab olamiz
       const batches = await ReadyWarehouse.find({
         product: productId,
-        branchId: payload.branchId,
+        // branchId: payload.branchId,
         currentQuantity: { $gt: 0 },
         status: 'active'
       }).sort({ createdAt: 1 });
@@ -48,7 +48,8 @@ async Create(payload) {
           quantity: amountFromThisBatch,
           salePrice: item.salePrice,
           costPrice: batch.costPrice, // Aynan shu partiyaning kelish narxi
-          partyNumber: batch.partyNumber
+          partyNumber: batch.partyNumber,
+          name : batch.name
         });
 
         // Jami kerakli miqdordan ayirib boramiz
@@ -77,21 +78,84 @@ async Create(payload) {
       paymentType: payload.paymentType,
       customerId: payload.customerId || null,
       driverId: payload.driverId || null,
+      author : payload.customerId,
       date: now,
     });
-
-    
-
-    return { 
+    if(sale){
+await BotDriverService.SentOrder(sale)
+return { 
       success: true, 
       status: 201, 
       msg: "Sotuv muvaffaqiyatli yakunlandi!", 
       data: sale 
     };
-
+    }else{
+      return { 
+      success: false, 
+      status: 404, 
+      msg: "Haydovchiga yuborishda xatolik yuz berdi!", 
+    };
+    }
   } catch (error) {
     console.error("Sale Error:", error);
     return { success: false, status: 400, msg: error.message };
+  }
+}
+async GetAll(query) {
+console.log("ok")
+
+  try {
+    const { 
+      page = 1, 
+      limit = 20, 
+      startDate, 
+      endDate, 
+      branchId, 
+      driverId 
+    } = query;
+
+    // 1. Filtrlarni shakllantirish
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (driverId) filter.driverId = driverId;
+
+    // Sana bo'yicha filtr (masalan: bugungi sotuvlar)
+    if (startDate || endDate) {
+      filter.date = {};
+      if (startDate) filter.date.$gte = new Date(startDate);
+      if (endDate) filter.date.$lte = new Date(endDate);
+    }
+
+    // 2. Ma'lumotlarni olish
+    const sales = await SaleModel.find()
+      .populate("customerId", "fullname phoneNumber address") // Kerakli maydonlarni aniq ko'rsatish
+      .populate("driverId", "fullname phoneNumber role")
+      .populate("author", "fullname phoneNumber")
+      .sort({ createdAt: -1 }) // Yangilari tepada
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+    // 3. Jami hujjatlar sonini hisoblash (Pagination uchun)
+    const count = await SaleModel.countDocuments(filter);
+
+    return {
+      success: true,
+      status: 200,
+      msg: "Sotuvlar muvaffaqiyatli yuklandi",
+      data: sales,
+      pagination: {
+        totalSales: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: Number(page)
+      }
+    };
+  } catch (error) {
+    console.error("GetAll Sales Error:", error);
+    return { 
+      success: false, 
+      status: 500, 
+      msg: "Ma'lumotlarni yuklashda xatolik yuz berdi" 
+    };
   }
 }
 }

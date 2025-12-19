@@ -14,8 +14,8 @@ router.post(
 
 // --- 2. Barcha Sotuv Cheklarini Ro'yxatini olish ---
 // Admin yoki Kassir uchun umumiy sotuvlar ro'yxati (Paging/Filtrlash)
-router.get(
-  "/list", // URL: /api/sale/salepos/list
+router.post(
+  "/all", // URL: /api/sale/salepos/list
   authMiddleware, 
   SaleposManagmentController.GetAll
 );

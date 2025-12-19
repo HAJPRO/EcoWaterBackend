@@ -117,7 +117,7 @@ const PORT = process.env.PORT || 5000;
 
 const START = async () => {
   try {
-    await mongoose.connect(process.env.DB_URL); // mongoose.connect hozirgi versiyalarda options talab qilmaydi
+    await mongoose.connect(process.env.DB_URL,{ autoIndex: false }); // mongoose.connect hozirgi versiyalarda options talab qilmaydi
     console.log("DB ga ulanish muvaffaqiyatli");
 
     // Express serverni to'g'ridan-to'g'ri app.listen() orqali ishga tushirish
@@ -134,24 +134,24 @@ const START = async () => {
 if (require.main === module) {
     START();
 }
-mongoose.connection.on('open', async () => {
-  try {
-    const collection = mongoose.connection.db.collection('readywarehouses');
-    const indexes = await collection.indexes();
+// mongoose.connection.on('open', async () => {
+//   try {
+//     const collection = mongoose.connection.db.collection('readywarehouses');
+//     const indexes = await collection.indexes();
     
-    // partyNumber bilan bog'liq unikal indeksni qidiramiz
-    const targetIndex = indexes.find(idx => idx.key && idx.key.partyNumber);
+//     // partyNumber bilan bog'liq unikal indeksni qidiramiz
+//     const targetIndex = indexes.find(idx => idx.key && idx.key.partyNumber);
 
-    if (targetIndex) {
-      console.log("Topilgan indeks nomi:", targetIndex.name);
-      await collection.dropIndex(targetIndex.name);
-      console.log(`SUCCESS: ${targetIndex.name} indeksi muvaffaqiyatli o'chirildi!`);
-    } else {
-      console.log("INFO: partyNumber uchun hech qanday indeks topilmadi.");
-    }
-  } catch (err) {
-    console.error("Xatolik yuz berdi:", err.message);
-  }
-});
+//     if (targetIndex) {
+//       console.log("Topilgan indeks nomi:", targetIndex.name);
+//       await collection.dropIndex(targetIndex.name);
+//       console.log(`SUCCESS: ${targetIndex.name} indeksi muvaffaqiyatli o'chirildi!`);
+//     } else {
+//       console.log("INFO: partyNumber uchun hech qanday indeks topilmadi.");
+//     }
+//   } catch (err) {
+//     console.error("Xatolik yuz berdi:", err.message);
+//   }
+// });
 // Boshqa fayllar import qilishi uchun Express app ob'ektini eksport qilamiz
 module.exports = app;

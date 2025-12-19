@@ -21,6 +21,15 @@ class SaleposManagmentController {
             next(error);
         }
     }
+async GetAll(req, res, next) {
+        try {
+            // Query parametrlari (page, limit, filter) req.query orqali kelishi kerak
+            const data = await SaleposManagmentService.GetAll(req.body);
+            res.status(200).json(data);
+        } catch (error) {
+            next(error);
+        }
+    }
     
     /**
      * Sotuv/Order detallarini ID bo'yicha olish
@@ -58,15 +67,7 @@ class SaleposManagmentController {
      * Barcha Sotuv Cheklarini Ro'yxatini olish
      * Endpoint: GET /api/sale/salepos/list
      */
-    async GetAll(req, res, next) {
-        try {
-            // Query parametrlari (page, limit, filter) req.query orqali kelishi kerak
-            const data = await SaleposManagmentService.GetAllSales(req.query);
-            res.status(200).json(data);
-        } catch (error) {
-            next(error);
-        }
-    }
+    
 
     /**
      * Haydovchilar Ro'yxatini olish (Agentlar ro'yxati)

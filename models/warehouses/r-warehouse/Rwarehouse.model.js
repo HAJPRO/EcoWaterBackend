@@ -22,7 +22,7 @@ const ReadyWarehouseSchema = new mongoose.Schema({
     type: String, 
     enum: ['active', 'sold_out'], 
     default: 'active',
-    index: true 
+    // index: true 
   }
 }, { timestamps: true });
 
