@@ -11,7 +11,18 @@ const divider = "━━━━━━━━━━━━━━━━━━";
 const header = (title) => `<b>✨ ${title} ✨</b>\n${divider}`;
 
 /**
- * Haydovchiga buyurtma yuborish (Premium Design)
+ * Navigatsiya tugmasini shakllantirish uchun yordamchi
+ */
+const getNavButton = (driverLat, driverLong, customer) => {
+    if (customer?.location?.lat && customer?.location?.long) {
+        const yandexUrl = `https://yandex.com/maps/?rtext=${driverLat},${driverLong}~${customer.location.lat},${customer.location.long}&rtt=auto`;
+        return [{ text: "🚗 NAVIGATSIYA (YANDEX)", url: yandexUrl }];
+    }
+    return null;
+};
+
+/**
+ * Haydovchiga buyurtma yuborish
  */
 const SentOrder = async (order) => {
     try {
@@ -22,7 +33,7 @@ const SentOrder = async (order) => {
 
         const chatId = driver.chatId;
 
-        // 1. Initial Alert
+        // 1. Lokatsiya so'rash
         await bot.sendMessage(chatId, 
             `${header("YANGI BUYURTMA KELDI")}\n` +
             `🆔 Buyurtma: <code>#${order.orderNumber}</code>\n\n` +
@@ -43,13 +54,12 @@ const SentOrder = async (order) => {
             if (msg.location) {
                 bot.removeListener("message", onMsg);
 
-                // ✅ Lokatsiyani o'chirish (Chatni toza saqlash)
                 try { await bot.deleteMessage(chatId, msg.message_id); } catch (e) {}
 
                 const { latitude, longitude } = msg.location;
 
-                // Mahsulotlarni chiroyli formatlash
-                const itemsList = (order.items || []).map((item, index) => {
+                // Mahsulotlar ro'yxati
+                const itemsList = (order.items || []).map((item) => {
                     const total = Number(item.quantity) * Number(item.salePrice);
                     return `📦 <b>${item.name}</b>\n    <code>${item.quantity} ${item.unit || 'ta'} × ${formatNumber(item.salePrice)} = ${formatNumber(total)} so'm</code>`;
                 }).join("\n\n");
@@ -57,7 +67,6 @@ const SentOrder = async (order) => {
                 const addr = customer?.address;
                 const fullAddress = `${addr?.region || ""} ${addr?.district || ""} ${addr?.street || ""}`.trim() || "Kiritilmagan";
 
-                // ASOSIY PREMIUM DIZAYN
                 const mainMessage = `
 📝 <b>BUYURTMA TAFSILOTLARI</b>
 ${divider}
@@ -77,25 +86,23 @@ ${divider}
 💳 <b>TO'LOV:</b> ${order.paymentType === 'cash' ? '💵 NAQD' : '💳 KARTA'}
 ${divider}`;
 
-                let buttons = [
+                // ✅ Tugmalarga koordinatalarni biriktiramiz
+                let inline_keyboard = [
                     [
-                        { text: "✅ QABUL QILISH", callback_data: `accept_${order._id}` },
+                        { text: "✅ QABUL QILISH", callback_data: `accept_${order._id}_${latitude}_${longitude}` },
                         { text: "❌ BEKOR QILISH", callback_data: `cancel_${order._id}` }
                     ]
                 ];
 
-                if (customer?.location?.lat) {
-                    const yandexUrl = `https://yandex.com/maps/?rtext=${latitude},${longitude}~${customer.location.lat},${customer.location.long}&rtt=auto`;
-                    buttons.push([{ text: "🚗 NAVIGATSIYA (YANDEX)", url: yandexUrl }]);
-                }
+                const navBtn = getNavButton(latitude, longitude, customer);
+                if (navBtn) inline_keyboard.push(navBtn);
 
                 await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
                     caption: mainMessage,
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: buttons }
+                    reply_markup: { inline_keyboard }
                 });
 
-                // Klaviatura yopilganini tasdiqlash (UX uchun vaqtinchalik xabar)
                 const tempMsg = await bot.sendMessage(chatId, "✨ Ma'lumotlar yuklandi", { reply_markup: { remove_keyboard: true } });
                 setTimeout(() => bot.deleteMessage(chatId, tempMsg.message_id), 1500);
             }
@@ -106,46 +113,60 @@ ${divider}`;
 };
 
 /**
- * Interaktiv tugmalar mantiqi
+ * Callback tugmalar mantiqi
  */
 bot.on("callback_query", async (query) => {
     const chatId = query.message.chat.id;
     const messageId = query.message.message_id;
-    const [action, id] = query.data.split("_");
+    const [action, id, lat, long] = query.data.split("_");
 
     try {
+        // --- BUYURTMANI QABUL QILISH ---
         if (action === "accept") {
-            const order = await Order.findByIdAndUpdate(id, { status: "Yetkazib berilmoqda", driverAcceptedTime: new Date() }, { new: true });
+            const order = await Order.findByIdAndUpdate(id, { 
+                status: "Yetkazib berilmoqda", 
+                driverAcceptedTime: new Date() 
+            }, { new: true });
             
-            await bot.editMessageReplyMarkup({
-                inline_keyboard: [[{ text: "🤝 MIJOZGA TOPSHIRILDI", callback_data: `delivered_${id}` }]]
-            }, { chat_id: chatId, message_id: messageId });
+            const customer = await Customer.findById(order.customerId);
 
-            await bot.answerCallbackQuery(query.id, { text: "Buyurtma qabul qilindi!", show_alert: false });
-            await bot.sendMessage(chatId, `🚀 <b>#${order.orderNumber}</b> yetkazilmoqda...`, { parse_mode: "HTML" });
+            // ✅ Navigator tugmasini saqlab qolgan holda topshirish tugmasini chiqarish
+            let buttons = [[{ text: "🤝 MIJOZGA TOPSHIRILDI", callback_data: `delivered_${id}_${lat}_${long}` }]];
+            
+            const navBtn = getNavButton(lat, long, customer);
+            if (navBtn) buttons.push(navBtn);
+
+            await bot.editMessageReplyMarkup({ inline_keyboard: buttons }, { chat_id: chatId, message_id: messageId });
+            await bot.answerCallbackQuery(query.id, { text: "Yo'lingiz bexatar bo'lsin!" });
         }
 
+        // --- BUYURTMANI TOPSHIRISH ---
         if (action === "delivered") {
-            const order = await Order.findByIdAndUpdate(id, { status: "Yetkazib berildi", driverArrivedTime: new Date() }, { new: true });
+            const order = await Order.findByIdAndUpdate(id, { 
+                status: "Yetkazib berildi", 
+                driverArrivedTime: new Date() 
+            }, { new: true });
             
+            // Endi navigatsiya shart emas, faqat lokatsiyani yangilash tugmasi
             await bot.editMessageReplyMarkup({
-                inline_keyboard: [[{ text: "📍 MANZILNI YANGILASH (LOKATSIYA)", callback_data: `updloc_${order.customerId}` }]]
+                inline_keyboard: [[{ text: "📍 MANZILNI YANGILASH (ANIQLIK)", callback_data: `updloc_${order.customerId}` }]]
             }, { chat_id: chatId, message_id: messageId });
             
-            await bot.sendMessage(chatId, `🏁 <b>#${order.orderNumber}</b> muvaffaqiyatli yakunlandi. Baraka toping!`, { parse_mode: "HTML" });
+            await bot.sendMessage(chatId, `🏁 <b>#${order.orderNumber}</b> muvaffaqiyatli topshirildi.`, { parse_mode: "HTML" });
             await bot.answerCallbackQuery(query.id);
         }
 
+        // --- LOKATSIYANI YANGILASH ---
         if (action === "updloc") {
-            userLocationUpdateMap.set(chatId, id); // id = customerId
+            userLocationUpdateMap.set(chatId, id);
             await bot.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chatId, message_id: messageId });
 
             await bot.sendMessage(chatId, 
-                `🏡 <b>MANZILNI ANIQLASHTIRISH</b>\n${divider}\n📍 Iltimos, mijoz darvozasi oldida turib joylashuvni yuboring.`, 
+                `🏡 <b>ANIQ MANZILNI SAQLASH</b>\n${divider}\n📍 Iltimos, mijoz darvozasi oldida turib joylashuvni yuboring.`, 
                 {
                     parse_mode: "HTML",
                     reply_markup: {
-                        keyboard: [[{ text: "📍 Aniq manzilni saqlash", request_location: true }]],
+                        keyboard: [[{ text: "📍 Darvoza koordinatasini yuborish", request_location: true }]],
                         resize_keyboard: true, one_time_keyboard: true
                     }
                 }
@@ -155,7 +176,7 @@ bot.on("callback_query", async (query) => {
 });
 
 /**
- * Manzilni saqlash va chatni tozalash
+ * Lokatsiya yuborilganda manzilni bazaga yozish
  */
 bot.on("message", async (msg) => {
     if (msg.location && userLocationUpdateMap.has(msg.chat.id)) {
@@ -170,7 +191,7 @@ bot.on("message", async (msg) => {
             }, { new: true });
 
             await bot.sendMessage(chatId, 
-                `✅ <b>MANZIL YANGILANDI!</b>\n${divider}\n👤 Mijoz: <b>${customer.fullname}</b>\n\n<i>Endi bu mijozga navigatsiya 100% aniqlikda ishlaydi.</i>`, 
+                `✅ <b>MANZIL SAQLANDI!</b>\n${divider}\n👤 Mijoz: <b>${customer.fullname}</b>\n\n<i>Navigatsiya endi 100% aniqlikda ishlaydi.</i>`, 
                 { parse_mode: "HTML", reply_markup: { remove_keyboard: true } }
             );
             userLocationUpdateMap.delete(chatId);

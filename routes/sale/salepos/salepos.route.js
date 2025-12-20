@@ -19,6 +19,16 @@ router.post(
   authMiddleware, 
   SaleposManagmentController.GetAll
 );
+router.post(
+  "/customerId", // URL: /api/sale/salepos/list
+  authMiddleware, 
+  SaleposManagmentController.GetByCustomerId
+);
+router.post(
+  "/employeeId", // URL: /api/sale/salepos/list
+  authMiddleware, 
+  SaleposManagmentController.GetByEmployeeId
+);
 
 // --- 3. Bitta Sotuv Chekining Detallarini olish ---
 // Order ID URL parametrida berilishi kerak

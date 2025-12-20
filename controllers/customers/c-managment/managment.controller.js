@@ -57,20 +57,25 @@ class CustomerManagmentController {
   //   } catch (error) {
   //     next(error);
   //   }
-  async ExportExcelDownload(req, res, next) {
-    try {
-      const { buffer, filename } = await CustomerManagmentService.ExportExcelDownload(req.body);
-  
-      const cleanFilename = encodeURIComponent(filename);
-  
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-      res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${cleanFilename}`);
-      res.send(buffer);
-    } catch (error) {
-      console.error("Excel export xatosi:", error.message);
-      res.status(400).json({ message: error.message });
-    }
+  async ExportExcelDownload(req, res) {
+  try {
+    // req.body - bu stordan kelayotgan buyurtmalar massivi
+    const { buffer, filename } = await CustomerManagmentService.ExportExcelDownload(req.body);
+
+    const cleanFilename = encodeURIComponent(filename);
+
+    // BRAUZERGA FAYL EKANINI BILDIRISH
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${cleanFilename}`);
+    res.setHeader("Content-Length", buffer.length);
+
+    // Bufferni to'g'ridan-to'g'ri yuboramiz
+    return res.send(buffer);
+  } catch (error) {
+    console.error("Excel Controller Error:", error.message);
+    res.status(400).json({ message: error.message });
   }
+}
   
 
   }

@@ -13,7 +13,7 @@ class SaleposManagmentController {
             // Sotuvchi (Kassir) ID sini ma'lumotlarga qo'shish
             const data = await SaleposManagmentService.Create({ 
                 author: req.user.id, 
-                ...req.body 
+                payload : req.body 
             });
             res.status(200).json(data);
         } catch (error) {
@@ -24,7 +24,25 @@ class SaleposManagmentController {
 async GetAll(req, res, next) {
         try {
             // Query parametrlari (page, limit, filter) req.query orqali kelishi kerak
-            const data = await SaleposManagmentService.GetAll(req.body);
+            const data = await SaleposManagmentService.GetAll({payload: req.body,author : req.user.id});
+            res.status(200).json(data);
+        } catch (error) {
+            next(error);
+        }
+    }
+async GetByCustomerId(req, res, next) {
+        try {
+            // Query parametrlari (page, limit, filter) req.query orqali kelishi kerak
+            const data = await SaleposManagmentService.GetByCustomerId({id:req.body.id,author : req.user.id});
+            res.status(200).json(data);
+        } catch (error) {
+            next(error);
+        }
+    }
+async GetByEmployeeId(req, res, next) {
+        try {
+            // Query parametrlari (page, limit, filter) req.query orqali kelishi kerak
+            const data = await SaleposManagmentService.GetByEmployeeId({id:req.body.id,author : req.user.id});
             res.status(200).json(data);
         } catch (error) {
             next(error);

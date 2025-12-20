@@ -145,13 +145,19 @@ console.log(data);
     }
   }
   async ExportExcelDownload(data) {
-    try {
-      const excel = await ExportExcelCustomerOrders(data);
-      return excel;
-    } catch (error) {
-      return { msg: `Server xatosi: ${error.message}` };
+  try {
+    // Utils'dagi funksiyani chaqiramiz
+    const result = await ExportExcelCustomerOrders(data);
+    
+    if (!result || !result.buffer) {
+      throw new Error("Excel faylini yaratishda xatolik yuz berdi (Buffer empty)");
     }
+
+    return result; // { buffer, filename } qaytaradi
+  } catch (error) {
+    throw new Error(error.message);
   }
+}
 }
 
 module.exports = new CustomerManagmentService();
