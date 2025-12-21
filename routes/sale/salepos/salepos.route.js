@@ -64,10 +64,10 @@ router.delete(
 
 // --- 7. Export Excel ---
 // Ma'lumotlarni so'rash GET bo'lishi kerak, lekin agar katta body jo'natish kerak bo'lsa POST ham qoldirilishi mumkin.
-router.get(
-  "/excel/download", // URL: /api/sale/salepos/excel/download
+router.post(
+  "/excel", // URL: /api/sale/salepos/excel/download
   authMiddleware, 
-  SaleposManagmentController.ExportExcelDownload
+  SaleposManagmentController.handleExcelExport
 );
 
 

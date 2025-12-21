@@ -3,8 +3,10 @@ const SaleModel = require("../../../models/Sale/orders/sales.model");
 const ReadyWarehouse = require("../../../models/warehouses/r-warehouse/Rwarehouse.model");
 const Product = require("../../../models/Sale/products/product.model"); 
 const UserModel = require("../../../models/user.model"); 
-
+const {ExportToExcelUniversal} = require("../../../utils/excelHelper")
 const BotDriverService = require("../../../bots/drivers/services/driver.service");
+const moment = require('moment-timezone');
+
 // const { generateUniqueOrderNumber } = require("../../../utils/generateUniqueNumber"); 
 class SaleposManagmentService {
 async Create(data) {
@@ -262,6 +264,35 @@ async GetByEmployeeId(payload) {
       msg: "Xaridlar tarixini yuklashda xatolik yuz berdi",
       error: error.message 
     };
+  }
+}
+async handleExcelExport(data) {
+  console.log(data)
+  try {
+   const columns = [
+    { header: "№", key: "index", width: 8 },
+    { header: "Buyurtma nomer", key: "orderNumber", width: 22 },
+    { header: "Mijoz", key: "customerId.fullname", width: 35 },
+    { header: "Sotuvchi", key: "author.fullname", width: 25 },
+    { header: "Haydovchi", key: "driverId.fullname", width: 25 },
+    { header: "Vaqt", key: "date", width: 18, type: 'date' },
+    { header: "To'lov turi", key: "paymentType", width: 15 },
+    { header: "Umumiy Summa", key: "totalAmount", width: 20, type: 'currency' },
+    { header: "Holat", key: "status", width: 18 }
+];
+    const result = await ExportToExcelUniversal(data, columns, {
+            title: "SOTUVLAR HISOBOTI",
+            filename: `Sotuvlar_Hisoboti_${moment().format("DD_MM_YYYY")}`,
+            sheetName: "Sotuvlar Ro'yxati"
+        });
+    
+    if (!result || !result.buffer) {
+      throw new Error("Excel faylini yaratishda xatolik yuz berdi (Buffer empty)");
+    }
+
+    return result; // { buffer, filename } qaytaradi
+  } catch (error) {
+    throw new Error(error.message);
   }
 }
 }

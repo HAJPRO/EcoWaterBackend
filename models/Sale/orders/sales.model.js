@@ -19,7 +19,8 @@ const SaleHistorySchema = new mongoose.Schema({
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
   driverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   date: { type: Date, default: Date.now },
-  status : {type:String},
+  status : {type:String,default:"Kutilmoqda"},
+  isSentDriver : {type:Boolean, default:false},
   driverAcceptedTime : {type : Date},
   driverArrivedTime : {type : Date}
 },{ timestamps: true });

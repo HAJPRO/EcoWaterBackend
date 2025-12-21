@@ -1,5 +1,6 @@
 // Salepos/POS operatsiyalarini boshqarish servisini import qilish
 const SaleposManagmentService = require("../../../services/sale/salepos/salepos.service.js"); 
+const { sendExcelResponse } = require("../../../utils/excelHelper.js");
 // Eslatma: Sizning misolingizda chaqirilgan fayl nomi 'salepos,service' emas, balki 'salepos.service' bo'lishi kerak.
 
 class SaleposManagmentController {
@@ -120,14 +121,44 @@ async GetByEmployeeId(req, res, next) {
      * Sotuv Ma'lumotlarini Excelga Export qilish
      * Endpoint: GET /api/sale/salepos/export
      */
-    async ExportExcelDownload(req, res, next) {
-        try {
-            const data = await SaleposManagmentService.ExportExcelDownload(req.query);
-            res.status(200).json(data);
-        } catch (error) {
-            next(error);
-        }
-    }
+//      async handleExcelExport(req, res) {
+    
+//   try {
+//     // req.body - bu stordan kelayotgan buyurtmalar massivi
+//     const { buffer, filename } = await SaleposManagmentService.handleExcelExport(req.body);
+
+//     const cleanFilename = encodeURIComponent(filename);
+
+//     // BRAUZERGA FAYL EKANINI BILDIRISH
+//     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//     res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${cleanFilename}`);
+//     res.setHeader("Content-Length", buffer.length);
+
+//     // Bufferni to'g'ridan-to'g'ri yuboramiz
+//     return res.send(buffer);
+//   } catch (error) {
+//     console.error("Excel Controller Error:", error.message);
+//     res.status(400).json({ message: error.message });
+//   }
+// }
+
+async handleExcelExport(req, res) {
+    try {
+        // 1. Servisdan ma'lumotni olish
+        // req.body - bu frontenddan kelayotgan filterlangan ma'lumotlar
+        const result = await SaleposManagmentService.handleExcelExport(req.body);
+
+        // 2. Universal helper orqali javob qaytarish
+        return sendExcelResponse(res, result);
+
+    } catch (error) {
+        console.error("Excel Export Error:", error.message);
+        return res.status(error.status || 400).json({ 
+            success: false,
+            message: error.message || "Eksport jarayonida xatolik yuz berdi" 
+        });
+    }
+}
 }
 
 module.exports = new SaleposManagmentController();
