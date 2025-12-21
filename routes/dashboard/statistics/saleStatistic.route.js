@@ -4,6 +4,6 @@ const SaleStatisticsController = require('../../../controllers/dashboard/statist
 
 const router = express.Router();
 
-router.post('/all', SaleStatisticsController.GetAllDayStatistics);
+router.get('/all', SaleStatisticsController.GetSaleStatistics);
 
 module.exports = router;

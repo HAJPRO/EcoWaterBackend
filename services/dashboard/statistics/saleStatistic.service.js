@@ -1,88 +1,161 @@
-const User = require("../../../models/user.model");
-const Customer = require("../../../models/Customers/customer.model");
-const Order = require("../../../models/Sale/orders/sales.model");
-const moment = require("moment");
+const Order = require('../../../models/Sale/orders/sales.model');
+const moment = require('moment-timezone');
 
 class SaleStatisticService {
-    async GetAllDayStatistics() {
-        try {
-            const [
-                metrics,
-                charBarOptions,
-                charLineOptions,
-                topDrivers,
-                topCustomers
-            ] = await Promise.all([
-                this.getMainMetrics(),
-                this.getBarChartStats(),
-                this.getLineChartStats(),
-                this.getTopPerformers("driverId", "users", 5),
-                this.getTopPerformers("customerId", "customers", 5)
-            ]);
+    async getSaleStatistics(query) {
+        const { period, start, end, timezone = 'Asia/Tashkent' } = query;
+        let startDate, endDate;
 
-            return { metrics, charBarOptions, charLineOptions, topDrivers, topCustomers };
-        } catch (error) {
-            throw new Error(`Statistika yig'ishda xatolik: ${error.message}`);
+        // 1. Vaqt chegaralarini aniqlash
+        if (period === 'day') {
+            startDate = moment.tz(timezone).startOf('day').toDate();
+            endDate = moment.tz(timezone).endOf('day').toDate();
+        } else if (period === 'week') {
+            // Haftani aynan Dushanbadan boshlash (ISO week)
+            startDate = moment.tz(timezone).startOf('isoWeek').toDate();
+            endDate = moment.tz(timezone).endOf('day').toDate();
+        } else if (period === 'month') {
+            startDate = moment.tz(timezone).startOf('year').toDate();
+            endDate = moment.tz(timezone).endOf('year').toDate();
+        } else if (period === 'custom') {
+            startDate = moment.tz(start, timezone).startOf('day').toDate();
+            endDate = moment.tz(end, timezone).endOf('day').toDate();
         }
+
+        const stats = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: startDate, $lte: endDate },
+                    status: "Yetkazib berildi" 
+                }
+            },
+            {
+                $facet: {
+                    "metrics": [
+                        {
+                            $group: {
+                                _id: null,
+                                totalSales: { $sum: { $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } } },
+                                totalProfit: { $sum: { $multiply: [{ $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } }, 0.1] } },
+                                orderCount: { $sum: 1 }
+                            }
+                        }
+                    ],
+                    "chartData": [
+                        {
+                            $group: {
+                                _id: {
+                                    $dateToString: { 
+                                        format: period === 'day' ? "%H:00" : (period === 'month' ? "%Y-%m" : "%Y-%m-%d"), 
+                                        date: "$createdAt",
+                                        timezone: timezone 
+                                    }
+                                },
+                                sales: { $sum: { $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } } },
+                                profit: { $sum: { $multiply: [{ $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } }, 0.1] } }
+                            }
+                        }
+                    ],
+                    "topDrivers": [
+                        { $group: { _id: "$driverId", count: { $sum: 1 }, totalSales: { $sum: { $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } } } } },
+                        { $sort: { totalSales: -1 } }, { $limit: 10 },
+                        { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "info" } },
+                        { $unwind: { path: "$info", preserveNullAndEmptyArrays: true } }
+                    ],
+                    "topCustomers": [
+                        { $group: { _id: "$customerId", totalSales: { $sum: { $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } } }, count: { $sum: 1 } } },
+                        { $sort: { totalSales: -1 } }, { $limit: 10 },
+                        { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "info" } },
+                        { $unwind: { path: "$info", preserveNullAndEmptyArrays: true } }
+                    ],
+                    "topSellers": [
+                        { $group: { _id: "$author", totalSales: { $sum: { $convert: { input: "$totalAmount", to: "double", onError: 0, onNull: 0 } } }, count: { $sum: 1 } } },
+                        { $sort: { totalSales: -1 } }, { $limit: 10 },
+                        { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "info" } },
+                        { $unwind: { path: "$info", preserveNullAndEmptyArrays: true } }
+                    ]
+                }
+            }
+        ]);
+
+        return this.formatResponse(stats[0], period, startDate, endDate, timezone);
     }
 
-    async getMainMetrics() {
-        const startToday = moment().startOf('day').toDate();
-        const startMonth = moment().startOf('month').toDate();
+    formatResponse(data, period, startDate, endDate, timezone) {
+        const rawMetrics = data.metrics[0] || { totalSales: 0, totalProfit: 0, orderCount: 0 };
+        
+        // Bo'sh kunlarni 0 bilan to'ldirish
+        const filledChart = this.fillMissingChartData(data.chartData, period, startDate, endDate, timezone);
 
-        const [todaySale, monthCust] = await Promise.all([
-            Order.aggregate([
-                { $match: { createdAt: { $gte: startToday }, status: "Yetkazib berildi" } },
-                { $group: { _id: null, total: { $sum: "$totalAmount" } } }
-            ]),
-            Customer.countDocuments({ createdAt: { $gte: startMonth } })
-        ]);
-
-        return [
-            { title: "Bugungi tushum", value: todaySale[0]?.total || 0, change: 12, text: "kechagiga nisbatan" },
-            { title: "Yangi mijozlar", value: monthCust, change: 8, text: "bu oyda" },
-            { title: "Suv iste'moli", value: 450, change: -3, text: "m3 (kunlik)" }
-        ];
+        return {
+            metrics: [
+                { title: "Jami Sotuv", value: rawMetrics.totalSales, change: 0, icon: 'fa-bolt' },
+                { title: "Sof Foyda", value: rawMetrics.totalProfit, change: 0, icon: 'fa-chart-line' },
+                { title: "Buyurtmalar", value: rawMetrics.orderCount, change: 0, icon: 'fa-truck' }
+            ],
+            chart: filledChart,
+            topDrivers: data.topDrivers.map(d => ({ info: { fullname: d.info?.fullname || "Noma'lum" }, count: d.count, totalSales: d.totalSales })),
+            topCustomers: data.topCustomers.map(c => ({ info: { fullname: c.info?.fullname || "Noma'lum" }, totalSales: c.totalSales, count: c.count })),
+            topSellers: data.topSellers.map(s => ({ info: { fullname: s.info?.fullname || "Noma'lum" }, totalSales: s.totalSales, count: s.count }))
+        };
     }
 
-    async getBarChartStats() {
-        return Promise.all([
-            this._getMonthlyProductStats({ "products.pro_type": "Gazli" }, "Gazli", "bar"),
-            this._getMonthlyProductStats({ "products.pro_type": "Gazsiz" }, "Gazsiz", "bar"),
-            this._getMonthlyProductStats({ "products.pro_type": "Sharbatlar" }, "Sharbatlar", "bar")
-        ]);
+    fillMissingChartData(dbData, period, startDate, endDate, timezone) {
+        const dataMap = new Map(dbData.map(item => [item._id, item]));
+        const labels = [];
+        const sales = [];
+        const profit = [];
+
+        let current = moment(startDate).tz(timezone);
+        const last = moment(endDate).tz(timezone);
+
+        // 7 kunlik massivni aylanib chiqish (Dushanbadan Yakshanbagacha)
+        while (current <= last) {
+            let labelKey;
+            let displayLabel;
+
+            if (period === 'day') {
+                labelKey = current.format("HH:00");
+                displayLabel = labelKey;
+                current.add(1, 'hour');
+            } else if (period === 'month') {
+                labelKey = current.format("YYYY-MM");
+                displayLabel = this.getUzMonthName(current.month());
+                current.add(1, 'month');
+            } else {
+                labelKey = current.format("YYYY-MM-DD");
+                // HAFTA FILTRIDA KUN NOMINI CHIQARADI
+                displayLabel = period === 'week' ? this.getUzDayName(current.day()) : labelKey;
+                current.add(1, 'day');
+            }
+
+            const val = dataMap.get(labelKey) || { sales: 0, profit: 0 };
+            labels.push(displayLabel);
+            sales.push(val.sales);
+            profit.push(val.profit);
+
+            // Cheklovlar
+            if (period === 'day' && labels.length >= 24) break;
+            if (period === 'week' && labels.length >= 7) break;
+            if (period === 'month' && labels.length >= 12) break;
+        }
+
+        return {
+            labels,
+            series: [
+                { name: 'Sotuv', data: sales },
+                { name: 'Foyda', data: profit }
+            ]
+        };
     }
 
-    async getLineChartStats() {
-        return Promise.all([
-            this._getMonthlyProductStats({ "products.pro_name": "Kola" }, "Kola", "line"),
-            this._getMonthlyProductStats({ "products.pro_name": "Fanta" }, "Fanta", "line"),
-            this._getMonthlyProductStats({ "products.pro_name": "eco water" }, "Eco Water", "line")
-        ]);
-  }
-
-    async getTopPerformers(groupId, collection, limit) {
-        return Order.aggregate([
-            { $match: { status: "Yetkazib berildi" } },
-            { $group: { _id: `$${groupId}`, totalSales: { $sum: "$totalAmount" }, count: { $sum: 1 } } },
-            { $sort: { totalSales: -1 } },
-            { $limit: limit },
-            { $lookup: { from: collection, localField: "_id", foreignField: "_id", as: "info" } },
-            { $unwind: "$info" }
-        ]);
+    getUzMonthName(mIdx) {
+        return ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"][mIdx];
     }
 
-    async _getMonthlyProductStats(query, name, type) {
-        const currentYear = new Date().getFullYear();
-        const result = await Order.aggregate([
-            { $match: { status: "Yetkazib berildi", createdAt: { $gte: new Date(`${currentYear}-01-01`) } } },
-            { $unwind: "$products" },
-            { $match: query },
-            { $group: { _id: { $month: "$createdAt" }, total: { $sum: "$products.pro_total_price" } } }
-        ]);
-        const data = Array(12).fill(0);
-        result.forEach(item => data[item._id - 1] = item.total);
-        return { name, type, data, labels: ["Yan", "Fev", "Mar", "Apr", "May", "Iyun", "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"] };
+    getUzDayName(dIdx) {
+        // MongoDB va moment.js dagi kun indeksi (0-Yakshanba, 1-Dushanba...)
+        return ["Yak", "Du", "Se", "Cho", "Pa", "Ju", "Sha"][dIdx];
     }
 }
 
