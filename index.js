@@ -70,6 +70,8 @@ app.use(
   require("./routes/admin/permission.route.js")
 );
 app.use("/api/v1/admin/role", require("./routes/admin/role.route.js"));
+app.use("/api/v1/admin/user", require("./routes/admin/users.route.js"));
+
 app.use("/api/v1/auth", require("./routes/auth.route.js"));
 
 // HR

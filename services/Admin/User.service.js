@@ -75,7 +75,6 @@ class UserService {
       // }
 
       // })
-
       return users;
     } catch (error) {
       return error.messages;
