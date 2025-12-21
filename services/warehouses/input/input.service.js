@@ -92,45 +92,78 @@ async create(payload) {
   }
 }
  
-  async getAll(query) {
-    try {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 10;
-      const skip = (page - 1) * limit;
+ async getAll(payload) {
+  console.log(payload)
+  // 1. Argument nomini payload-ga o'zgartirdik (data bilan adashmaslik uchun)
+  const { status,author,startDate,endDate,search } = payload;
+  
+  try {
+    // 2. Pagination parametrlarini standartlashtirish
+    const page = Math.max(1, parseInt(payload.page) || 1);
+    const limit = Math.max(1, parseInt(payload.limit) || 10);
+    const skip = (page - 1) * limit;
 
-      let filter = {};
-      // Filterlar...
-      if (query.author) filter.author = query.author;
-      if (query.search) {
-        filter.$or = [
-            { partyNumber: { $regex: query.search, $options: "i" } },
-            // Product modelidan qidirish uchun $lookup (populate) kerak bo'ladi.
-        ];
+    // 3. Dinamik filtr obyektini shakllantirish
+    let filter = {};
+
+    if (author) filter.author = author;
+    if (status) filter.status = status;
+
+    // Sana oralig'i (Frontenddan kelsa)
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999); // Kun oxirigacha qamrab olish
+        filter.createdAt.$lte = end;
       }
-      if (query.status) filter.status = query.status;
-
-
-      const [products, total] = await Promise.all([
-        ReadyWarehouse.find(filter)
-          .populate('product', 'name code image unit') // Product modelidan kerakli maydonlarni olamiz
-          .populate('supplier', 'company')
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
-        ReadyWarehouse.countDocuments(filter)
-      ]);
-
-      return { 
-        success: true, 
-        products, 
-        pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
-      };
-
-    } catch (error) {
-      return { success: false, msg: `Server xatosi: ${error.message}`, products: [] };
     }
+
+    // Qidiruv mantiqi
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      filter.$or = [
+        { partyNumber: searchRegex },
+        { manufacturer: searchRegex }
+      ];
+    }
+
+    // 4. So'rovni bajarish (Parallel ravishda)
+    // Natijani 'items' deb nomladik, 'data' emas
+    const [items, total] = await Promise.all([
+      InputHistory.find()
+        // .populate('product', 'name code category unit') 
+        // .populate('author', 'fullname role') 
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(), 
+      InputHistory.countDocuments(filter)
+    ]);
+
+    // 5. Natijani qaytarish
+    return { 
+      success: true, 
+      data: items, // Frontend uchun standart 'data' kaliti ostida yuboramiz
+      pagination: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
+    };
+
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { 
+      success: false, 
+      msg: `Server xatosi: ${error.message}`, 
+      data: [],
+      pagination: { total: 0, page: 1, limit: 10, totalPages: 0 }
+    };
   }
+}
   
   /**
    * Bitta partiyani olish

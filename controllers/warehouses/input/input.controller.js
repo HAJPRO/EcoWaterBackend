@@ -56,9 +56,8 @@ class WarehouseInputController {
   async getAll(req, res, next) {
     try {
       // GET so'rovlari uchun parametrlar req.query dan olinadi
-      const query = { ...req.query, author: req.user.id };
+      const query = { ...req.body, author: req.user.id };
       const result = await WarehouseInputService.getAll(query);
-      
       res.status(200).json(result);
     } catch (error) {
       next(error);

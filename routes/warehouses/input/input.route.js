@@ -23,8 +23,8 @@ router.get(
 
 // Barcha partiyalarni olish (Pagination va Search bilan)
 // GET /api/warehouses/input/?page=1&limit=10&search=...
-router.get(
-  "/getall",
+router.post(
+  "/all",
   authMiddleware,
   WarehouseInputController.getAll // Controllerdagi getAll metodi
 );
