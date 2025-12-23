@@ -1,26 +1,20 @@
 module.exports = class UserDto {
-  username;
-  department;
   id;
+  username;
+  fullname;
+  department;
   isActivated;
   roles;
-  actions;
-
-  // Qo‘shimcha maydonlar
+  permissions; // Guardlar uchun yangi maydon
   chatId;
   action;
-  fullname;
-  gender;
   age;
   phoneNumber;
-  passportNumber;
   address;
   position;
   status;
   isActive;
   registeredAt;
-  driverLicenseNumber;
-  driverLicenseDate;
   carNumber;
   carType;
   carColor;
@@ -35,28 +29,20 @@ module.exports = class UserDto {
   notes;
 
   constructor(model) {
-    this.username = model.username;
-    this.department = model.department;
     this.id = model._id;
+    this.username = model.username;
+    this.fullname = model.fullname;
+    this.department = model.department;
     this.isActivated = model.isActivated;
-    this.roles = model.roles;
-    this.actions = model.actions;
-
     this.chatId = model.chatId;
     this.action = model.action;
-    this.fullname = model.fullname;
-    this.gender = model.gender;
     this.age = model.age;
     this.phoneNumber = model.phoneNumber;
-    this.passportNumber = model.passportNumber;
     this.address = model.address;
     this.position = model.position;
     this.status = model.status;
     this.isActive = model.isActive;
     this.registeredAt = model.registeredAt;
-
-    this.driverLicenseNumber = model.driverLicenseNumber;
-    this.driverLicenseDate = model.driverLicenseDate;
     this.carNumber = model.carNumber;
     this.carType = model.carType;
     this.carColor = model.carColor;
@@ -69,5 +55,24 @@ module.exports = class UserDto {
     this.completedOrders = model.completedOrders;
     this.blockedUntil = model.blockedUntil;
     this.notes = model.notes;
+
+    // --- ROLES: ID-lar massivini 'value'lar massiviga aylantirish ---
+    this.roles = Array.isArray(model.roles)
+      ? model.roles.map((r) => (typeof r === "object" ? r.value : String(r)))
+      : [];
+
+    // --- PERMISSIONS: Barcha rollar ichidagi permissionlarni yig'ish ---
+    const permsSet = new Set();
+    if (Array.isArray(model.roles)) {
+      model.roles.forEach((role) => {
+        if (role.permissions && Array.isArray(role.permissions)) {
+          role.permissions.forEach((p) => {
+            // Agar permission populate bo'lgan bo'lsa .value ni oladi
+            permsSet.add(typeof p === "object" ? p.value : String(p));
+          });
+        }
+      });
+    }
+    this.permissions = Array.from(permsSet);
   }
 };

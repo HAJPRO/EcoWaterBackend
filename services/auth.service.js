@@ -33,7 +33,6 @@ class AuthService {
     return { msg: "Muvaffaqiyatli qo'shildi", user: userDto, ...tokens };
   }
   async update(data) {
-    console.log(data);
 
     const updateUser = await userModel.findByIdAndUpdate(data.id, data.model, { new: true })
     return {
@@ -41,64 +40,39 @@ class AuthService {
     };
   }
 
-  async login(username, password) {
+async login(username, password) {
+    // 1. Userni topish va Role -> Permission zanjirini ochish (Deep Populate)
+    const user = await userModel.findOne({ username }).populate({
+        path: 'roles',
+        model: 'Role',
+        populate: {
+            path: 'permissions',
+            model: 'Permission'
+        }
+    });
 
-    const user = await userModel.findOne({ username });
+    if (!user) throw BaseError.BadRequest("Username yoki parol xato");
 
-    if (!user) {
-      return BaseError.BadRequest("User is not defined");
+    // 2. Parolni tekshirish
+    const isPassword = await bcrypt.compare(password, user.password);
+    if (!isPassword) throw BaseError.BadRequest("Username yoki parol xato");
 
-    }
-    if (user) {
-      const isPassword = await bcrypt.compare(password, user.password);
-      if (!isPassword) {
-        return BaseError.BadRequest("Password is incorrect");
-      }
-      if (isPassword && user.username === username) {
-        const userDto = new UserDto(user);
+    // 3. UserDto yaratish (ichida roles va permissions'ni formatlaydi)
+    const userDto = new UserDto(user);
 
+    // 4. Token generatsiya qilish 
+    // MUHIM: Permissions va Roles bu yerda string massivi bo'lishi shart
+    const tokens = tokenService.generateToken({
+        id: userDto.id,
+        username: userDto.username,
+        roles: userDto.roles, 
+        permissions: userDto.permissions 
+    });
 
-        const tokens = tokenService.generateToken({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-        await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-        // GET USER DATA WITH ALL PERMISSIONS
-        const result = await userModel.aggregate([
-          { $match: { username: userDto.username } },
-          {
-            $lookup: {
-              from: "userpermissions",
-              localField: "_id",
-              foreignField: "user_id",
-              as: "permissions",
-            },
-          },
-          {
-            $project: {
-              _id: 1,
-              username: 1,
-              permissions: {
-                $cond: {
-                  if: { $isArray: "$permissions" },
-                  then: { $arrayElemAt: ["$permissions", 0] },
-                  else: null,
-                },
-              },
-            },
-          },
-          // {
-          //   $addFields: {
-          //     permissions: {
-          //       permissions: "$permissions.permissions",
-          //     },
-          //   },
-          // },
-        ]);
-        return { user: userDto, ...tokens, result };
-      }
-    }
-
-  }
+    return { user: userDto, ...tokens };
+}
 
   async logout(refreshToken) {
     return await tokenService.removeToken(refreshToken);
