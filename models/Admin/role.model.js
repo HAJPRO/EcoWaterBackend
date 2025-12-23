@@ -15,8 +15,9 @@ const RoleSchema = new Schema(
     description: {
       type: String,
     },
-    permissions: [{
-      type: String
+   permissions: [{
+      type: Schema.Types.ObjectId,
+      ref: "Permission" // Permission modeli nomi bilan bir xil bo'lishi kerak
     }],
   }, {
   timestamps: true,

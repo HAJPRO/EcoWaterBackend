@@ -2,6 +2,8 @@ const RoleModel = require("../../models/Admin/role.model");
 
 class RoleService {
   async Create(data) {
+    console.log(data);
+    
     try {
       const isExists = await RoleModel.findOne({
         $or: [
