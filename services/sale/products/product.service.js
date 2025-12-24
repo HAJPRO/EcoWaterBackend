@@ -1,4 +1,6 @@
 const Product = require("../../../models/Sale/products/product.model"); // Model manzili to'g'ri ekanligiga ishonch hosil qiling
+const { ExportToExcelUniversal } = require("../../../utils/excelHelper");
+const moment = require('moment-timezone');
 
 class ProductManagementService {
 
@@ -142,6 +144,36 @@ async update(id, updateData) {
       return { success: false, msg: `Xatolik: ${error.message}` };
     }
   }
+
+  async handleExcelExport(data) {
+  try {
+   const columns = [
+    { header: "№", key: "index", width: 8 },
+    { header: "Mahsulot nomi", key: "name", width: 35 },
+    { header: "Artikul (Code)", key: "code", width: 15 },
+    { header: "Kategoriya", key: "category", width: 25 },
+    { header: "Tannarxi", key: "costPrice", width: 18, type: 'currency' },
+    { header: "Sotuv narxi", key: "salePrice", width: 18, type: 'currency' },
+    { header: "Ustama (%)", key: "margainPercent", width: 12 },
+    { header: "Ombordagi qoldiq", key: "totalStock", width: 18 },
+    { header: "O'lchov birligi", key: "unit", width: 15 },
+    { header: "Holat", key: "status", width: 15 }
+];
+    const result = await ExportToExcelUniversal(data, columns, {
+            title: "Mahsulot qoldig'i",
+          filename: `mahsulot_Hisoboti_${moment().format("DD_MM_YYYY")}`,
+            sheetName: "Mahsulotlar Ro'yxati"
+        });
+    
+    if (!result || !result.buffer) {
+      throw new Error("Excel faylini yaratishda xatolik yuz berdi (Buffer empty)");
+    }
+
+    return result; // { buffer, filename } qaytaradi
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 }
 
 module.exports = new ProductManagementService();

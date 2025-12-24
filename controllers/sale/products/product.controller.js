@@ -1,4 +1,5 @@
 const ProductService = require("../../../services/sale/products/product.service.js");
+const { sendExcelResponse } = require("../../../utils/excelHelper.js");
 
 class ProductManagementController {
   
@@ -91,6 +92,24 @@ class ProductManagementController {
     } catch (error) {
       next(error);
     }
+  }
+
+  async handleExcelExport(req, res) {
+      try {
+          // 1. Servisdan ma'lumotni olish
+          // req.body - bu frontenddan kelayotgan filterlangan ma'lumotlar
+          const result = await ProductService.handleExcelExport(req.body);
+  
+          // 2. Universal helper orqali javob qaytarish
+          return sendExcelResponse(res, result);
+  
+      } catch (error) {
+          console.error("Excel Export Error:", error.message);
+          return res.status(error.status || 400).json({ 
+              success: false,
+              message: error.message || "Eksport jarayonida xatolik yuz berdi" 
+          });
+      }
   }
 }
 

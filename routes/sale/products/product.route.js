@@ -50,4 +50,10 @@ router.delete(
   ProductManagmentController.delete
 );
 
+router.post(
+  "/excel", // URL: /api/sale/salepos/excel/download
+  authMiddleware, 
+  ProductManagmentController.handleExcelExport
+);
+
 module.exports = router;

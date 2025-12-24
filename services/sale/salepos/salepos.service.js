@@ -267,7 +267,6 @@ async GetByEmployeeId(payload) {
   }
 }
 async handleExcelExport(data) {
-  console.log(data)
   try {
    const columns = [
     { header: "№", key: "index", width: 8 },
