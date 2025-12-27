@@ -1,5 +1,5 @@
 // models/Product.js
-const mongoose = require("mongoose"); // 1-XATO TUZATILDI: Import qo'shildi
+const mongoose = require("mongoose");
 const { model, Schema } = mongoose;
 
 const ProductSchema = new Schema(
@@ -9,12 +9,12 @@ const ProductSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      index: true // Qidiruv tezligi uchun
+      index: true
     },
     code: {
       type: String,
       required: true,
-      unique: true, // Shtrix-kod takrorlanmasligi shart
+      unique: true, 
       trim: true,
       index: true
     },
@@ -25,8 +25,8 @@ const ProductSchema = new Schema(
       index: true
     },
     image: {
-      type: String,
-      default: "" // Placeholder shart emas, frontend o'zi hal qiladi
+      type: String, // Fayl yo'li (path) string ko'rinishida saqlanadi
+      default: ""
     },
     description: {
       type: String,
@@ -40,9 +40,10 @@ const ProductSchema = new Schema(
       enum: ["dona", "kg", "litr", "metr", "qop", "blok"]
     },
     
-    // Blok/Upakovka logikasi
-    hasMultiUnit: { type: Boolean, default: false },
-    packSize: { type: Number, default: 1 }, 
+    packSize: { 
+      type: Number, 
+      default: 1 
+    }, 
 
     // --- 3. Narx Siyosati ---
     costPrice: { 
@@ -55,11 +56,15 @@ const ProductSchema = new Schema(
       required: true, 
       min: 0
     },
-    packSalePrice: { 
-      type: Number, 
+    // USTAMA FOIZI: Max 100 cheklovi olib tashlandi, chunki ustama 100% dan oshishi mumkin
+    margainPercent: {
+      type: Number,
       default: 0,
-      min: 0
+      min: 0,
+      // max: 100 olib tashlandi
     },
+    
+    // --- 4. Zaxira ---
     totalStock: {
       type: Number,
       default: 0,
@@ -69,12 +74,7 @@ const ProductSchema = new Schema(
       type: Number,
       default: 10
     },
-margainPercent: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100
-    },
+
     // --- 5. Tizim Ma'lumotlari ---
     author: { 
       type: Schema.Types.ObjectId, 
@@ -86,13 +86,11 @@ margainPercent: {
       default: "active",
       index: true
     },
-    state : {type:Boolean, default:true}
+    state : {type: Boolean, default: true}
   },
   {
-    timestamps: true, // createdAt, updatedAt
+    timestamps: true, // createdAt va updatedAt avtomatik boshqariladi
   }
 );
-
-
 
 module.exports = model("Product", ProductSchema);

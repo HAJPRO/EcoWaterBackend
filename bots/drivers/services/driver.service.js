@@ -115,7 +115,7 @@ ${divider}`;
     if (navBtn) inline_keyboard.push(navBtn);
 
     // Xabarni yuborish
-    await bot.sendPhoto(chatId, "https://explorerbyx.org/assets/images/ecowater-logo.jpg", {
+    await bot.sendPhoto(chatId, "https://img.freepik.com/premium-psd/blue-white-milk-carton-with-cup-milk-it_1267171-130.jpg?semt=ais_hybrid", {
         caption: mainMessage,
         parse_mode: "HTML",
         reply_markup: { inline_keyboard }

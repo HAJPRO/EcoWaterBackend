@@ -8,15 +8,21 @@ class ProductManagementController {
    */
   async create(req, res, next) {
     try {
-      // author ID ni req.user dan, qolgan ma'lumotni req.body dan olamiz
-      const result = await ProductService.create(req.body, req.user.id);
+      // req.body - bu matnli ma'lumotlar
+      // req.file - bu multer orqali yuklangan rasm obyekti
+      const productData = req.body;
+
+      // Agar rasm yuklangan bo'lsa, uning yo'lini ma'lumotlarga qo'shamiz
+      if (req.file) {
+        productData.image = req.file.path; 
+      }
+
+      const result = await ProductService.create(productData, req.user.id);
       
-      // Agar service "false" qaytarsa (masalan, shtrix-kod band bo'lsa)
       if (!result.success) {
         return res.status(400).json(result);
       }
 
-      // 201 - Created statusi
       res.status(201).json(result);
     } catch (error) {
       next(error);
@@ -25,15 +31,21 @@ class ProductManagementController {
 
   /**
    * Mahsulotni yangilash (PUT/PATCH)
-   * URL: /products/:id
    */
   async update(req, res, next) {
     try {
-      const { id } = req.params; // ID ni URL dan olamiz
-      const result = await ProductService.update(id, req.body);
+      const { id } = req.params;
+      const updateData = req.body;
+
+      // Yangilashda ham yangi rasm yuklangan bo'lsa, yo'lini yangilaymiz
+      if (req.file) {
+        updateData.image = req.file.path;
+      }
+
+      const result = await ProductService.update(id, updateData);
 
       if (!result.success) {
-        return res.status(404).json(result); // Topilmadi yoki xato
+        return res.status(404).json(result);
       }
 
       res.status(200).json(result);
@@ -44,11 +56,9 @@ class ProductManagementController {
 
   /**
    * Barcha mahsulotlarni olish (GET)
-   * URL: /products?page=1&limit=20&search=cola
    */
   async getAll(req, res, next) {
     try {
-      // GET so'rovda parametrlar query dan olinadi
       const result = await ProductService.getAll(req.query);
       res.status(200).json(result);
     } catch (error) {
@@ -58,7 +68,6 @@ class ProductManagementController {
 
   /**
    * Bitta mahsulotni olish (GET)
-   * URL: /products/:id
    */
   async getOne(req, res, next) {
     try {
@@ -77,7 +86,6 @@ class ProductManagementController {
 
   /**
    * Mahsulotni o'chirish (DELETE)
-   * URL: /products/:id
    */
   async delete(req, res, next) {
     try {
@@ -94,22 +102,20 @@ class ProductManagementController {
     }
   }
 
+  /**
+   * Excel Export
+   */
   async handleExcelExport(req, res) {
-      try {
-          // 1. Servisdan ma'lumotni olish
-          // req.body - bu frontenddan kelayotgan filterlangan ma'lumotlar
-          const result = await ProductService.handleExcelExport(req.body);
-  
-          // 2. Universal helper orqali javob qaytarish
-          return sendExcelResponse(res, result);
-  
-      } catch (error) {
-          console.error("Excel Export Error:", error.message);
-          return res.status(error.status || 400).json({ 
-              success: false,
-              message: error.message || "Eksport jarayonida xatolik yuz berdi" 
-          });
-      }
+    try {
+      const result = await ProductService.handleExcelExport(req.body);
+      return sendExcelResponse(res, result);
+    } catch (error) {
+      console.error("Excel Export Error:", error.message);
+      return res.status(400).json({ 
+        success: false,
+        message: error.message || "Eksportda xatolik yuz berdi" 
+      });
+    }
   }
 }
 

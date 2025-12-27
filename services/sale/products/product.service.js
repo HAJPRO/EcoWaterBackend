@@ -1,23 +1,28 @@
-const Product = require("../../../models/Sale/products/product.model"); // Model manzili to'g'ri ekanligiga ishonch hosil qiling
+const Product = require("../../../models/Sale/products/product.model");
 const { ExportToExcelUniversal } = require("../../../utils/excelHelper");
 const moment = require('moment-timezone');
 
 class ProductManagementService {
 
-  
+  /**
+   * Yangi mahsulot yaratish
+   */
   async create(data, authorId) {
     try {
-      // 1. Shtrix-kod (code) takrorlanmasligini tekshirish
+      // 1. Shtrix-kod takrorlanmasligini tekshirish
       const existingProduct = await Product.findOne({ code: data.code });
       if (existingProduct) {
         return { success: false, msg: `Diqqat: ${data.code} kodli mahsulot allaqachon mavjud!` };
       }
 
-      // 2. Yangi obyektni tayyorlash (Yangi Schema bo'yicha)
+      // 2. Yangi obyektni tayyorlash
       const newProductPayload = {
         ...data,
         author: authorId,
+        // Frontenddan kelayotgan rasm yo'li (agar controllerda multer sozlangan bo'lsa)
+        image: data.image || "" 
       };
+
       const newProduct = await Product.create(newProductPayload);
       return { success: true, msg: "Mahsulot muvaffaqiyatli qo'shildi!", data: newProduct };
     } catch (error) {
@@ -26,53 +31,55 @@ class ProductManagementService {
     }
   }
 
-  
- // ... (avvalgi kod)
-
-async update(id, updateData) {
+  /**
+   * Mahsulotni tahrirlash
+   */
+  async update(id, updateData) {
     try {
-        // 1. Yangilanishi MUMKIN BO'LMAGAN maydonlarni O'CHIRISH
-        // Bu joyga kiritilgan parametrlar updateData ichida bo'lsa ham, MongoDB ga jo'natilmaydi.
-        delete updateData.totalStock;
-        delete updateData.margainPercent;
-        delete updateData.packSalePrice;
-        delete updateData.salePrice;
+      // 1. Faqat xavfsizlik nuqtai nazaridan o'chirilishi kerak bo'lgan maydonlar
+      // totalStock faqat ombor amaliyoti (kirim/chiqim) orqali o'zgarishi kerak
+      delete updateData.totalStock; 
+      delete updateData.author;
+      delete updateData._id;
 
-        // 2. Agar code o'zgarayotgan bo'lsa, u boshqa mahsulotda yo'qligini tekshirish
-        if (updateData.code) {
-            const duplicate = await Product.findOne({ code: updateData.code, _id: { $ne: id } });
-            if (duplicate) {
-                return { success: false, msg: "Bu shtrix-kod boshqa mahsulotda band!" };
-            }
+      // 2. Agar code o'zgarayotgan bo'lsa, unikal ekanligini tekshirish
+      if (updateData.code) {
+        const duplicate = await Product.findOne({ code: updateData.code, _id: { $ne: id } });
+        if (duplicate) {
+          return { success: false, msg: "Bu shtrix-kod boshqa mahsulotda band!" };
         }
-        // 3. Mahsulotni yangilash
-        // updateData endi faqat ruxsat etilgan maydonlarni o'z ichiga oladi
-        const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { 
-            new: true, 
-            runValidators: true 
-        });
-        
-        if (!updatedProduct) {
-            return { success: false, msg: "Mahsulot topilmadi" };
-        }
+      }
 
-        return { success: true, msg: "Mahsulot muvaffaqiyatli yangilandi!", data: updatedProduct };
+      // 3. Mahsulotni yangilash
+      const updatedProduct = await Product.findByIdAndUpdate(
+        id, 
+        { $set: updateData }, // $set ishlatish xavfsizroq
+        { new: true, runValidators: true } 
+      );
+      
+      if (!updatedProduct) {
+        return { success: false, msg: "Mahsulot topilmadi" };
+      }
+
+      return { success: true, msg: "Mahsulot muvaffaqiyatli yangilandi!", data: updatedProduct };
     } catch (error) {
-        return { success: false, msg: `Xatolik: ${error.message}` };
+      console.error("Product Update Error:", error);
+      return { success: false, msg: `Xatolik: ${error.message}` };
     }
-}
+  }
 
-  
+  /**
+   * Barcha mahsulotlarni pagination va filter bilan olish
+   */
   async getAll(query) {
     try {
       const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 20;
+      const limit = parseInt(query.limit) || 10;
       const skip = (page - 1) * limit;
       
-      // Qidiruv shartlarini yig'ish
-      let filter = { status: "active" }; // Default faqat aktivlar
+      let filter = { state: true }; // O'chirilmagan mahsulotlar
 
-      // Qidiruv (Nom yoki Kod bo'yicha)
+      // Qidiruv
       if (query.search) {
         filter.$or = [
           { name: { $regex: query.search, $options: "i" } },
@@ -80,18 +87,17 @@ async update(id, updateData) {
         ];
       }
 
-      // Kategoriya bo'yicha
+      // Kategoriya filtri
       if (query.category && query.category !== "Barchasi") {
         filter.category = query.category;
       }
 
-      // So'rovlarni parallel bajarish (tezlik uchun)
       const [products, total] = await Promise.all([
         Product.find(filter)
-          .sort({ createdAt: -1 }) // Eng yangilari tepada
+          .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
-          .lean(), // Faqat JSON qaytaradi (tez)
+          .lean(),
         Product.countDocuments(filter)
       ]);
 
@@ -111,14 +117,12 @@ async update(id, updateData) {
   }
 
   /**
-   * Bitta mahsulotni ID bo'yicha olish
+   * Bitta mahsulotni olish
    */
   async getOne(id) {
     try {
-      const product = await Product.findById(id).lean();
-      if (!product) {
-        return { success: false, msg: "Mahsulot topilmadi" };
-      }
+      const product = await Product.findById(id).populate('author', 'name').lean();
+      if (!product) return { success: false, msg: "Mahsulot topilmadi" };
       return { success: true, data: product };
     } catch (error) {
       return { success: false, msg: `Xatolik: ${error.message}` };
@@ -126,54 +130,49 @@ async update(id, updateData) {
   }
 
   /**
-   * Mahsulotni o'chirish (yoki arxivlash)
+   * Mahsulotni o'chirish (Soft Delete tavsiya etiladi)
    */
   async delete(id) {
     try {
-      // 1-variant: Butunlay o'chirish (Physical Delete)
-      const deleted = await Product.findByIdAndDelete(id);
+      // Fizik o'chirish o'rniga holatni o'zgartirish (State: false)
+      const deleted = await Product.findByIdAndUpdate(id, { state: false, status: 'inactive' });
       
-      // 2-variant: Arxivlash (Tavsiya etiladi, agar sotuv tarixi bo'lsa)
-      // const deleted = await Product.findByIdAndUpdate(id, { status: 'archived' });
-
-      if (!deleted) {
-        return { success: false, msg: "Mahsulot topilmadi" };
-      }
+      if (!deleted) return { success: false, msg: "Mahsulot topilmadi" };
       return { success: true, msg: "Mahsulot o'chirildi" };
     } catch (error) {
       return { success: false, msg: `Xatolik: ${error.message}` };
     }
   }
 
+  /**
+   * Excel export funksiyasi
+   */
   async handleExcelExport(data) {
-  try {
-   const columns = [
-    { header: "№", key: "index", width: 8 },
-    { header: "Mahsulot nomi", key: "name", width: 35 },
-    { header: "Artikul (Code)", key: "code", width: 15 },
-    { header: "Kategoriya", key: "category", width: 25 },
-    { header: "Tannarxi", key: "costPrice", width: 18, type: 'currency' },
-    { header: "Sotuv narxi", key: "salePrice", width: 18, type: 'currency' },
-    { header: "Ustama (%)", key: "margainPercent", width: 12 },
-    { header: "Ombordagi qoldiq", key: "totalStock", width: 18 },
-    { header: "O'lchov birligi", key: "unit", width: 15 },
-    { header: "Holat", key: "status", width: 15 }
-];
-    const result = await ExportToExcelUniversal(data, columns, {
-            title: "Mahsulot qoldig'i",
-          filename: `mahsulot_Hisoboti_${moment().format("DD_MM_YYYY")}`,
-            sheetName: "Mahsulotlar Ro'yxati"
-        });
-    
-    if (!result || !result.buffer) {
-      throw new Error("Excel faylini yaratishda xatolik yuz berdi (Buffer empty)");
-    }
+    try {
+      const columns = [
+        { header: "№", key: "index", width: 8 },
+        { header: "Mahsulot nomi", key: "name", width: 35 },
+        { header: "Artikul (Code)", key: "code", width: 15 },
+        { header: "Kategoriya", key: "category", width: 25 },
+        { header: "Tannarxi", key: "costPrice", width: 18 },
+        { header: "Sotuv narxi", key: "salePrice", width: 18 },
+        { header: "Ustama (%)", key: "margainPercent", width: 12 },
+        { header: "Ombordagi qoldiq", key: "totalStock", width: 18 },
+        { header: "O'lchov birligi", key: "unit", width: 15 },
+        { header: "Holat", key: "status", width: 15 }
+      ];
 
-    return result; // { buffer, filename } qaytaradi
-  } catch (error) {
-    throw new Error(error.message);
+      const result = await ExportToExcelUniversal(data, columns, {
+        title: "Mahsulotlar ro'yxati",
+        filename: `mahsulotlar_${moment().format("DD_MM_YYYY")}`,
+        sheetName: "Mahsulotlar"
+      });
+
+      return result;
+    } catch (error) {
+      throw new Error("Excel eksportda xatolik: " + error.message);
+    }
   }
-}
 }
 
 module.exports = new ProductManagementService();
