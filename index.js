@@ -43,7 +43,7 @@ const corsOptions = {
       callback(new Error("CORS: Ruxsat etilmagan domen!"));
     }
   },
-  credentials: true, // Kuki (refreshToken) ishlashi uchun TRUE bo'lishi shart!
+  credentials: false, // Kuki (refreshToken) ishlashi uchun TRUE bo'lishi shart!
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
 };
