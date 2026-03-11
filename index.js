@@ -19,13 +19,10 @@ app.use(express.urlencoded({ extended: true }));
 const isProd = process.env.NODE_ENV === "production";
 
 // ✅ CORS sozlamalari
-const allowedOrigins = [
-  "https://ecowater.company-erp.uz"
-  // "https://dev.company-erp.uz"
-];
+const allowedOrigins = ["https://ecowater.company-erp.uz"];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Agar production emas bo'lsa yoki allowedOrigins ro'yxatida bo'lsa ruxsat berish
     if (!origin || !isProd || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -38,7 +35,7 @@ const corsOptions = {
 };
 
 // ✅ CORS middleware - har doim tepada
-app.use(cors({origin : "*"}));
+app.use(cors(corsOptions));
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
