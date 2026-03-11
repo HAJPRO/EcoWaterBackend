@@ -37,7 +37,7 @@ const allowedOrigins = ["https://ecowater.company-erp.uz"];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || !isProd || allowedOrigins.includes(origin)) {
+    if (!origin || !isProd) {
       callback(null, true);
     } else {
       callback(new Error("CORS: Ruxsat etilmagan domen!"));
