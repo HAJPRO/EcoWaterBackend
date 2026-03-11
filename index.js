@@ -32,24 +32,23 @@ const isProd = process.env.NODE_ENV === "production";
 //   credentials: false
 // }));
 
-// ✅ CORS sozlamalari
-const allowedOrigins = ["https://ecowater.company-erp.uz"];
-
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || !isProd) {
+    // Hammasiga ruxsat berish uchun (faqat ishlab chiqishda yoki ehtiyoj bo'lsa)
+    // callback(null, true); <-- Agar judayam bo'lmasa shuni oching
+    
+    if (!origin || process.env.NODE_ENV !== "production") {
       callback(null, true);
     } else {
-      callback(new Error("CORS: Ruxsat etilmagan domen!"));
+      callback(new Error("CORS: Ruxsat etilmagan!"));
     }
   },
-  credentials: false, // Kuki (refreshToken) ishlashi uchun TRUE bo'lishi shart!
+  credentials: false, // Kuki va Authorization headerlar uchun TRUE qolishi shart
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
 };
 
 app.use(cors(corsOptions));
-
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
