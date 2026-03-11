@@ -38,7 +38,7 @@ const corsOptions = {
 };
 
 // ✅ CORS middleware - har doim tepada
-app.use(cors(corsOptions));
+app.use(cors({origin : "*"}));
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
