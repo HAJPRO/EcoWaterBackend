@@ -21,21 +21,19 @@ const isProd = process.env.NODE_ENV === "production";
 // ✅ CORS sozlamalari
 const allowedOrigins = ["https://ecowater.company-erp.uz"];
 
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || !isProd || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
       callback(null, true);
     } else {
-      callback(new Error("CORS: Ruxsat etilmagan domen"));
+      callback(new Error("CORS: Ruxsat etilmagan!"));
     }
   },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization']
-};
+  credentials: true
+}));
 
 // ✅ CORS middleware - har doim tepada
-app.use(cors(corsOptions));
+// app.use(cors({origin : "*"}));
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
