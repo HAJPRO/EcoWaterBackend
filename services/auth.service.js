@@ -41,37 +41,27 @@ class AuthService {
   }
 
 async login(username, password) {
-    // 1. Userni topish va Role -> Permission zanjirini ochish (Deep Populate)
-    const user = await userModel.findOne({ username }).populate({
-        path: 'roles',
-        model: 'Role',
-        populate: {
-            path: 'permissions',
-            model: 'Permission'
-        }
-    });
+    try {
+        const user = await userModel.findOne({ username }).populate({
+            path: 'roles',
+            populate: { path: 'permissions' }
+        });
 
-    if (!user) throw BaseError.BadRequest("Username yoki parol xato");
+        if (!user) throw BaseError.BadRequest("Username yoki parol xato");
 
-    // 2. Parolni tekshirish
-    const isPassword = await bcrypt.compare(password, user.password);
-    if (!isPassword) throw BaseError.BadRequest("Username yoki parol xato");
+        const isPassword = await bcrypt.compare(password, user.password);
+        if (!isPassword) throw BaseError.BadRequest("Username yoki parol xato");
 
-    // 3. UserDto yaratish (ichida roles va permissions'ni formatlaydi)
-    const userDto = new UserDto(user);
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateToken({ ...userDto });
 
-    // 4. Token generatsiya qilish 
-    // MUHIM: Permissions va Roles bu yerda string massivi bo'lishi shart
-    const tokens = tokenService.generateToken({
-        id: userDto.id,
-        username: userDto.username,
-        roles: userDto.roles, 
-        permissions: userDto.permissions 
-    });
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+        return { user: userDto, ...tokens };
 
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-    return { user: userDto, ...tokens };
+    } catch (error) {
+        console.log("LOGIN SERVICE XATOSI:", error); // Terminalda xatoni ko'rsatadi
+        throw error; // errorMiddleware'ga uzatadi
+    }
 }
 
   async logout(refreshToken) {
