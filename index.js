@@ -37,7 +37,7 @@ const corsOptions = {
     // Hammasiga ruxsat berish uchun (faqat ishlab chiqishda yoki ehtiyoj bo'lsa)
     // callback(null, true); <-- Agar judayam bo'lmasa shuni oching
     
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+    if (!origin  || process.env.NODE_ENV !== "production") {
       callback(null, true);
     } else {
       callback(new Error("CORS: Ruxsat etilmagan!"));

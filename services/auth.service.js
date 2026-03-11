@@ -41,6 +41,7 @@ class AuthService {
   }
 
 async login(username, password) {
+  console.log(username,password)
     try {
         const user = await userModel.findOne({ username }).populate({
             path: 'roles',
