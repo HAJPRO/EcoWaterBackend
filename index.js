@@ -19,21 +19,36 @@ app.use(express.urlencoded({ extended: true }));
 const isProd = process.env.NODE_ENV === "production";
 
 // ✅ CORS sozlamalari
-const allowedOrigins = ["https://ecowater.company-erp.uz"];
+// const allowedOrigins = ["https://ecowater.company-erp.uz"];
 
-app.use(cors({
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("CORS: Ruxsat etilmagan!"));
+//     }
+//   },
+//   credentials: false
+// }));
+
+const corsOptions = {
   origin: function (origin, callback) {
+    // Hammasiga ruxsat berish uchun (faqat ishlab chiqishda yoki ehtiyoj bo'lsa)
+    // callback(null, true); <-- Agar judayam bo'lmasa shuni oching
+    
     if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
       callback(null, true);
     } else {
       callback(new Error("CORS: Ruxsat etilmagan!"));
     }
   },
-  credentials: true
-}));
+  credentials: false, // Kuki va Authorization headerlar uchun TRUE qolishi shart
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
+};
 
-// ✅ CORS middleware - har doim tepada
-// app.use(cors({origin : "*"}));
+app.use(cors(corsOptions));
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
