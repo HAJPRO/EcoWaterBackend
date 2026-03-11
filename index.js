@@ -37,10 +37,10 @@ const corsOptions = {
     // Hammasiga ruxsat berish uchun (faqat ishlab chiqishda yoki ehtiyoj bo'lsa)
     // callback(null, true); <-- Agar judayam bo'lmasa shuni oching
     
-    if (!origin  || process.env.NODE_ENV !== "production") {
+    if (!origin || isProd !== "production") {
       callback(null, true);
     } else {
-      callback(new Error("CORS: Ruxsat etilmagan!"));
+      callback("CORS: Ruxsat etilmagan!");
     }
   },
   credentials: false, // Kuki va Authorization headerlar uchun TRUE qolishi shart
