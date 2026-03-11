@@ -37,9 +37,6 @@ const allowedOrigins = ["https://ecowater.company-erp.uz"];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // 1. Agar origin bo'lmasa (masalan Postman) 
-    // 2. Yoki production muhitida bo'lmasak
-    // 3. Yoki origin ruxsat etilgan ro'yxatda bo'lsa
     if (!origin || !isProd || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -53,7 +50,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(cors(corsOptions));
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
