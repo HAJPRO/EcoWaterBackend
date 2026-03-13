@@ -15,39 +15,33 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS
-const isProd = process.env.NODE_ENV === "production";
-
-// ✅ CORS sozlamalari
-// const allowedOrigins = ["https://ecowater.company-erp.uz"];
-
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("CORS: Ruxsat etilmagan!"));
-//     }
-//   },
-//   credentials: false
-// }));
+const joriyMuhit = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : "development";
+const isProd = joriyMuhit === "production";
+// CORS sozlamalari
+const allowedOrigins = [
+  "https://ecowater.company-erp.uz",
+  "http://localhost:5173"
+];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Hammasiga ruxsat berish uchun (faqat ishlab chiqishda yoki ehtiyoj bo'lsa)
-    // callback(null, true); <-- Agar judayam bo'lmasa shuni oching
-    
-    if (!origin || process.env.NODE_ENV !== "production") {
+    if (!origin || !isProd || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("CORS: Ruxsat etilmagan!"));
+      callback(new Error("CORS: Ruxsat etilmagan domen"));
     }
   },
-  credentials: false, // Kuki va Authorization headerlar uchun TRUE qolishi shart
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
+  // SHU YERGA 'x-tenant-id'ni QO'SHAMIZ:
+  allowedHeaders: [
+    'Origin', 
+    'Content-Type', 
+    'Accept', 
+    'Authorization', 
+    'x-tenant-id' // <--- Mana bu juda muhim!
+  ]
 };
-
 app.use(cors(corsOptions));
 
 // Static files (public papkasini statik qilish)
