@@ -25,7 +25,10 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || !isProd || allowedOrigins.includes(origin)) {
+    // 1. Agar origin yo'l bo'lsa (masalan, mobil ilova yoki Postman)
+    // 2. Yoki production emas bo'lsa (localhost uchun)
+    // 3. Yoki origin bizning ruxsat berilgan ro'yxatda bo'lsa
+    if (!origin || allowedOrigins.includes(origin) || !isProd) {
       callback(null, true);
     } else {
       callback(new Error("CORS: Ruxsat etilmagan domen"));
@@ -33,14 +36,15 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  // SHU YERGA 'x-tenant-id'ni QO'SHAMIZ:
   allowedHeaders: [
     'Origin', 
     'Content-Type', 
     'Accept', 
     'Authorization', 
-    'x-tenant-id' // <--- Mana bu juda muhim!
-  ]
+    'x-tenant-id',
+    'X-Requested-With' // Buni ham qo'shib qo'ygan yaxshi
+  ],
+  optionsSuccessStatus: 200 // Ba'zi eski brauzerlar uchun (204 o'rniga 200)
 };
 app.use(cors(corsOptions));
 
