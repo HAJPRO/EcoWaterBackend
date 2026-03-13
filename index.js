@@ -34,7 +34,7 @@ const corsOptions = {
       callback(new Error("CORS: Ruxsat etilmagan domen"));
     }
   },
-  credentials: true,
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Origin', 
@@ -46,7 +46,7 @@ const corsOptions = {
   ],
   optionsSuccessStatus: 200 // Ba'zi eski brauzerlar uchun (204 o'rniga 200)
 };
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 // Static files (public papkasini statik qilish)
 app.use(express.static(path.join(__dirname, "public")));
